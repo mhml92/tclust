@@ -6,46 +6,55 @@ int main(int argc, char** argv){
    try {  
       TCLAP::CmdLine cmd("Command description message", ' ', "0.9");
 
-      // positional argument (required)
-      TCLAP::UnlabeledValueArg<std::string> simFilenameArg("simfile","Input similarity file",true,"not there","string");
-      TCLAP::ValueArg<float> thresholdArg("T","threshold","Initial threshold of heuristic",false,0.0,"double");
-      TCLAP::ValueArg<float> threshold_maxArg("M","threshold_max","Maximim threshold of heuristic",false,0.0,"double");
-      TCLAP::ValueArg<float> threshold_stepArg("S","threshold_step","Step size of threshold in heuristic",false,0.0,"double");
-/*
-      TCLAP::ValueArg<bool> trainParametersArg("P","train_parameters","Step size of threshold in heuristic",false,true,"bool");
-      TCLAP::ValueArg<float> numGenerationsArg("S","threshold_step","Step size of threshold in heuristic",false,0.0,"double");
-      TCLAP::ValueArg<float> generationSizeArg("S","threshold_step","Step size of threshold in heuristic",false,0.0,"double");
-      */
-      /*
-                     NumericVector cpp_REF,               // golden standard ref
-                    double   cpp_threshold_step,         // main loop
+      TCLAP::UnlabeledValueArg<std::string> simFilenameArg(
+            "simfile",                 // name
+            "Input similarity file",   // desc
+            true,                      // required
+            "not there",               // default val
+            "string"                   // type descripttion
+            );
 
-                    bool     cpp_trainParameters,        // training
-                    int      cpp_numGenerations,         // training
-                    int      cpp_generationSize,         // training
-                    int      cpp_p,                      // force layout
-                    double   cpp_f_att,                  // force layout
-                    double   cpp_f_rep,                  // force layout
-                    int      cpp_R,                      // force layout
-                    double   cpp_start_t,                // force layout
-                    int      cpp_dim,                    // force layout
-                    double   cpp_d_init,                 // force partition
-                    double   cpp_d_maximal,              // force partition
-                    double   cpp_s_init,                 // force partition
-                    double   cpp_f_s,                    // force partition
-                    bool     cpp_postProcessing          // post processing
-      */
+      // layout vars
+      TCLAP::ValueArg<float> f_att_Arg(
+            "",
+            "f_att",
+            "Attraction force multiplier",
+            false,
+            1.0,
+            "float");
 
+      TCLAP::ValueArg<float> f_rep_Arg(
+            "",
+            "f_rep",
+            "Repulsion force multiplier",
+            false,
+            1.0,
+            "float");
+      TCLAP::ValueArg<unsigned> R_Arg("","R","Layout iterations",false,100,"unsigned integer");
+      TCLAP::ValueArg<unsigned> dim_Arg("","dim","Layout dimensions",false,2,"unsigend interger");
+      TCLAP::ValueArg<float> p_Arg("","p","Layout initial radius",false,1,"float");
 
-      cmd.add( simFilenameArg);
-      cmd.add( thresholdArg );
-      cmd.add( threshold_maxArg );
-      cmd.add( threshold_stepArg );
+      cmd.add(simFilenameArg);
+      cmd.add(f_att_Arg);
+      cmd.add(f_rep_Arg);
+      cmd.add(R_Arg);
+      cmd.add(dim_Arg);
+      cmd.add(p_Arg);
+
       cmd.parse( argc, argv );
-
-      std::string simFilename = simFilenameArg.getValue();
-      
-      TransClust transclust(simFilename);
+      TransClust transclust(
+         simFilenameArg.getValue(),
+         "",
+         0,
+         0,
+         0,
+         p_Arg.getValue(),
+         f_att_Arg.getValue(),
+         f_rep_Arg.getValue(),
+         R_Arg.getValue(),
+         dim_Arg.getValue()
+      );
+      transclust.cluster();
 
    }catch (TCLAP::ArgException &e){ 
       std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl; 

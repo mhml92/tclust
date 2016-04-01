@@ -1,0 +1,196 @@
+\hypertarget{namespaceFORCE}{\section{F\-O\-R\-C\-E Namespace Reference}
+\label{namespaceFORCE}\index{F\-O\-R\-C\-E@{F\-O\-R\-C\-E}}
+}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+float \hyperlink{namespaceFORCE_aa98e605135ced38fe09c8c97a2597af0}{dist} (std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&pos, unsigned i, unsigned j)
+\item 
+void \hyperlink{namespaceFORCE_a98853866c9b35b686d06faaeaffedff4}{layout} (const \hyperlink{classConnectedComponent}{Connected\-Component} \&cc, std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&pos, float p, float f\-\_\-att, float f\-\_\-rep, unsigned R, float start\-\_\-t, unsigned dim)
+\item 
+\hyperlink{classClusteringResult}{Clustering\-Result} \hyperlink{namespaceFORCE_a0c6a6dbc5e4c7cc9d9c33dd884034941}{partition} (const \hyperlink{classConnectedComponent}{Connected\-Component} \&cc, std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&pos, float d\-\_\-init, float d\-\_\-maximal, float s\-\_\-init, float f\-\_\-s)
+\item 
+std\-::vector$<$ std\-::vector\\*
+$<$ unsigned $>$ $>$ \hyperlink{namespaceFORCE_ac58f3224b8bcfdce18f57ed692278f00}{geometric\-Linking} (std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&pos, const float max\-Dist, const std\-::vector$<$ std\-::vector$<$ unsigned $>$$>$ \&objects)
+\item 
+void \hyperlink{namespaceFORCE_a4757f1fe7991d161f1deb3dafa1b933e}{D\-E\-B\-U\-G\-\_\-delta} (const \hyperlink{classConnectedComponent}{Connected\-Component} \&cc, std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&pos, std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&delta, unsigned r)
+\item 
+void \hyperlink{namespaceFORCE_a2a8c27faac3bf131cbf45212b723286e}{D\-E\-B\-U\-G\-\_\-position} (const \hyperlink{classConnectedComponent}{Connected\-Component} \&cc, std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&pos, float r)
+\item 
+void \hyperlink{namespaceFORCE_a91fbcba5dd9ef801ef9c1b145722d7e1}{D\-E\-B\-U\-G\-\_\-linking} (std\-::vector$<$ unsigned $>$ membership, std\-::vector$<$ std\-::vector$<$ float $>$$>$ pos, float threshold, unsigned id)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{namespaceFORCE_a4757f1fe7991d161f1deb3dafa1b933e}{\index{F\-O\-R\-C\-E@{F\-O\-R\-C\-E}!D\-E\-B\-U\-G\-\_\-delta@{D\-E\-B\-U\-G\-\_\-delta}}
+\index{D\-E\-B\-U\-G\-\_\-delta@{D\-E\-B\-U\-G\-\_\-delta}!FORCE@{F\-O\-R\-C\-E}}
+\subsubsection[{D\-E\-B\-U\-G\-\_\-delta}]{\setlength{\rightskip}{0pt plus 5cm}void F\-O\-R\-C\-E\-::\-D\-E\-B\-U\-G\-\_\-delta (
+\begin{DoxyParamCaption}
+\item[{const {\bf Connected\-Component} \&}]{cc, }
+\item[{std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&}]{pos, }
+\item[{std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&}]{delta, }
+\item[{unsigned}]{r}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{namespaceFORCE_a4757f1fe7991d161f1deb3dafa1b933e}
+
+
+Here is the call graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{namespaceFORCE_a4757f1fe7991d161f1deb3dafa1b933e_cgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{namespaceFORCE_a91fbcba5dd9ef801ef9c1b145722d7e1}{\index{F\-O\-R\-C\-E@{F\-O\-R\-C\-E}!D\-E\-B\-U\-G\-\_\-linking@{D\-E\-B\-U\-G\-\_\-linking}}
+\index{D\-E\-B\-U\-G\-\_\-linking@{D\-E\-B\-U\-G\-\_\-linking}!FORCE@{F\-O\-R\-C\-E}}
+\subsubsection[{D\-E\-B\-U\-G\-\_\-linking}]{\setlength{\rightskip}{0pt plus 5cm}void F\-O\-R\-C\-E\-::\-D\-E\-B\-U\-G\-\_\-linking (
+\begin{DoxyParamCaption}
+\item[{std\-::vector$<$ unsigned $>$}]{membership, }
+\item[{std\-::vector$<$ std\-::vector$<$ float $>$$>$}]{pos, }
+\item[{float}]{threshold, }
+\item[{unsigned}]{id}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{namespaceFORCE_a91fbcba5dd9ef801ef9c1b145722d7e1}
+\hypertarget{namespaceFORCE_a2a8c27faac3bf131cbf45212b723286e}{\index{F\-O\-R\-C\-E@{F\-O\-R\-C\-E}!D\-E\-B\-U\-G\-\_\-position@{D\-E\-B\-U\-G\-\_\-position}}
+\index{D\-E\-B\-U\-G\-\_\-position@{D\-E\-B\-U\-G\-\_\-position}!FORCE@{F\-O\-R\-C\-E}}
+\subsubsection[{D\-E\-B\-U\-G\-\_\-position}]{\setlength{\rightskip}{0pt plus 5cm}void F\-O\-R\-C\-E\-::\-D\-E\-B\-U\-G\-\_\-position (
+\begin{DoxyParamCaption}
+\item[{const {\bf Connected\-Component} \&}]{cc, }
+\item[{std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&}]{pos, }
+\item[{float}]{r}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{namespaceFORCE_a2a8c27faac3bf131cbf45212b723286e}
+
+
+Here is the call graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{namespaceFORCE_a2a8c27faac3bf131cbf45212b723286e_cgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{namespaceFORCE_aa98e605135ced38fe09c8c97a2597af0}{\index{F\-O\-R\-C\-E@{F\-O\-R\-C\-E}!dist@{dist}}
+\index{dist@{dist}!FORCE@{F\-O\-R\-C\-E}}
+\subsubsection[{dist}]{\setlength{\rightskip}{0pt plus 5cm}float F\-O\-R\-C\-E\-::dist (
+\begin{DoxyParamCaption}
+\item[{std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&}]{pos, }
+\item[{unsigned}]{i, }
+\item[{unsigned}]{j}
+\end{DoxyParamCaption}
+)}}\label{namespaceFORCE_aa98e605135ced38fe09c8c97a2597af0}
+
+
+Here is the caller graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{namespaceFORCE_aa98e605135ced38fe09c8c97a2597af0_icgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{namespaceFORCE_ac58f3224b8bcfdce18f57ed692278f00}{\index{F\-O\-R\-C\-E@{F\-O\-R\-C\-E}!geometric\-Linking@{geometric\-Linking}}
+\index{geometric\-Linking@{geometric\-Linking}!FORCE@{F\-O\-R\-C\-E}}
+\subsubsection[{geometric\-Linking}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$ std\-::vector$<$ unsigned $>$ $>$ F\-O\-R\-C\-E\-::geometric\-Linking (
+\begin{DoxyParamCaption}
+\item[{std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&}]{pos, }
+\item[{const float}]{max\-Dist, }
+\item[{const std\-::vector$<$ std\-::vector$<$ unsigned $>$$>$ \&}]{objects}
+\end{DoxyParamCaption}
+)}}\label{namespaceFORCE_ac58f3224b8bcfdce18f57ed692278f00}
+
+
+Here is the call graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=322pt]{namespaceFORCE_ac58f3224b8bcfdce18f57ed692278f00_cgraph}
+\end{center}
+\end{figure}
+
+
+
+
+Here is the caller graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{namespaceFORCE_ac58f3224b8bcfdce18f57ed692278f00_icgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{namespaceFORCE_a98853866c9b35b686d06faaeaffedff4}{\index{F\-O\-R\-C\-E@{F\-O\-R\-C\-E}!layout@{layout}}
+\index{layout@{layout}!FORCE@{F\-O\-R\-C\-E}}
+\subsubsection[{layout}]{\setlength{\rightskip}{0pt plus 5cm}void F\-O\-R\-C\-E\-::layout (
+\begin{DoxyParamCaption}
+\item[{const {\bf Connected\-Component} \&}]{cc, }
+\item[{std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&}]{pos, }
+\item[{float}]{p, }
+\item[{float}]{f\-\_\-att, }
+\item[{float}]{f\-\_\-rep, }
+\item[{unsigned}]{R, }
+\item[{float}]{start\-\_\-t, }
+\item[{unsigned}]{dim}
+\end{DoxyParamCaption}
+)}}\label{namespaceFORCE_a98853866c9b35b686d06faaeaffedff4}
+
+
+Here is the call graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{namespaceFORCE_a98853866c9b35b686d06faaeaffedff4_cgraph}
+\end{center}
+\end{figure}
+
+
+
+
+Here is the caller graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{namespaceFORCE_a98853866c9b35b686d06faaeaffedff4_icgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{namespaceFORCE_a0c6a6dbc5e4c7cc9d9c33dd884034941}{\index{F\-O\-R\-C\-E@{F\-O\-R\-C\-E}!partition@{partition}}
+\index{partition@{partition}!FORCE@{F\-O\-R\-C\-E}}
+\subsubsection[{partition}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Clustering\-Result} F\-O\-R\-C\-E\-::partition (
+\begin{DoxyParamCaption}
+\item[{const {\bf Connected\-Component} \&}]{cc, }
+\item[{std\-::vector$<$ std\-::vector$<$ float $>$$>$ \&}]{pos, }
+\item[{float}]{d\-\_\-init, }
+\item[{float}]{d\-\_\-maximal, }
+\item[{float}]{s\-\_\-init, }
+\item[{float}]{f\-\_\-s}
+\end{DoxyParamCaption}
+)}}\label{namespaceFORCE_a0c6a6dbc5e4c7cc9d9c33dd884034941}
+
+
+Here is the call graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{namespaceFORCE_a0c6a6dbc5e4c7cc9d9c33dd884034941_cgraph}
+\end{center}
+\end{figure}
+
+
+
+
+Here is the caller graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{namespaceFORCE_a0c6a6dbc5e4c7cc9d9c33dd884034941_icgraph}
+\end{center}
+\end{figure}
+
+

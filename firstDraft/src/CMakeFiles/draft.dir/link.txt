@@ -1,0 +1,1 @@
+/usr/bin/clang++-3.6    -std=c++11 -pedantic -Wall    CMakeFiles/draft.dir/program.cpp.o CMakeFiles/draft.dir/TransClust.cpp.o CMakeFiles/draft.dir/TriangularMatrix.cpp.o CMakeFiles/draft.dir/FindConnectedComponents.cpp.o  -o ../bin/draft -rdynamic 

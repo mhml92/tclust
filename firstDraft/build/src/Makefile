@@ -112,6 +112,78 @@ draft/fast:
 	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/build
 .PHONY : draft/fast
 
+ClusteringResult.o: ClusteringResult.cpp.o
+.PHONY : ClusteringResult.o
+
+# target to build an object file
+ClusteringResult.cpp.o:
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/ClusteringResult.cpp.o
+.PHONY : ClusteringResult.cpp.o
+
+ClusteringResult.i: ClusteringResult.cpp.i
+.PHONY : ClusteringResult.i
+
+# target to preprocess a source file
+ClusteringResult.cpp.i:
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/ClusteringResult.cpp.i
+.PHONY : ClusteringResult.cpp.i
+
+ClusteringResult.s: ClusteringResult.cpp.s
+.PHONY : ClusteringResult.s
+
+# target to generate assembly for a file
+ClusteringResult.cpp.s:
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/ClusteringResult.cpp.s
+.PHONY : ClusteringResult.cpp.s
+
+ConnectedComponent.o: ConnectedComponent.cpp.o
+.PHONY : ConnectedComponent.o
+
+# target to build an object file
+ConnectedComponent.cpp.o:
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o
+.PHONY : ConnectedComponent.cpp.o
+
+ConnectedComponent.i: ConnectedComponent.cpp.i
+.PHONY : ConnectedComponent.i
+
+# target to preprocess a source file
+ConnectedComponent.cpp.i:
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/ConnectedComponent.cpp.i
+.PHONY : ConnectedComponent.cpp.i
+
+ConnectedComponent.s: ConnectedComponent.cpp.s
+.PHONY : ConnectedComponent.s
+
+# target to generate assembly for a file
+ConnectedComponent.cpp.s:
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/ConnectedComponent.cpp.s
+.PHONY : ConnectedComponent.cpp.s
+
+FORCE.o: FORCE.cpp.o
+.PHONY : FORCE.o
+
+# target to build an object file
+FORCE.cpp.o:
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/FORCE.cpp.o
+.PHONY : FORCE.cpp.o
+
+FORCE.i: FORCE.cpp.i
+.PHONY : FORCE.i
+
+# target to preprocess a source file
+FORCE.cpp.i:
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/FORCE.cpp.i
+.PHONY : FORCE.cpp.i
+
+FORCE.s: FORCE.cpp.s
+.PHONY : FORCE.s
+
+# target to generate assembly for a file
+FORCE.cpp.s:
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/FORCE.cpp.s
+.PHONY : FORCE.cpp.s
+
 FindConnectedComponents.o: FindConnectedComponents.cpp.o
 .PHONY : FindConnectedComponents.o
 
@@ -135,6 +207,30 @@ FindConnectedComponents.s: FindConnectedComponents.cpp.s
 FindConnectedComponents.cpp.s:
 	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.s
 .PHONY : FindConnectedComponents.cpp.s
+
+Result.o: Result.cpp.o
+.PHONY : Result.o
+
+# target to build an object file
+Result.cpp.o:
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/Result.cpp.o
+.PHONY : Result.cpp.o
+
+Result.i: Result.cpp.i
+.PHONY : Result.i
+
+# target to preprocess a source file
+Result.cpp.i:
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/Result.cpp.i
+.PHONY : Result.cpp.i
+
+Result.s: Result.cpp.s
+.PHONY : Result.s
+
+# target to generate assembly for a file
+Result.cpp.s:
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build && $(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/Result.cpp.s
+.PHONY : Result.cpp.s
 
 TransClust.o: TransClust.cpp.o
 .PHONY : TransClust.o
@@ -217,9 +313,21 @@ help:
 	@echo "... draft"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... ClusteringResult.o"
+	@echo "... ClusteringResult.i"
+	@echo "... ClusteringResult.s"
+	@echo "... ConnectedComponent.o"
+	@echo "... ConnectedComponent.i"
+	@echo "... ConnectedComponent.s"
+	@echo "... FORCE.o"
+	@echo "... FORCE.i"
+	@echo "... FORCE.s"
 	@echo "... FindConnectedComponents.o"
 	@echo "... FindConnectedComponents.i"
 	@echo "... FindConnectedComponents.s"
+	@echo "... Result.o"
+	@echo "... Result.i"
+	@echo "... Result.s"
 	@echo "... TransClust.o"
 	@echo "... TransClust.i"
 	@echo "... TransClust.s"

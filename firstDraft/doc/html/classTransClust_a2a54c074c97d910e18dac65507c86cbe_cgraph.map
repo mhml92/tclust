@@ -1,0 +1,12 @@
+<map id="TransClust::cluster" name="TransClust::cluster">
+<area shape="rect" id="node2" href="$classConnectedComponent.html#a0ab1852c0c4cc9f224a59d3e8670d009" title="ConnectedComponent\l::size" alt="" coords="679,13,831,54"/>
+<area shape="rect" id="node4" href="$namespaceFORCE.html#a98853866c9b35b686d06faaeaffedff4" title="FORCE::layout" alt="" coords="476,111,588,137"/>
+<area shape="rect" id="node7" href="$namespaceFORCE.html#a0c6a6dbc5e4c7cc9d9c33dd884034941" title="FORCE::partition" alt="" coords="229,60,352,87"/>
+<area shape="rect" id="node9" href="$classConnectedComponent.html#ac2828775d06586f68945912765964698" title="ConnectedComponent\l::getThreshold" alt="" coords="679,234,831,275"/>
+<area shape="rect" id="node10" href="$namespacefcc.html#a7bb6ac8b965c5b8273285865d31af94d" title="fcc::findConnectedComponents" alt="" coords="187,187,394,213"/>
+<area shape="rect" id="node3" href="$classTriangularMatrix.html#a5040afab8fb04018c02dc2532401fab1" title="TriangularMatrix::getNum\lObjects" alt="" coords="889,13,1058,54"/>
+<area shape="rect" id="node5" href="$namespaceFORCE.html#aa98e605135ced38fe09c8c97a2597af0" title="FORCE::dist" alt="" coords="705,89,804,116"/>
+<area shape="rect" id="node6" href="$classConnectedComponent.html#a079a714fe4b6ceef8c47f5fc50eaf4ea" title="ConnectedComponent::at" alt="" coords="669,161,840,188"/>
+<area shape="rect" id="node8" href="$namespaceFORCE.html#ac58f3224b8bcfdce18f57ed692278f00" title="FORCE::geometricLinking" alt="" coords="445,60,619,87"/>
+<area shape="rect" id="node11" href="$namespacefcc.html#af21d20aac08ecb1a28be9244dbb525fe" title="fcc::findMembershipVector" alt="" coords="443,212,621,239"/>
+</map>

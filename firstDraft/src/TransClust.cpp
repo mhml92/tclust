@@ -1,45 +1,83 @@
 #include <TransClust.hpp>
-#include <TriangularMatrix.hpp>
+#include <ConnectedComponent.hpp>
 #include <FindConnectedComponents.hpp>
+#include <FORCE.hpp>
+#include "ClusteringResult.hpp"
+#include "Result.hpp"
 
-TransClust::TransClust(const std::string &filename){
-
+TransClust::TransClust(
+      const std::string& filename,
+      const std::string ref,
+      float th_min,
+      float th_max,
+      float th_step,
+      float p,
+      float f_att,
+      float f_rep,
+      unsigned R,
+      unsigned dim,
+      float start_t,
+      float d_init,
+      float d_maximal,
+      float s_init,
+      float f_s
+      )
+      :
+         ref(ref),
+         threshold_min(th_min),
+         threshold_max(th_max),
+         threshold_step(th_step),
+         p(p),
+         f_att(f_att),
+         f_rep(f_rep),
+         R(R),
+         start_t(start_t),
+         dim(dim),
+         d_init(d_init),
+         d_maximal(d_maximal),
+         s_init(s_init),
+         f_s(f_s)
+{
    // Read input similarity file
-   TriangularMatrix sim_matrix(filename);
-   cluster(sim_matrix);
+   ConnectedComponent sim_matrix(filename);
+   id2object = sim_matrix.getObjectNames();
+
+   threshold_min = sim_matrix.getMinSimilarity();
+   threshold_max = sim_matrix.getMaxSimilarity();
+   threshold_step = (threshold_max-threshold_min)/100;
+
+   fcc::findConnectedComponents(sim_matrix,ccs,threshold_step);
 }
 
 
-int TransClust::cluster(TriangularMatrix &costMatrix){
+void TransClust::cluster()
+{
 
-   // decompose into connected components
-   std::vector<TriangularMatrix> ccs = findConnectedComponents(costMatrix,0);
+   Result myresult(id2object.size());
+   while(!ccs.empty()){
+      ConnectedComponent& cc = ccs.front();   
 
-   // debug print connected components
-   for(auto &cc:ccs){
-      cc.dump();
+      // init position array
+      std::vector<std::vector<float>> pos;
+      pos.resize(cc.size(), std::vector<float>(dim,0));
+
+      // layout
+      //if(cc.size() > 1){
+         FORCE::layout(cc,pos,p,f_att,f_rep,R,start_t,dim);
+         //FORCE::DEBUG_position(cc,pos,cc.getThreshold());
+         ClusteringResult res = FORCE::partition(cc,pos,d_init,d_maximal,s_init,f_s);
+
+         myresult.add(cc,res);
+         //FORCE::DEBUG_linking(res.getClusters(),pos,cc.getThreshold(),cc.getId());
+         float new_threshold = cc.getThreshold()+threshold_step;
+         if(new_threshold < threshold_max){
+            fcc::findConnectedComponents(cc,ccs,new_threshold);
+         }
+      //}
+      ccs.pop();
    }
-   return 0;
+   myresult.dump();
 }
-/*
-List cppTransclustr( NumericMatrix cpp_sim_matrix,        // sim matrix
-      NumericVector cpp_REF,               // golden standard ref
-      double   cpp_threshold_current,      // main loop
-      double   cpp_threshold_max,          // main loop
-      double   cpp_threshold_step,         // main loop
-      bool     cpp_trainParameters,        // training
-      int      cpp_numGenerations,         // training
-      int      cpp_generationSize,         // training
-      int      cpp_p,                      // force layout
-      double   cpp_f_att,                  // force layout
-      double   cpp_f_rep,                  // force layout
-      int      cpp_R,                      // force layout
-      double   cpp_start_t,                // force layout
-      int      cpp_dim,                    // force layout
-      double   cpp_d_init,                 // force partition
-      double   cpp_d_maximal,              // force partition
-      double   cpp_s_init,                 // force partition
-      double   cpp_f_s,                    // force partition
-      bool     cpp_postProcessing          // post processing
-      ){
-      */
+
+
+

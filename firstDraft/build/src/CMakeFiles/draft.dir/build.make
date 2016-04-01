@@ -49,9 +49,101 @@ include src/CMakeFiles/draft.dir/progress.make
 # Include the compile flags for this target's objects.
 include src/CMakeFiles/draft.dir/flags.make
 
+src/CMakeFiles/draft.dir/FORCE.cpp.o: src/CMakeFiles/draft.dir/flags.make
+src/CMakeFiles/draft.dir/FORCE.cpp.o: ../src/FORCE.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/CMakeFiles $(CMAKE_PROGRESS_1)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/draft.dir/FORCE.cpp.o"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/draft.dir/FORCE.cpp.o -c /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/FORCE.cpp
+
+src/CMakeFiles/draft.dir/FORCE.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/draft.dir/FORCE.cpp.i"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/FORCE.cpp > CMakeFiles/draft.dir/FORCE.cpp.i
+
+src/CMakeFiles/draft.dir/FORCE.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/draft.dir/FORCE.cpp.s"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/FORCE.cpp -o CMakeFiles/draft.dir/FORCE.cpp.s
+
+src/CMakeFiles/draft.dir/FORCE.cpp.o.requires:
+.PHONY : src/CMakeFiles/draft.dir/FORCE.cpp.o.requires
+
+src/CMakeFiles/draft.dir/FORCE.cpp.o.provides: src/CMakeFiles/draft.dir/FORCE.cpp.o.requires
+	$(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/FORCE.cpp.o.provides.build
+.PHONY : src/CMakeFiles/draft.dir/FORCE.cpp.o.provides
+
+src/CMakeFiles/draft.dir/FORCE.cpp.o.provides.build: src/CMakeFiles/draft.dir/FORCE.cpp.o
+
+src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o: src/CMakeFiles/draft.dir/flags.make
+src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o: ../src/ConnectedComponent.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/CMakeFiles $(CMAKE_PROGRESS_2)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/draft.dir/ConnectedComponent.cpp.o -c /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/ConnectedComponent.cpp
+
+src/CMakeFiles/draft.dir/ConnectedComponent.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/draft.dir/ConnectedComponent.cpp.i"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/ConnectedComponent.cpp > CMakeFiles/draft.dir/ConnectedComponent.cpp.i
+
+src/CMakeFiles/draft.dir/ConnectedComponent.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/draft.dir/ConnectedComponent.cpp.s"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/ConnectedComponent.cpp -o CMakeFiles/draft.dir/ConnectedComponent.cpp.s
+
+src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o.requires:
+.PHONY : src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o.requires
+
+src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o.provides: src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o.requires
+	$(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o.provides.build
+.PHONY : src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o.provides
+
+src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o.provides.build: src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o
+
+src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o: src/CMakeFiles/draft.dir/flags.make
+src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o: ../src/FindConnectedComponents.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/CMakeFiles $(CMAKE_PROGRESS_3)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/draft.dir/FindConnectedComponents.cpp.o -c /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/FindConnectedComponents.cpp
+
+src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/draft.dir/FindConnectedComponents.cpp.i"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/FindConnectedComponents.cpp > CMakeFiles/draft.dir/FindConnectedComponents.cpp.i
+
+src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/draft.dir/FindConnectedComponents.cpp.s"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/FindConnectedComponents.cpp -o CMakeFiles/draft.dir/FindConnectedComponents.cpp.s
+
+src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.requires:
+.PHONY : src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.requires
+
+src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.provides: src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.requires
+	$(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.provides.build
+.PHONY : src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.provides
+
+src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.provides.build: src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o
+
+src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o: src/CMakeFiles/draft.dir/flags.make
+src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o: ../src/TriangularMatrix.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/CMakeFiles $(CMAKE_PROGRESS_4)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/draft.dir/TriangularMatrix.cpp.o -c /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/TriangularMatrix.cpp
+
+src/CMakeFiles/draft.dir/TriangularMatrix.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/draft.dir/TriangularMatrix.cpp.i"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/TriangularMatrix.cpp > CMakeFiles/draft.dir/TriangularMatrix.cpp.i
+
+src/CMakeFiles/draft.dir/TriangularMatrix.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/draft.dir/TriangularMatrix.cpp.s"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/TriangularMatrix.cpp -o CMakeFiles/draft.dir/TriangularMatrix.cpp.s
+
+src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.requires:
+.PHONY : src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.requires
+
+src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.provides: src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.requires
+	$(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.provides.build
+.PHONY : src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.provides
+
+src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.provides.build: src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o
+
 src/CMakeFiles/draft.dir/program.cpp.o: src/CMakeFiles/draft.dir/flags.make
 src/CMakeFiles/draft.dir/program.cpp.o: ../src/program.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/CMakeFiles $(CMAKE_PROGRESS_5)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/draft.dir/program.cpp.o"
 	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/draft.dir/program.cpp.o -c /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/program.cpp
 
@@ -74,7 +166,7 @@ src/CMakeFiles/draft.dir/program.cpp.o.provides.build: src/CMakeFiles/draft.dir/
 
 src/CMakeFiles/draft.dir/TransClust.cpp.o: src/CMakeFiles/draft.dir/flags.make
 src/CMakeFiles/draft.dir/TransClust.cpp.o: ../src/TransClust.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/CMakeFiles $(CMAKE_PROGRESS_2)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/CMakeFiles $(CMAKE_PROGRESS_6)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/draft.dir/TransClust.cpp.o"
 	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/draft.dir/TransClust.cpp.o -c /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/TransClust.cpp
 
@@ -95,66 +187,74 @@ src/CMakeFiles/draft.dir/TransClust.cpp.o.provides: src/CMakeFiles/draft.dir/Tra
 
 src/CMakeFiles/draft.dir/TransClust.cpp.o.provides.build: src/CMakeFiles/draft.dir/TransClust.cpp.o
 
-src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o: src/CMakeFiles/draft.dir/flags.make
-src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o: ../src/TriangularMatrix.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/CMakeFiles $(CMAKE_PROGRESS_3)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o"
-	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/draft.dir/TriangularMatrix.cpp.o -c /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/TriangularMatrix.cpp
+src/CMakeFiles/draft.dir/ClusteringResult.cpp.o: src/CMakeFiles/draft.dir/flags.make
+src/CMakeFiles/draft.dir/ClusteringResult.cpp.o: ../src/ClusteringResult.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/CMakeFiles $(CMAKE_PROGRESS_7)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/draft.dir/ClusteringResult.cpp.o"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/draft.dir/ClusteringResult.cpp.o -c /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/ClusteringResult.cpp
 
-src/CMakeFiles/draft.dir/TriangularMatrix.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/draft.dir/TriangularMatrix.cpp.i"
-	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/TriangularMatrix.cpp > CMakeFiles/draft.dir/TriangularMatrix.cpp.i
+src/CMakeFiles/draft.dir/ClusteringResult.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/draft.dir/ClusteringResult.cpp.i"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/ClusteringResult.cpp > CMakeFiles/draft.dir/ClusteringResult.cpp.i
 
-src/CMakeFiles/draft.dir/TriangularMatrix.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/draft.dir/TriangularMatrix.cpp.s"
-	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/TriangularMatrix.cpp -o CMakeFiles/draft.dir/TriangularMatrix.cpp.s
+src/CMakeFiles/draft.dir/ClusteringResult.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/draft.dir/ClusteringResult.cpp.s"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/ClusteringResult.cpp -o CMakeFiles/draft.dir/ClusteringResult.cpp.s
 
-src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.requires:
-.PHONY : src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.requires
+src/CMakeFiles/draft.dir/ClusteringResult.cpp.o.requires:
+.PHONY : src/CMakeFiles/draft.dir/ClusteringResult.cpp.o.requires
 
-src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.provides: src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.requires
-	$(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.provides.build
-.PHONY : src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.provides
+src/CMakeFiles/draft.dir/ClusteringResult.cpp.o.provides: src/CMakeFiles/draft.dir/ClusteringResult.cpp.o.requires
+	$(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/ClusteringResult.cpp.o.provides.build
+.PHONY : src/CMakeFiles/draft.dir/ClusteringResult.cpp.o.provides
 
-src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.provides.build: src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o
+src/CMakeFiles/draft.dir/ClusteringResult.cpp.o.provides.build: src/CMakeFiles/draft.dir/ClusteringResult.cpp.o
 
-src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o: src/CMakeFiles/draft.dir/flags.make
-src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o: ../src/FindConnectedComponents.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/CMakeFiles $(CMAKE_PROGRESS_4)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o"
-	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/draft.dir/FindConnectedComponents.cpp.o -c /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/FindConnectedComponents.cpp
+src/CMakeFiles/draft.dir/Result.cpp.o: src/CMakeFiles/draft.dir/flags.make
+src/CMakeFiles/draft.dir/Result.cpp.o: ../src/Result.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/CMakeFiles $(CMAKE_PROGRESS_8)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/CMakeFiles/draft.dir/Result.cpp.o"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/draft.dir/Result.cpp.o -c /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/Result.cpp
 
-src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/draft.dir/FindConnectedComponents.cpp.i"
-	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/FindConnectedComponents.cpp > CMakeFiles/draft.dir/FindConnectedComponents.cpp.i
+src/CMakeFiles/draft.dir/Result.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/draft.dir/Result.cpp.i"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/Result.cpp > CMakeFiles/draft.dir/Result.cpp.i
 
-src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/draft.dir/FindConnectedComponents.cpp.s"
-	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/FindConnectedComponents.cpp -o CMakeFiles/draft.dir/FindConnectedComponents.cpp.s
+src/CMakeFiles/draft.dir/Result.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/draft.dir/Result.cpp.s"
+	cd /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/build/src && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/mikkel/Dropbox/Datalogi/Speciale/code/firstDraft/src/Result.cpp -o CMakeFiles/draft.dir/Result.cpp.s
 
-src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.requires:
-.PHONY : src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.requires
+src/CMakeFiles/draft.dir/Result.cpp.o.requires:
+.PHONY : src/CMakeFiles/draft.dir/Result.cpp.o.requires
 
-src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.provides: src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.requires
-	$(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.provides.build
-.PHONY : src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.provides
+src/CMakeFiles/draft.dir/Result.cpp.o.provides: src/CMakeFiles/draft.dir/Result.cpp.o.requires
+	$(MAKE) -f src/CMakeFiles/draft.dir/build.make src/CMakeFiles/draft.dir/Result.cpp.o.provides.build
+.PHONY : src/CMakeFiles/draft.dir/Result.cpp.o.provides
 
-src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.provides.build: src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o
+src/CMakeFiles/draft.dir/Result.cpp.o.provides.build: src/CMakeFiles/draft.dir/Result.cpp.o
 
 # Object files for target draft
 draft_OBJECTS = \
+"CMakeFiles/draft.dir/FORCE.cpp.o" \
+"CMakeFiles/draft.dir/ConnectedComponent.cpp.o" \
+"CMakeFiles/draft.dir/FindConnectedComponents.cpp.o" \
+"CMakeFiles/draft.dir/TriangularMatrix.cpp.o" \
 "CMakeFiles/draft.dir/program.cpp.o" \
 "CMakeFiles/draft.dir/TransClust.cpp.o" \
-"CMakeFiles/draft.dir/TriangularMatrix.cpp.o" \
-"CMakeFiles/draft.dir/FindConnectedComponents.cpp.o"
+"CMakeFiles/draft.dir/ClusteringResult.cpp.o" \
+"CMakeFiles/draft.dir/Result.cpp.o"
 
 # External object files for target draft
 draft_EXTERNAL_OBJECTS =
 
+bin/draft: src/CMakeFiles/draft.dir/FORCE.cpp.o
+bin/draft: src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o
+bin/draft: src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o
+bin/draft: src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o
 bin/draft: src/CMakeFiles/draft.dir/program.cpp.o
 bin/draft: src/CMakeFiles/draft.dir/TransClust.cpp.o
-bin/draft: src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o
-bin/draft: src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o
+bin/draft: src/CMakeFiles/draft.dir/ClusteringResult.cpp.o
+bin/draft: src/CMakeFiles/draft.dir/Result.cpp.o
 bin/draft: src/CMakeFiles/draft.dir/build.make
 bin/draft: src/CMakeFiles/draft.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --red --bold "Linking CXX executable ../bin/draft"
@@ -164,10 +264,14 @@ bin/draft: src/CMakeFiles/draft.dir/link.txt
 src/CMakeFiles/draft.dir/build: bin/draft
 .PHONY : src/CMakeFiles/draft.dir/build
 
+src/CMakeFiles/draft.dir/requires: src/CMakeFiles/draft.dir/FORCE.cpp.o.requires
+src/CMakeFiles/draft.dir/requires: src/CMakeFiles/draft.dir/ConnectedComponent.cpp.o.requires
+src/CMakeFiles/draft.dir/requires: src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.requires
+src/CMakeFiles/draft.dir/requires: src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.requires
 src/CMakeFiles/draft.dir/requires: src/CMakeFiles/draft.dir/program.cpp.o.requires
 src/CMakeFiles/draft.dir/requires: src/CMakeFiles/draft.dir/TransClust.cpp.o.requires
-src/CMakeFiles/draft.dir/requires: src/CMakeFiles/draft.dir/TriangularMatrix.cpp.o.requires
-src/CMakeFiles/draft.dir/requires: src/CMakeFiles/draft.dir/FindConnectedComponents.cpp.o.requires
+src/CMakeFiles/draft.dir/requires: src/CMakeFiles/draft.dir/ClusteringResult.cpp.o.requires
+src/CMakeFiles/draft.dir/requires: src/CMakeFiles/draft.dir/Result.cpp.o.requires
 .PHONY : src/CMakeFiles/draft.dir/requires
 
 src/CMakeFiles/draft.dir/clean:

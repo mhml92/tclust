@@ -7,29 +7,30 @@
 class TriangularMatrix{
    public:
       // Create connected component based on TriangularMatrix and threshold
-      TriangularMatrix(const TriangularMatrix &m,const std::vector<unsigned> &objects, double th);  
+      TriangularMatrix(const TriangularMatrix &m,const std::vector<unsigned> &objects);  
+
       // Read input similarity file and create similarity matrix
       TriangularMatrix(const std::string &filename);  
 
+      // read from x_1,x_2,...,x_n coordinates
+      TriangularMatrix(const std::vector<std::vector<float>> &pos);
 
       // accessing values of the matrix
-      double &operator()(unsigned i,unsigned j) {return matrix.at(index(i,j));};
-      const double& operator()(unsigned i,unsigned j)const {return matrix.at(index(i,j));};
+      inline float &operator()(unsigned i,unsigned j) {return matrix.at(index(i,j));};
+      inline const float& operator()(unsigned i,unsigned j)const {return matrix.at(index(i,j));};
 
 
       // convineance functions
-      double getMaxValue(){return maxValue;}
-      double getMinValue(){return minValue;}
-      double getThreshold(){return threshold;}
-      const std::string getObjectName(int i)const {return index2object.at(i);};
-      unsigned getNumObjects(){return index2object.size();}
+      inline float getMaxValue() const {return maxValue;}
+      inline float getMinValue() const {return minValue;}
+      inline const std::string getObjectName(unsigned i) const {return index2ObjName.at(i);};
+      inline const std::vector<std::string>& getObjectNames() const {return index2ObjName;};
+      inline const unsigned getNumObjects() const {return index2ObjName.size();}
+      inline const unsigned getObjectId(unsigned i) const {return index2ObjId.at(i);}
 
-
-      // debug print matrix in 'cost matrix' format
-      void dump();
    private:
       // indexing the symetric matrix
-      unsigned index(unsigned i,unsigned j)const{
+      inline unsigned index(unsigned i,unsigned j) const {
          if(j > i){
             unsigned tmp = i;
             i = j;j = tmp;
@@ -37,13 +38,13 @@ class TriangularMatrix{
             std::cout << "Error: attempt to index diagonal in TriangularMatrix" << std::endl;
             return 0;
          }
-         return ((i*(i-1))/2)+j;
+         return (((i*(i-1))/2)+j);
       };
-      double threshold = 0.0;
-      std::vector<double> matrix;
-      double maxSimilarityValue = 0;
-      double maxValue = 0;
-      double minValue = 0;
-      std::vector<std::string> index2object;
+      std::vector<float> matrix;
+      float maxValue = 0;
+      float minValue = 0;
+      std::vector<std::string> index2ObjName;
+      std::vector<unsigned> index2ObjId;
 };
+
 #endif
