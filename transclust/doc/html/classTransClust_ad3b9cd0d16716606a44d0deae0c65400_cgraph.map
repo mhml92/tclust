@@ -1,14 +1,14 @@
 <map id="TransClust::TransClust" name="TransClust::TransClust">
-<area shape="rect" id="node2" href="$classConnectedComponent.html#af0f73d769badaf6331d037f7a8f3c7e6" title="ConnectedComponent\l::getObjectNames" alt="" coords="241,5,393,46"/>
-<area shape="rect" id="node4" href="$classConnectedComponent.html#aff31974c26d909f216620e186a978246" title="ConnectedComponent\l::getMinSimilarity" alt="" coords="241,70,393,111"/>
-<area shape="rect" id="node6" href="$classConnectedComponent.html#a674bc2a6eee509ac9ea0efc45a1e4378" title="ConnectedComponent\l::getMaxSimilarity" alt="" coords="241,135,393,177"/>
+<area shape="rect" id="node2" href="$classConnectedComponent.html#a8d149660eceb8b757caeb51c18a40e74" title="ConnectedComponent\l::getObjectNames" alt="" coords="241,5,393,46"/>
+<area shape="rect" id="node4" href="$classConnectedComponent.html#ab0ca069e0532723b56bbbe21d049723e" title="ConnectedComponent\l::getMinSimilarity" alt="" coords="241,70,393,111"/>
+<area shape="rect" id="node6" href="$classConnectedComponent.html#a89dcdc8f6aa08fe6a1ee744247539b56" title="ConnectedComponent\l::getMaxSimilarity" alt="" coords="241,135,393,177"/>
 <area shape="rect" id="node8" href="$namespacefcc.html#a7bb6ac8b965c5b8273285865d31af94d" title="fcc::findConnectedComponents" alt="" coords="214,201,421,228"/>
-<area shape="rect" id="node3" href="$classTriangularMatrix.html#a8786092d7b7c58613b6e19384c7ebfcb" title="TriangularMatrix::getObject\lNames" alt="" coords="469,5,648,46"/>
-<area shape="rect" id="node5" href="$classTriangularMatrix.html#adfcd136b2d1e437fe86eee93e8d5dcee" title="TriangularMatrix::getMin\lValue" alt="" coords="477,70,640,111"/>
-<area shape="rect" id="node7" href="$classTriangularMatrix.html#a1f93bf63a6c6c09d5130ab3111aaab05" title="TriangularMatrix::getMax\lValue" alt="" coords="475,135,642,177"/>
+<area shape="rect" id="node3" href="$classTriangularMatrix.html#a171bf2f7fc533eeaefca13fa3e386387" title="TriangularMatrix::getObject\lNames" alt="" coords="469,5,648,46"/>
+<area shape="rect" id="node5" href="$classTriangularMatrix.html#a6b6d89fbaa1afda4f990aedd21f74c6f" title="TriangularMatrix::getMin\lValue" alt="" coords="477,70,640,111"/>
+<area shape="rect" id="node7" href="$classTriangularMatrix.html#aa4fc0ce9f8760cb5aac755aba33a76b9" title="TriangularMatrix::getMax\lValue" alt="" coords="475,135,642,177"/>
 <area shape="rect" id="node9" href="$namespacefcc.html#af21d20aac08ecb1a28be9244dbb525fe" title="fcc::findMembershipVector" alt="" coords="469,201,648,228"/>
-<area shape="rect" id="node10" href="$classConnectedComponent.html#a0ab1852c0c4cc9f224a59d3e8670d009" title="ConnectedComponent\l::size" alt="" coords="705,129,857,170"/>
-<area shape="rect" id="node12" href="$classConnectedComponent.html#ac2828775d06586f68945912765964698" title="ConnectedComponent\l::getThreshold" alt="" coords="705,194,857,235"/>
-<area shape="rect" id="node13" href="$classConnectedComponent.html#a079a714fe4b6ceef8c47f5fc50eaf4ea" title="ConnectedComponent::at" alt="" coords="696,260,867,287"/>
-<area shape="rect" id="node11" href="$classTriangularMatrix.html#a5040afab8fb04018c02dc2532401fab1" title="TriangularMatrix::getNum\lObjects" alt="" coords="915,129,1085,170"/>
+<area shape="rect" id="node10" href="$classConnectedComponent.html#ae8a62b4025a594b121452c329ef34cd3" title="ConnectedComponent\l::size" alt="" coords="705,129,857,170"/>
+<area shape="rect" id="node12" href="$classConnectedComponent.html#af2cb7ead8d9bc01a32bb54a0195ae9ef" title="ConnectedComponent\l::getThreshold" alt="" coords="705,194,857,235"/>
+<area shape="rect" id="node13" href="$classConnectedComponent.html#af8b909a40a6854ad049e1742702aee60" title="ConnectedComponent::at" alt="" coords="696,260,867,287"/>
+<area shape="rect" id="node11" href="$classTriangularMatrix.html#a5d5b979b63a18d6bfd53e08df3f4b9ae" title="TriangularMatrix::getNum\lObjects" alt="" coords="915,129,1085,170"/>
 </map>
