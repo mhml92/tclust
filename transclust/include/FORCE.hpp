@@ -24,6 +24,7 @@ namespace FORCE{
    ClusteringResult partition(
          const ConnectedComponent& cc,
          std::vector<std::vector<float>>& pos,
+         ClusteringResult& cs,
          float d_init,
          float d_maximal,
          float s_init,

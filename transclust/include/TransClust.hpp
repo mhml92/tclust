@@ -4,7 +4,8 @@
 #include <queue>
 #include <vector>
 #include <map>
-#include <ConnectedComponent.hpp>
+#include "ConnectedComponent.hpp"
+#include "ClusteringResult.hpp"
 #include "Result.hpp"
 
 class TransClust{
@@ -21,8 +22,8 @@ class TransClust{
             float p           = 1.0,
             float f_att       = 1.0,
             float f_rep       = 1.0,
-            unsigned R        = 200,
-            unsigned dim      = 3,
+            unsigned R        = 100,
+            unsigned dim      = 2,
             float start_t     = 100,
             float d_init      = 0.01,
             float d_maximal   = 5,

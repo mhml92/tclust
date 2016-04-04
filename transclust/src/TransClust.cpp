@@ -53,7 +53,7 @@ TransClust::TransClust(
 void TransClust::cluster()
 {
 
-   Result myresult(id2object.size());
+   Result result(id2object);
    while(!ccs.empty()){
       ConnectedComponent& cc = ccs.front();   
 
@@ -62,21 +62,21 @@ void TransClust::cluster()
       pos.resize(cc.size(), std::vector<float>(dim,0));
 
       // layout
-      //if(cc.size() > 1){
-         FORCE::layout(cc,pos,p,f_att,f_rep,R,start_t,dim);
-         //FORCE::DEBUG_position(cc,pos,cc.getThreshold());
-         ClusteringResult res = FORCE::partition(cc,pos,d_init,d_maximal,s_init,f_s);
+      FORCE::layout(cc,pos,p,f_att,f_rep,R,start_t,dim);
+      //FORCE::DEBUG_position(cc,pos,cc.getThreshold());
 
-         myresult.add(cc,res);
-         //FORCE::DEBUG_linking(res.getClusters(),pos,cc.getThreshold(),cc.getId());
-         float new_threshold = cc.getThreshold()+threshold_step;
-         if(new_threshold < threshold_max){
-            fcc::findConnectedComponents(cc,ccs,new_threshold);
-         }
-      //}
+      ClusteringResult cr;
+      FORCE::partition(cc,pos,cr,d_init,d_maximal,s_init,f_s);
+
+      result.add(cc,cr);
+      //FORCE::DEBUG_linking(res.getClusters(),pos,cc.getThreshold(),cc.getId());
+      float new_threshold = cc.getThreshold()+threshold_step;
+      if(new_threshold < threshold_max){
+         fcc::findConnectedComponents(cc,ccs,new_threshold);
+      }
       ccs.pop();
    }
-   myresult.dump();
+   result.dump();
 }
 
 

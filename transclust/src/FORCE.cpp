@@ -4,10 +4,10 @@
 #include <random>
 #include <limits>
 #include <queue>
-#include <ConnectedComponent.hpp>
-#include <FindConnectedComponents.hpp>
-#include <FORCE.hpp>
-#include <ClusteringResult.hpp>
+#include "ConnectedComponent.hpp"
+#include "FindConnectedComponents.hpp"
+#include "FORCE.hpp"
+#include "ClusteringResult.hpp"
 
 namespace FORCE{
 
@@ -155,6 +155,7 @@ namespace FORCE{
    ClusteringResult partition(
          const ConnectedComponent& cc,
          std::vector<std::vector<float>>& pos,
+         ClusteringResult& cr,
          float d_init,
          float d_maximal,
          float s_init,
@@ -170,8 +171,7 @@ namespace FORCE{
          d += s;
          s += s*f_s;
       }
-      float best_cost = std::numeric_limits<float>::max();
-      std::vector<unsigned> best_clustering; 
+      cr.cost = std::numeric_limits<float>::max();
 
       std::vector<std::vector<unsigned>> clustering;
 
@@ -203,13 +203,13 @@ namespace FORCE{
                }
             }
          }
-         if(cost < best_cost){
-            best_cost = cost;
-            best_clustering = membership;
+         if(cost < cr.cost){
+            cr.cost = cost;
+            cr.membership = membership;
          }
 
       }
-      return ClusteringResult(best_clustering,best_cost);
+      return cr;
    }
 
    /*******************************************************************************

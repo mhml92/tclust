@@ -2,56 +2,66 @@
 #include <limits>
 #include <algorithm>
 #include <map>
+#include <unordered_map>
 #include <iomanip>
 
-Result::Result(unsigned rs):resultSize(rs)
+Result::Result(std::vector<std::string> id2object)
+   :
+      id2object(id2object)
+
 { }
 
 void Result::add(ConnectedComponent& cc, ClusteringResult& cr)
 {
-   if(thresholdIndex.find(cc.getThreshold()) == thresholdIndex.end())
-   {
-      // if first cc of threshold
-      results.push_back(std::vector<unsigned>(resultSize,std::numeric_limits<unsigned>::max()));
-      thresholdClusterIndex.push_back(0);
-      thresholdClusterCost.push_back(0);
-      thresholdIndex.insert(std::pair<float,unsigned>(cc.getThreshold(),results.size()-1));
-   } 
-
-   unsigned index = thresholdIndex.at(cc.getThreshold());
-   unsigned cid = thresholdClusterIndex.at(index);
-
-   thresholdClusterCost.at(index) += cr.getCost();
-   for(unsigned i = 0; i < cr.getClusters().size();i++)
-   {
-      results.at(index).at(cc.getObjectId(i)) = cr.getClusters().at(i)+cid;
+   // update cost
+   if(cost.find(cc.getThreshold()) == cost.end()){
+      cost.insert({cc.getThreshold(),0});
    }
-   thresholdClusterIndex.at(index) += mydistinct(cr.getClusters());
+   cost.at(cc.getThreshold()) += cr.cost;
 
-   /*
-   for(auto& clustear:cr.getClusters()){
-      unsigned cid = thresholdClusterIndex.at(index);
-      for(unsigned j = 0; j < cluster.size();j++){
-         results.at(index).at(cc.getObjectId(j)) = cid;
+   // update clusters
+   std::vector<std::vector<unsigned>> clstrs;
+   std::unordered_map<unsigned,unsigned>clstr_index;
+   for(unsigned i = 0; i < cr.membership.size(); i++){
+
+      unsigned clster_num = cr.membership.at(i);
+      // if cluster number is not present in map
+      if(clstr_index.find(clster_num) == clstr_index.end())
+      {
+         clstr_index.insert({clster_num,clstrs.size()});
+         clstrs.push_back(std::vector<unsigned>());
       }
-      thresholdClusterIndex.at(index) = cid+1;
+
+      unsigned ci = clstr_index.at(clster_num);
+      unsigned objId = cc.getObjectId(i);
+      clstrs.at(ci).push_back(objId);
    }
-   */
+
+   // check if threshold exists in map
+   if(clusters.find(cc.getThreshold()) == clusters.end()){
+      clusters.insert({cc.getThreshold(),std::vector<std::vector<unsigned>>()}); 
+   }
+   for(auto& clstr:clstrs){
+      clusters.at(cc.getThreshold()).push_back(clstr);
+   }
 }
-
-
 
 void Result::dump()
 {
-   for(auto const& th:thresholdIndex)
+   for(auto& c:cost)
    {
-      unsigned index = th.second;
-      std::cout << th.first << "\t" << " - " << "\t";
-      for(unsigned i = 0; i < resultSize;i++)
-      {
-         std::cout << results.at(index).at(i) << ", ";
+      float threshold = c.first;
+      float cost = c.second;
+      std::cout << threshold << "\t";
+      std::cout << cost << "\t";
+      std::string output = "";
+      for(auto& clstr:clusters.at(threshold)){
+         for(auto& oid:clstr){
+            output += id2object[oid] + ",";
+         }
+         output.pop_back();
+         output += ";";
       }
-      std::cout << std::endl;
+      std::cout << output << std::endl;
    }
-   
 }

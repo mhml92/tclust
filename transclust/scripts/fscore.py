@@ -20,9 +20,6 @@ def parse_transclust_output(file_name):
             for objects in line:
                 cluster_id = cluster_id +1
                 clusters.append(objects.split(","))
-                #objects =
-                #for obj in objects:
-                #    clusters[cluster_id].append(obj)
             data.append({
                 "threshold":threshold,
                 "cost":cost,
@@ -30,6 +27,14 @@ def parse_transclust_output(file_name):
             )
     return data
 
+def parse_two_col_gs(file_name):
+    data = {}
+    with open(file_name,"r") as f:
+        for line in f:
+            line = line.split()
+            data[str(line[0])] = str(line[1])
 
-myData = parse_transclust_output(args.f)
-print(myData[99])
+    return data
+
+print(parse_transclust_output(args.f))
+
