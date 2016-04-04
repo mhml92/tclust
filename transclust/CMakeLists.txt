@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 # project name
-project( DRAFT ) 
+project( TransClust) 
 
 # version
 set (CMAKEDEMO_VERSION_MAJOR 0)

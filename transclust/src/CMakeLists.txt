@@ -1,2 +1,2 @@
 file(GLOB SOURCES *.cpp)
-add_executable(draft ${SOURCES}) 
+add_executable(transclust ${SOURCES}) 
