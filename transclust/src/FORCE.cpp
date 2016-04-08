@@ -118,19 +118,19 @@ namespace FORCE{
             float m = (start_t*(float)cc.size())/(pow(r+1,2));
             for(unsigned i = 0; i < pos.size(); i++){
 
-            float len = 0;
-            for(unsigned j = 0; j < dim;j++){
-            len += pow(delta[i][j],2);
+             float len = 0;
+             for(unsigned j = 0; j < dim;j++){
+             len += pow(delta[i][j],2);
             }
             len = sqrt(len);
             float scalar = std::min(m,len);
             if(scalar != 0){
-            for(unsigned j = 0; j < dim;j++){
-            delta[i][j] = (delta[i][j]/len)*scalar;
-            }
+               for(unsigned j = 0; j < dim;j++){
+                  delta[i][j] = (delta[i][j]/len)*scalar;
+               }
             }else{
-            for(unsigned j = 0; j < dim;j++){
-            delta[i][j] = 0;
+               for(unsigned j = 0; j < dim;j++){
+               delta[i][j] = 0;
             }
             }
             }

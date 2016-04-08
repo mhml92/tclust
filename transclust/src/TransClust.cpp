@@ -41,12 +41,12 @@ TransClust::TransClust(
    // Read input similarity file
    ConnectedComponent sim_matrix(filename);
    id2object = sim_matrix.getObjectNames();
-
+/*
    threshold_min = sim_matrix.getMinSimilarity();
    threshold_max = sim_matrix.getMaxSimilarity();
    threshold_step = (threshold_max-threshold_min)/100;
-
-   fcc::findConnectedComponents(sim_matrix,ccs,threshold_step);
+*/
+   fcc::findConnectedComponents(sim_matrix,ccs,threshold_min);
 }
 
 
@@ -71,7 +71,8 @@ void TransClust::cluster()
       result.add(cc,cr);
       //FORCE::DEBUG_linking(res.getClusters(),pos,cc.getThreshold(),cc.getId());
       float new_threshold = cc.getThreshold()+threshold_step;
-      if(new_threshold < threshold_max){
+
+      if(new_threshold <= threshold_max){
          fcc::findConnectedComponents(cc,ccs,new_threshold);
       }
       ccs.pop();

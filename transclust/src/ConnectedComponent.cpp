@@ -1,3 +1,4 @@
+#include <cmath>
 #include "ConnectedComponent.hpp"
 
 ConnectedComponent::ConnectedComponent(
@@ -18,7 +19,7 @@ ConnectedComponent::ConnectedComponent(
       :
          m(cc.getMatrix(),objects),
          threshold(th),
-         normalization_context(cc.getMaxSimilarity()),
+         normalization_context(std::max(abs(cc.getMaxSimilarity()-threshold),abs(cc.getMinSimilarity()-threshold))),
          cost(-1),
          id(getNewId())
 { 

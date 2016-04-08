@@ -17,8 +17,8 @@ class TransClust{
             const std::string& filename,
             const std::string ref = "",
             float th_min      = 0.0,
-            float th_max      = 0.0,
-            float th_step     = 0.0,
+            float th_max      = 100.0,
+            float th_step     = 1.0,
             float p           = 1.0,
             float f_att       = 1.0,
             float f_rep       = 1.0,
@@ -28,7 +28,7 @@ class TransClust{
             float d_init      = 0.01,
             float d_maximal   = 5,
             float s_init      = 0.01,
-            float f_s         = 1.1
+            float f_s         = 1.01
             );
       void cluster();
    private:
