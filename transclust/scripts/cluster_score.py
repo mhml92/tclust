@@ -12,8 +12,7 @@ parser.add_argument("--trans_gs", help="Golden standard file in the format of tr
 parser.add_argument("--col_gs", help="Golden standard file in the two column format")
 parser.add_argument("--fscore",help="Compare using f-score (default)",action="store_true")
 parser.add_argument("--rand_index",help="Compare using Rand Index",action="store_true")
-parser.add_argument("-R",help="Output as an R dataframe",action="store_true")
-parser.add_argument("-H",help="Prepend header to output (only works if -R is set)",action="store_true")
+parser.add_argument("-H",help="Prepend header to output",action="store_true")
 args = parser.parse_args()
 
 if(args.trans_gs == None and args.col_gs == None):
@@ -96,12 +95,10 @@ def randIndex(clusters, ref_clusters):
     ref_objects = []
     ref_membership = []
     cluster_num = 0
-    #sys.stderr.write("here1: " + str(ref_clusters) + "\n")
     for ref in ref_clusters:
         ref_objects = ref_objects + ref
         ref_membership.extend([cluster_num]*len(ref))
         cluster_num = cluster_num+1
-    #sys.stderr.write("here2: " + str(ref_objects) + "\n")
 
     ref_objects, ref_membership = (list(t) for t in zip(*sorted(zip(ref_objects,ref_membership))))
 
@@ -109,16 +106,11 @@ def randIndex(clusters, ref_clusters):
     membership = []
     cluster_num = 0
     for cls in clusters:
-        if '' not in cls: # dirty dirty hack
-            objects = objects + cls
-            membership.extend([cluster_num]*len(cls))
-            cluster_num = cluster_num+1
-        else:
-            print("waaat")
+        objects = objects + cls
+        membership.extend([cluster_num]*len(cls))
+        cluster_num = cluster_num+1
     objects, membership = (list(t) for t in zip(*sorted(zip(objects,membership))))
 
-    #sys.stderr.write("len: " + str(len(ref_objects))+ "\n")
-    #sys.stderr.write("len: " + str(len(objects)) + "\n")
     a = 0
     b = 0
     for i in range(0,len(ref_objects)):
@@ -152,7 +144,20 @@ def printR(args,result,reference,multiline,func):
     for i in range(0,len(result)):
         #sys.stderr.write("calculating " + str(i) + " of " + str(len(result)) + "\n")
         if multiline:
-            fm = func(result[i]["clusters"],reference[i]["clusters"])
+            # find threshold in reference
+            found = False
+            ref_i = 0
+            while(not found):
+                res_t = float(result[i]["threshold"])
+                ref_t = float(reference[ref_i]['threshold'])
+                if res_t == ref_t:
+                    found = True
+                else:
+                    ref_i += 1
+            if not found:
+                sys.exit("No matching threshold found")
+
+            fm = func(result[i]["clusters"],reference[ref_i]["clusters"])
             gsfile = path_leaf(args.trans_gs)
         else:
             fm = func(result[i]["clusters"],reference["clusters"])
@@ -180,17 +185,10 @@ if args.rand_index:
 else:
     func = fscore
 
-# if r friendly output
-if args.R:
-    if args.trans_gs != None:
-        printR(args,result,reference,True,func)
-    else:
-        printR(args,result,reference,False,func)
+# choose comparison method
+if args.trans_gs != None:
+    multiline = True
 else:
-    if args.trans_gs != None:
-        for i in range(0,len(result)):
-            print(str(result[i]['threshold']) +"\t"+ str(func(result[i]["clusters"],reference[i]["clusters"])))
-    else:
-        for i in range(0,len(result)):
-            print(str(result[i]['threshold']) +"\t"+ str(func(result[i]["clusters"],reference["clusters"])))
+    multiline = False
 
+printR(args,result,reference,multiline,func)

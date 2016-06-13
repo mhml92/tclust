@@ -18,8 +18,8 @@
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 ##########################################################################
-
-
+import os
+WD = os.path.dirname(os.path.realpath(__file__))
 
 # some default flags
 # for more information install clang-3.2-doc package and
@@ -39,9 +39,11 @@ flags = [
 
 
 '-I',
-'include',
+WD + '/include/',
 '-I',
-'lib'
+WD + '/lib/tclap/include/',
+'-I',
+WD + '/lib/plog/include/',
 # include third party libraries
 #'-isystem',
 #'/usr/include/python2.7',

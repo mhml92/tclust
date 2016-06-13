@@ -24,9 +24,9 @@ for i in xrange(0,num_objects):
     for j in xrange(i+1,num_objects):
         pair = str(obj[i]) + "\t" + str(obj[j]) + "\t"
         if clt[i] == clt[j]:
-           pair = pair + str(h_sim + (random.uniform(-1,1)*jitter))
+            pair = pair + str(h_sim + (random.uniform(-1,1)*jitter))
         else:
-           pair = pair + str(l_sim + (random.uniform(-1,1)*jitter))
+            pair = pair + str(l_sim + (random.uniform(-1,1)*jitter))
         f.write(pair+"\n")
 f.close()
 

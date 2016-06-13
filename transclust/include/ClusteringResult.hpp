@@ -3,8 +3,8 @@
 #include <vector>
 
 // Struct holding a partial clustering
-typedef struct ClusteringResult {
-   float cost;
-   std::vector<unsigned> membership; 
-} clustering;
+struct ClusteringResult {
+	float cost;
+	std::vector<unsigned> membership; 
+};
 #endif
