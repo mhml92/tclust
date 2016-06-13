@@ -58,7 +58,7 @@ class TransClust{
 		// FPT values
 		unsigned maxFPTSize = 300;
 		float maxK = 100;
-		float time_limit = 60;
+		float time_limit = 600;
 		float stepSize = 5;
 
 
