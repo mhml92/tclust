@@ -10,7 +10,7 @@
 /*******************************************************************************
  * Set logging verbosity
  ******************************************************************************/
-const plog::Severity VERBOSITY = plog::verbose;
+const plog::Severity VERBOSITY = plog::none;
 
 int main(int argc, char** argv){
 	try {
@@ -54,7 +54,7 @@ int main(int argc, char** argv){
 				"dim",
 				"Layout dimensions",
 				false,
-				2,
+				3,
 				"unsigend interger");
 		TCLAP::ValueArg<float> p_Arg(
 				"",
@@ -83,6 +83,7 @@ int main(int argc, char** argv){
 		TransClust transclust(
 			simFilenameArg.getValue(),
 			"",
+			0.0,
 			0,
 			100.0,
 			1,
@@ -92,8 +93,6 @@ int main(int argc, char** argv){
 			R_Arg.getValue(),
 			dim_Arg.getValue()
 		);
-
-
 
 		/*************************************************************************
 		 * Cluster

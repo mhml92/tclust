@@ -5,12 +5,14 @@
 #include <iterator>
 #include <limits>
 #include <utility>
+#include <stdlib.h>
+#include <plog/Log.h>
 
 TriangularMatrix::TriangularMatrix(
 		const TriangularMatrix &m,
 		const std::vector<unsigned> &objects)
 {
-	maxValue = std::numeric_limits<float>::min();
+	maxValue = -std::numeric_limits<float>::max();
 	minValue = std::numeric_limits<float>::max();
 
 	unsigned num_o = objects.size();
@@ -44,24 +46,25 @@ TriangularMatrix::TriangularMatrix(
 	}
 }
 
-TriangularMatrix::TriangularMatrix(const std::string &filename)
+TriangularMatrix::TriangularMatrix(const std::string &filename, float sim_fallback)
 {
 	// map <object name> -> <index in matrix>
 	std::map<std::string, unsigned> object2index;
 
 	// map for similarity value <<object1 name>-<object2 name>> -> <value>
 	std::map<std::pair<std::string, std::string>, float> sim_value;
+	// map for findeing one-way sim values
+	std::map<std::pair<std::string, std::string>, bool> hasPartner;
 
-	maxValue = std::numeric_limits<float>::min();
+	maxValue = -std::numeric_limits<float>::max();
 	minValue = std::numeric_limits<float>::max();
-
 	/*********************************
 	 * Read the input similarity file
 	 ********************************/
 	std::ifstream fs(filename);
 	for (std::string line; std::getline(fs, line); )
 	{
-
+		
 		// split line from similarity file <o1,o2,sim val>
 		std::istringstream buf(line);
 		std::istream_iterator<std::string> beg(buf), end;
@@ -69,11 +72,11 @@ TriangularMatrix::TriangularMatrix(const std::string &filename)
 
 		// object 1
 		std::string o1 = tokens.at(0);
-		// object 3
+		// object 2
 		std::string o2 = tokens.at(1);
 
 		// o1,o2 similarity
-		float value = stof(tokens.at(2));
+		float value = std::atof(tokens.at(2).c_str());
 
 		// update max and min value
 		if (minValue > value)
@@ -102,7 +105,7 @@ TriangularMatrix::TriangularMatrix(const std::string &filename)
 			index2ObjId.push_back(_id);
 		}
 
-		// create key for similarity map (smalles id first)
+		// create key for similarity map (smallest id first)
 		std::pair<std::string, std::string> key;
 		if (object2index[o1] < object2index[o2])
 		{
@@ -117,11 +120,16 @@ TriangularMatrix::TriangularMatrix(const std::string &filename)
 		// choose the smallest
 		if (sim_value.find(key) != sim_value.end())
 		{
-			if (sim_value[key] < value)
+			hasPartner[key] = true;
+			if (sim_value[key] > value)
 			{
 				value = sim_value[key];
 			}
+		}else{
+			hasPartner[key] = false;
 		}
+
+
 		sim_value[key] = value;
 
 	}
@@ -133,7 +141,18 @@ TriangularMatrix::TriangularMatrix(const std::string &filename)
 	{
 		for (unsigned j = i + 1; j < num_o; j++)
 		{
-			float val = sim_value[std::make_pair(index2ObjName[i], index2ObjName[j])];
+			std::pair<std::string, std::string> key;
+			key = std::make_pair(index2ObjName[i], index2ObjName[j]);
+			float val = sim_fallback;
+			if(sim_value.find(key) != sim_value.end())
+			{
+				val = sim_value[key];
+			}			
+			//if(!hasPartner[key])
+			//{
+			//	LOG_VERBOSE << "SINGLE val: " << val;
+			//	val = sim_fallback;
+			//}
 
 			if (maxValue < val)
 			{
@@ -147,71 +166,3 @@ TriangularMatrix::TriangularMatrix(const std::string &filename)
 		}
 	}
 }
-
-
-/*
-// find the object pair (might be o1o2 or o2o1)
-if(sim_value.find(index2ObjName[i]+'-'+index2ObjName[j]) != sim_value.end())
-{
-val = sim_value[index2ObjName[i]+'-'+index2ObjName[j]];
-}
-else if(sim_value.find(index2ObjName[j]+'-'+index2ObjName[i]) != sim_value.end())
-{
-val = sim_value[index2ObjName[j]+'-'+index2ObjName[i]];
-}
-else
-{
-//if it is not present then it is 0
-
-// TO DO: this must be configurable
-val = 0;
-}
-*/
-
-/*
-	if(object2index.empty()){
-	index2ObjName.push_back(tokens.at(0));
-	object2index[tokens.at(0)] = 0;
-	index2ObjId.push_back(0);
-	}else{
-	if(index2ObjName.back() != tokens.at(0)){
-	index2ObjId.push_back(index2ObjName.size());
-	object2index[tokens.at(0)] = index2ObjName.size();
-	index2ObjName.push_back(tokens.at(0));
-	}
-	if(object2index.find(tokens.at(1)) == object2index.end()){
-	std::cout << "need to fix: read sim file" << std::endl;
-	}
-	}
-// if o1,o2 || o2,o1 exists in sim_value
-float current_sval = std::numeric_limits<float>::min();
-float sval = atof(tokens.at(2).c_str());
-
-// hack
-bool zeroOne = true;
-if(sim_value.find(tokens.at(0)+'-'+tokens.at(1))!= sim_value.end()){
-current_sval = sim_value[tokens.at(0)+'-'+tokens.at(1)];
-}else if(sim_value.find(tokens.at(1)+'-'+tokens.at(0)) != sim_value.end()){
-current_sval = sim_value[tokens.at(1)+'-'+tokens.at(0)];
-zeroOne = false;
-}
-
-*/
-/* non symetric similarity warning
-	if(current_sval != std::numeric_limits<float>::min() && current_sval != sval){
-// warning if non symetrical
-std::cout << "Warning:\tNon symmetric similarity values for objects: "
-<< tokens.at(0) << ", " << tokens.at(1)
-<< ": Choosing smallest similarity" << std::endl;
-}
-*/
-/*
-
-	if(current_sval == std::numeric_limits<float>::min() || current_sval > sval){
-	if(zeroOne){
-	sim_value[tokens.at(0)+'-'+tokens.at(1)] = sval;
-	}else{
-	sim_value[tokens.at(1)+'-'+tokens.at(0)] = sval;
-	}
-	}
-	*/

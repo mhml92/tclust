@@ -4,13 +4,14 @@
 #include <map>
 #include <vector>
 #include <iostream>
+#include <plog/Log.h>
 class TriangularMatrix{
 	public:
 		// Create connected component based on TriangularMatrix and threshold
 		TriangularMatrix(const TriangularMatrix &m,const std::vector<unsigned> &objects);  
 
 		// Read input similarity file and create similarity matrix
-		TriangularMatrix(const std::string &filename);  
+		TriangularMatrix(const std::string &filename, float sim_fallback);  
 
 		// read from x_1,x_2,...,x_n coordinates
 		TriangularMatrix(const std::vector<std::vector<float>> &pos);

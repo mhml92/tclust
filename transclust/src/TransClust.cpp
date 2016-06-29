@@ -2,14 +2,17 @@
 #include "ConnectedComponent.hpp"
 #include "FindConnectedComponents.hpp"
 #include "FORCE.hpp"
+//#include "New_FPT.hpp"
 #include "FPT.hpp"
 #include "ClusteringResult.hpp"
 #include "Result.hpp"
+#include "DEBUG.hpp"
 #include <plog/Log.h>
 
 TransClust::TransClust(
 		const std::string& filename,
 		const std::string ref,
+		float sim_fallback,
 		float th_min,
 		float th_max,
 		float th_step,
@@ -40,17 +43,24 @@ TransClust::TransClust(
 		s_init(s_init),
 		f_s(f_s)
 {
-	LOG_VERBOSE << "Reading input file " << filename;
+	LOG_DEBUG << "Reading input file " << filename;
 
 	// Read input similarity file
-	ConnectedComponent sim_matrix(filename);
+	ConnectedComponent sim_matrix(filename,sim_fallback);
 	id2object = sim_matrix.getObjectNames();
+
+	if(true){
+		threshold_min = 0;//sim_matrix.getMinSimilarity();
+		threshold_max = 100;//sim_matrix.getMaxSimilarity();
+		threshold_step = 1;//(threshold_max-threshold_min)/100;
+	}else{
+
 		threshold_min = sim_matrix.getMinSimilarity();
 		threshold_max = sim_matrix.getMaxSimilarity();
-		threshold_step = (threshold_max-threshold_min)/10;
-	FCC::findConnectedComponents(sim_matrix,ccs,threshold_min);
+		threshold_step =(threshold_max-threshold_min)/100;
+	}
 
-	//FCC::findConnectedComponents(sim_matrix,ccs,32.0);
+	FCC::findConnectedComponents(sim_matrix,ccs,threshold_min);
 }
 
 
@@ -61,30 +71,69 @@ void TransClust::cluster()
 
 	while(!ccs.empty()){
 		ConnectedComponent& cc = ccs.front();   
-		LOG_VERBOSE << "Proccessing ConnectedComponent with id: " << cc.getId();
-		LOG_VERBOSE << "CC size: " << cc.size();
+		LOG_DEBUG << "Processing ConnectedComponent with id: " << cc.getId() 
+			<< " of size: " << cc.size() 
+			<< " and threshold: " << cc.getThreshold() ;
 
 		ClusteringResult cr;
 		// set initial cost to negativ, indicating 'no solution found (yet)'
 		cr.cost = -1;
 
-		// if cost is less than 0 no solution has been found
-		/*
-		if(cr.cost < 0){ 
+		// if cc is at least a conflict tripple
+		if(cc.size() > 2){
+			/**********************************************************************
+			 * Cluster using FORCE
+			 *********************************************************************/
+			
 			// init position array
 			std::vector<std::vector<float>> pos;
 			pos.resize(cc.size(), std::vector<float>(dim,0));
 
 			// layout
-			FORCE::layout(cc,pos,p,f_att,f_rep,R,start_t,dim);
+			FORCE::layout(
+					cc,
+					pos,
+					p,
+					f_att,
+					f_rep,
+					R,
+					start_t,
+					dim);
 			//FORCE::DEBUG_position(cc,pos,cc.getThreshold());
-
+			// partition
 			FORCE::partition(cc,pos,cr,d_init,d_maximal,s_init,f_s);
-		}
-		*/
-		if(cc.size() <= maxFPTSize){
-			LOG_VERBOSE << "Clustering cc-" << cc.getId() << " with FTP";
-			FPT::cluster(cc,cr,time_limit,maxK,stepSize);   
+			
+			LOG_DEBUG << "FORCE found solution with " << DEBUG::num_clusters(cr.membership) 
+				<< " clusters and  cost: " << cr.cost
+				<< ", cost should be: " << DEBUG::calculate_cluster_cost(cc,cr);
+
+			/**********************************************************************
+			 * Cluster using FPT
+			 *********************************************************************/
+			//if(cr.cost <= maxFPTCost){
+			//	LOG_DEBUG << "Cost small enough to try and solve it with FPT";
+			//	LOG_VERBOSE << "Clustering cc-" << cc.getId() << " with FTP";
+			//	// temp hack
+			//	float tmp_force_cost = cr.cost;
+			//	FPT fpt(cc,time_limit,5,cr.cost+1); // DEBUG TEST 1000000 mockInf
+			//	//New_FPT fpt(cc,cr,time_limit,cr.cost/10);
+			//	fpt.cluster(cr);   
+
+			//	// temp hack continued
+			//	if(cr.cost < 0){
+			//		cr.cost = tmp_force_cost;
+			//	}else{
+			//		LOG_DEBUG << "FPT found solution with " 
+			//			<< DEBUG::num_clusters(cr.membership) 
+			//			<< " clusters and  cost: " << cr.cost
+			//			<< ", cost should be: " << DEBUG::calculate_cluster_cost(cc,cr);
+			//	}
+			//}
+		}else{
+			LOG_VERBOSE << "CC is only one or two nodes";
+			// cc consist of 1 or 2 nodes and is a cluster
+			cr.cost = 0;
+			cr.membership = std::vector<unsigned>(cc.size(),0);
 		}
 		result.add(cc,cr);
 		//FORCE::DEBUG_linking(res.getClusters(),pos,cc.getThreshold(),cc.getId());
@@ -95,9 +144,7 @@ void TransClust::cluster()
 			FCC::findConnectedComponents(cc,ccs,new_threshold);
 		}
 		ccs.pop();
+		LOG_DEBUG << "----------------------------------------------";
 	}
 	result.dump();
 }
-
-
-

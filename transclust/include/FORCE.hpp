@@ -21,7 +21,7 @@ namespace FORCE{
 			float start_t,
 			unsigned dim);
 
-	ClusteringResult partition(
+	void partition(
 			const ConnectedComponent& cc,
 			std::vector<std::vector<float>>& pos,
 			ClusteringResult& cs,

@@ -2,11 +2,17 @@
 #include "ConnectedComponent.hpp"
 
 ConnectedComponent::ConnectedComponent(
-		const std::string &filename)
+		const std::string &filename,
+		float sim_fallback)
 	:
-		m(filename),
+		m(filename,sim_fallback),
 		threshold(0),
-		normalization_context(m.getMaxValue()),
+		normalization_context(
+			std::fmax(
+				fabs(m.getMaxValue()-threshold),
+				fabs(m.getMinValue()-threshold)
+			)
+		),
 		cost(-1),
 		id(getNewId())
 { }
@@ -20,14 +26,15 @@ ConnectedComponent::ConnectedComponent(
 		m(cc.getMatrix(),objects),
 		threshold(th),
 		normalization_context(
-			std::max(
-				abs(cc.getMaxSimilarity()-threshold),
-				abs(cc.getMinSimilarity()-threshold)
+			std::fmax(
+				fabs(m.getMaxValue()-threshold),
+				fabs(m.getMinValue()-threshold)
 			)
 		),
 		cost(-1),
 		id(getNewId())
 {
+	
 
 }
 

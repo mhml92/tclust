@@ -1,4 +1,4 @@
-#include <math.h> 
+#include <cmath> 
 #include <iomanip> 
 #include <iostream>
 #include <random>
@@ -13,12 +13,12 @@ namespace FORCE{
 
 	float dist(std::vector<std::vector<float>>& pos,unsigned i, unsigned j)
 	{
-		float dist = 0;
+		float res = 0.f;
 		for(unsigned d = 0; d < pos[0].size(); d++){
 			float side = pos[i][d] - pos[j][d]; 
-			dist += pow(side,2);
+			res += std::pow(side,2.f);
 		}
-		return sqrt(dist);
+		return std::sqrt(res);
 	}
 
 	void layout(
@@ -31,6 +31,7 @@ namespace FORCE{
 			float start_t,
 			unsigned dim)
 	{ 
+		//std::cout << "id: " << cc.getId() << " threshold: " << cc.getThreshold() << " num nodes: " << cc.size() << std::endl;
 		/*************************************************************************
 		 * INITIAL LAYOUT
 		 ************************************************************************/
@@ -48,16 +49,16 @@ namespace FORCE{
 		}else{
 			// uniform hsphere layout
 			std::default_random_engine generator;
-			std::uniform_real_distribution<float> distribution(-1,1);
+			std::uniform_real_distribution<float> distribution(-1.0,1.0);
 			for(unsigned i = 0; i < pos.size(); i++)
 			{
-				float r = 0.0;
+				float r = 0.f;
 				for(unsigned d = 0; d < dim; d++)
 				{
 					pos[i][d] = distribution(generator);
-					r += pow(pos[i][d],2);
+					r += pow(pos[i][d],2.f);
 				}
-				r = sqrt(r);
+				r = std::sqrt(r);
 				for(unsigned d = 0; d < dim; d++)
 				{
 					pos[i][d] = (pos[i][d]/r)*p;
@@ -68,6 +69,8 @@ namespace FORCE{
 		/*************************************************************************
 		 * MAIN LOOP
 		 ************************************************************************/
+		f_att /= cc.size();
+		f_rep /= cc.size();
 		std::vector<std::vector<float>> delta;
 		for(unsigned r = 0; r < R; r++)
 		{
@@ -86,22 +89,18 @@ namespace FORCE{
 					{
 						float log_d = std::log(dist_ij+1);
 						//float log_d = std::log(dist_ij+exp(1));
+						//float log_d = dist_ij;
 
 						float f_ij = 0;
 
 						float edge_weight = cc.at(i,j);
-
-						//std::cout << "Edge_weight " <<  edge_weight << std::endl;
-						if(edge_weight >= 0)
+						if(edge_weight > 0)
 						{
-							f_ij = (edge_weight*f_att*log_d)/((float)cc.size());
+							f_ij = (edge_weight*f_att*log_d)/dist_ij;
 						}else{
-							f_ij = (edge_weight*f_rep)/((float)cc.size()*log_d);
-							//f_ij = (cc.at(i,j)*f_rep*log_d)/((float)cc.size());
+							f_ij = ((edge_weight*f_rep)/(log_d))/dist_ij;
 						}
 
-
-						f_ij /= dist_ij;
 						for(unsigned d = 0; d < dim; d++)
 						{
 							float f_vec = f_ij * (pos[j][d]-pos[i][d]);
@@ -111,50 +110,47 @@ namespace FORCE{
 					}
 				}
 			}
-
-			//DEBUG_position(cc,pos,r);
-			/**********************************************************************
-			 * APPLY COOLING FUNCTION
-			 *********************************************************************/
-			/*
-				float m = (start_t*(float)cc.size())/(pow(r+1,2));
-				for(unsigned i = 0; i < pos.size(); i++){
-
-				float len = 0;
-				for(unsigned j = 0; j < dim;j++){
-				len += pow(delta[i][j],2);
-				}
-				len = sqrt(len);
-				float scalar = std::min(m,len);
-				if(scalar != 0){
-				for(unsigned j = 0; j < dim;j++){
-				delta[i][j] = (delta[i][j]/len)*scalar;
-				}
-				}else{
-				for(unsigned j = 0; j < dim;j++){
-				delta[i][j] = 0;
-				}
-				}
-				}
-				*/
-
 			for(unsigned i = 0; i < pos.size();i++)
 			{
 				// float length = 0;
 				for(unsigned d = 0; d < dim;d++)
 				{
-					//  length += pow(delta[i][d],2); 
 					pos[i][d] += delta[i][d];
 				}
 				//   std::cout << std::setw(10) << i << ": "<< sqrt(length) << std::endl;
 			}
+			//DEBUG_position(cc,pos,r);
+			/**********************************************************************
+			 * APPLY COOLING FUNCTION
+			 *********************************************************************/
+			/*
+			float m = (start_t*(float)cc.size())/(pow(r+1,2));
+			for(unsigned i = 0; i < pos.size(); i++){
+
+				float len = 0;
+				for(unsigned j = 0; j < dim;j++){
+					len += pow(delta[i][j],2);
+				}
+				len = sqrt(len);
+				float scalar = std::min(m,len);
+				if(scalar != 0){
+					for(unsigned j = 0; j < dim;j++){
+						delta[i][j] = (delta[i][j]/len)*scalar;
+					}
+				}else{
+					for(unsigned j = 0; j < dim;j++){
+						delta[i][j] = 0;
+					}
+				}
+			}
+			*/
 
 			//DEBUG_position(cc,pos,r);
 			//DEBUG_delta(cc,pos,delta,r);
 		} 
 	}
 
-	ClusteringResult partition(
+	void partition(
 			const ConnectedComponent& cc,
 			std::vector<std::vector<float>>& pos,
 			ClusteringResult& cr,
@@ -170,6 +166,7 @@ namespace FORCE{
 		std::vector<float> D;
 		while(d <= d_maximal){
 			D.push_back(d);
+			LOG_DEBUG << "THE D: " << d;
 			d += s;
 			s += s*f_s;
 		}
@@ -183,6 +180,14 @@ namespace FORCE{
 
 		for(std::vector<float>::reverse_iterator it = D.rbegin(); it != D.rend(); ++it) {
 			clustering = geometricLinking(pos,*it,clustering);
+			//LOG_DEBUG << "CLUSTERING";
+			//for(auto& cluster:clustering){
+			//	for(unsigned i = 0; i < cluster.size(); i++){
+			//		std::cout << cluster[i] << ", ";
+			//	}
+			//	std::cout << std::endl;
+			//}
+			
 
 			std::vector<unsigned> membership(cc.size(),std::numeric_limits<unsigned>::max());
 			unsigned clusterId = 0;
@@ -192,6 +197,10 @@ namespace FORCE{
 				}
 				clusterId++;
 			}
+			//for(unsigned i = 0; i < membership.size(); i++){
+			//	std::cout << membership[i] << ", ";
+			//}
+			//std::cout << std::endl;
 
 			float cost = 0;
 			for(unsigned i = 0; i< membership.size(); i++)
@@ -209,14 +218,15 @@ namespace FORCE{
 					}
 				}
 			}
+			LOG_DEBUG << "cluster cost: " <<cost << " at: " << *it;
 			if(cost < cr.cost)
 			{
+				LOG_DEBUG << "new cluster cost: " <<cost << " at: " << *it;
 				cr.cost = cost;
 				cr.membership = membership;
 			}
 
 		}
-		return cr;
 	}
 
 	/*******************************************************************************
@@ -248,6 +258,7 @@ namespace FORCE{
 				{
 					if(membership.at(j) == std::numeric_limits<unsigned>::max())
 					{
+						LOG_DEBUG << "dist i,j: " << i <<"( "<< obj.at(i)<<" ), " << j<<"( "<< obj.at(j)<<" ), " << " = "  <<dist(pos,obj.at(i),obj.at(j));
 						if( dist(pos,obj.at(i),obj.at(j)) <= maxDist)
 						{
 							Q.push(j);

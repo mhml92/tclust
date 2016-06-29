@@ -1,7 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.5
 import sys
 import argparse
 import ntpath
+import math
 import operator as op
 from functools import reduce
 
@@ -150,7 +151,7 @@ def printR(args,result,reference,multiline,func):
             while(not found):
                 res_t = float(result[i]["threshold"])
                 ref_t = float(reference[ref_i]['threshold'])
-                if res_t == ref_t:
+                if math.isclose(res_t,ref_t,abs_tol=0.01):
                     found = True
                 else:
                     ref_i += 1

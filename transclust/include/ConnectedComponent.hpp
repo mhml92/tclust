@@ -9,28 +9,16 @@ static unsigned _cc_id(0);
 class ConnectedComponent
 {
 	public:
-		ConnectedComponent(const std::string &filename);
+		ConnectedComponent(const std::string &filename,float sim_fallback);
 		ConnectedComponent(const ConnectedComponent& cc,
 				const std::vector<unsigned>& objects, float th);
 		/*
 			ConnectedComponent(const std::vector<std::vector<float>>& pos,float th);
 			*/
-		inline const TriangularMatrix& getMatrix() const
-		{
-			return m;
-		}
-		inline const unsigned size()const
-		{
-			return m.getNumObjects();
-		}
-		inline const float getMinSimilarity() const
-		{
-			return m.getMinValue();
-		}
-		inline const float getMaxSimilarity() const
-		{
-			return m.getMaxValue();
-		}
+		inline const TriangularMatrix& getMatrix() const { return m; }
+		inline const unsigned size()const { return m.getNumObjects(); }
+		inline const float getMinSimilarity() const{ return m.getMinValue(); }
+		inline const float getMaxSimilarity() const{ return m.getMaxValue(); }
 		inline const std::vector<std::string>& getObjectNames() const
 		{
 			return m.getObjectNames();
