@@ -6,7 +6,7 @@
 
 namespace FCC{
 
-	//float dist(std::vector<std::vector<float>>& pos,unsigned i, unsigned j);
+	//double dist(std::vector<std::vector<double>>& pos,unsigned i, unsigned j);
 
 	/****************************************************************************
 	 * FIND CCs IN CC W. THRESHOLD
@@ -14,32 +14,32 @@ namespace FCC{
 	void findConnectedComponents(
 			const ConnectedComponent &cc, 
 			std::queue<ConnectedComponent> &ccs,
-			const float threshold);
+			const double threshold);
 
 	/****************************************************************************
 	 * DETERMINE MEMBERSHIP BASED ON CC
 	 ***************************************************************************/
 	std::vector<std::vector<unsigned>> findMembershipVector(
 			const ConnectedComponent &cc, 
-			const float threshold);
+			const double threshold);
 
 	/****************************************************************************
 	 * FIND CCs IN POS W. THRESHOLD
 	 ***************************************************************************/
 	void findConnectedComponents(
 			const ConnectedComponent &cc, 
-			const std::vector<std::vector<float>>& pos,
+			const std::vector<std::vector<double>>& pos,
 			std::vector<ConnectedComponent> &ccs,
-			const float threshold);
+			const double threshold);
 
 	/****************************************************************************
 	 * DETERMINE MEMBERSHIP BASED ON POS 
 	 ***************************************************************************/
 	std::vector<std::vector<unsigned>> findMembershipVector(
 			const ConnectedComponent& cc,
-			const std::vector<std::vector<float>>& pos,
+			const std::vector<std::vector<double>>& pos,
 			std::vector<ConnectedComponent>& ccs,
-			const float threshold);
+			const double threshold);
 
 }
 #endif

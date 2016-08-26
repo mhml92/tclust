@@ -1,16 +1,16 @@
-#include <cmath>
 #include "ConnectedComponent.hpp"
 
 ConnectedComponent::ConnectedComponent(
 		const std::string &filename,
-		float sim_fallback)
+		bool use_custom_fallback,
+		double sim_fallback)
 	:
-		m(filename,sim_fallback),
-		threshold(0),
+		m(filename,use_custom_fallback,sim_fallback),
+		threshold(0.0),
 		normalization_context(
-			std::fmax(
-				fabs(m.getMaxValue()-threshold),
-				fabs(m.getMinValue()-threshold)
+			std::max(
+				std::abs(m.getMaxValue()-threshold),
+				std::abs(m.getMinValue()-threshold)
 			)
 		),
 		cost(-1),
@@ -21,33 +21,19 @@ ConnectedComponent::ConnectedComponent(
 ConnectedComponent::ConnectedComponent(
 		const ConnectedComponent &cc,
 		const std::vector<unsigned> &objects,
-		float th)
+		double th)
 	:
 		m(cc.getMatrix(),objects),
 		threshold(th),
 		normalization_context(
-			std::fmax(
-				fabs(m.getMaxValue()-threshold),
-				fabs(m.getMinValue()-threshold)
+			std::max(
+				std::abs(m.getMaxValue()-threshold),
+				std::abs(m.getMinValue()-threshold)
 			)
 		),
-		cost(-1),
+		cost(-1.0),
 		id(getNewId())
-{
-	
-
-}
-
-/*
-	ConnectedComponent::ConnectedComponent(
-	const std::vector<std::vector<float>>& pos,
-	float th)
-	:
-	m(pos),
-	threshold(th),
-	normalization_context(0)
-	{ }
-	*/
+{ }
 
 void ConnectedComponent::dump()
 {

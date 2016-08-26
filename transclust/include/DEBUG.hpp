@@ -16,12 +16,12 @@ namespace DEBUG{
 		return s.size();
 	}
 
-	inline float calculate_cluster_cost(
+	inline double calculate_cluster_cost(
 			ConnectedComponent &cc,
 			ClusteringResult &cr
 			)
 	{
-		float cost = 0;
+		double cost = 0;
 		for( unsigned i = 0; i < cc.size(); i++ )
 		{
 			for ( unsigned j = i+1; j < cc.size(); j++ )

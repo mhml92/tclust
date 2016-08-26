@@ -4,7 +4,7 @@
 
 // Struct holding a partial clustering
 struct ClusteringResult {
-	float cost;
+	double cost;
 	std::vector<unsigned> membership; 
 };
 #endif

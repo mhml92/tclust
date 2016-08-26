@@ -61,7 +61,7 @@ def load_sim_data(simfile):
 			#######################################################################
 			if key in sim_value:
 				hasPartner[key] = True
-				if sim_value[key] > value:
+				if sim_value[key] < value:
 					value = sim_value[key]
 			else:
 				hasPartner[key] = False
@@ -70,16 +70,18 @@ def load_sim_data(simfile):
 	num_o = len(index2object)
 	matrix = [[-1 for i in range(num_o)] for j in range(num_o)]
 
-	#for i in range(len(index2object)):
-	#	print(i,index2object[i])
 	for i in range(num_o):
 		for j in range(i+1,num_o):
-			#print(i,j)
-			if str(index2object[i]+"_"+index2object[j]) not in sim_value:
+			key = str(index2object[i]+"_"+index2object[j])
+			if key not in sim_value:
 				val = 0
 			else:
-				val = sim_value[str(index2object[i]+"_"+index2object[j])]
-			matrix[i][j] = matrix[j][i] = val
+				if hasPartner[key]:
+					val = sim_value[key]
+				else:
+					val = 0
+			matrix[i][j] = val
+			matrix[j][i] = val
 
 	return {"matrix":matrix,"object2index":object2index}
 
@@ -90,6 +92,9 @@ def load_result_file(filename):
 	with open(filename) as f:
 		results = []
 		for line in f:
+			if line.strip().startswith("//"):
+				continue
+
 			line = line.split()
 			clusters = line[2].rstrip(";").split(";")
 
@@ -198,7 +203,8 @@ for resfile in resfiles:
 	filename = os.path.basename(resfile["filename"])
 	for res in resfile["result"]:
 		threshold = res["threshold"]
-		cost = calculate_cost(sim_data,threshold,res["clusters"])
+		clusters = res["clusters"]
+		cost = calculate_cost(sim_data,threshold,clusters)
 		data[resfile["filename"]].append({"threshold":threshold,"cost":cost})
 
 # print data

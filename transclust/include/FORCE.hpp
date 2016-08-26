@@ -1,7 +1,6 @@
 #ifndef FORCE_HPP
 #define FORCE_HPP
 #include <vector>
-#include <math.h>
 #include <iostream>
 #include "ConnectedComponent.hpp"
 #include "ClusteringResult.hpp"
@@ -9,41 +8,50 @@
 namespace FORCE{
 
 
-	float dist(std::vector<std::vector<float>>& pos,unsigned i, unsigned j);
+	double dist(std::vector<std::vector<double>>& pos,unsigned i, unsigned j);
 
 	void layout(
 			const ConnectedComponent& cc,
-			std::vector<std::vector<float>>& pos,
-			float p,
-			float f_att,
-			float f_rep,
-			unsigned R,
-			float start_t,
-			unsigned dim);
+			std::vector<std::vector<double>>& pos,
+			double p,
+			double f_att,
+			double f_rep,
+			const unsigned R,
+			double start_t,
+			const unsigned dim);
+
+
+	/*
+	void binarySearchPartition(
+			const ConnectedComponent& cc,
+			std::vector<std::vector<double>>& pos,
+			ClusteringResult& cr);
+			*/
+
 
 	void partition(
 			const ConnectedComponent& cc,
-			std::vector<std::vector<float>>& pos,
+			std::vector<std::vector<double>>& pos,
 			ClusteringResult& cs,
-			float d_init,
-			float d_maximal,
-			float s_init,
-			float f_s);
+			double d_init,
+			double d_maximal,
+			double s_init,
+			double f_s);
 
 
 	std::vector<std::vector<unsigned>> geometricLinking(
-			std::vector<std::vector<float>>& pos,
-			const float maxDist,
+			std::vector<std::vector<double>>& pos,
+			const double maxDist,
 			const std::vector<std::vector<unsigned>>& objects);
 
 	inline void DEBUG_delta(
 			const ConnectedComponent& cc,
-			std::vector<std::vector<float>>& pos,
-			std::vector<std::vector<float>>& delta,
+			std::vector<std::vector<double>>& pos,
+			std::vector<std::vector<double>>& delta,
 			unsigned r)
 	{
 		for(unsigned i = 0; i < pos.size(); i++){
-			float len = 0;
+			double len = 0;
 			for(unsigned j = 0; j < pos[0].size();j++){
 				len += pow(delta[i][j],2);
 			}
@@ -54,11 +62,12 @@ namespace FORCE{
 
 	inline void DEBUG_position(
 			const ConnectedComponent& cc,
-			std::vector<std::vector<float>>& pos,
-			float r)
+			std::vector<std::vector<double>>& pos,
+			double r)
 	{
+		//std::cout << "threshold\tr\tx\ty" << std::endl;
 		for(unsigned i = 0; i < pos.size();i++){
-			std::cout << cc.getThreshold() << "\t" << r << "\t";
+			std::cout << cc.getId() << "\t" << cc.getThreshold() << "\t" << r << "\t";
 			for(unsigned d = 0;d < pos[0].size();d++){
 				std::cout << pos[i][d] << "\t";
 			}
@@ -68,8 +77,8 @@ namespace FORCE{
 
 	inline void DEBUG_linking(
 			std::vector<unsigned> membership,
-			std::vector<std::vector<float>> pos,
-			float threshold,
+			std::vector<std::vector<double>> pos,
+			double threshold,
 			unsigned id)
 	{
 

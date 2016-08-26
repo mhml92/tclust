@@ -2,7 +2,6 @@
 #define FPT_HPP
 #include <iomanip>
 #include <vector>
-#include <cmath>
 #include <list>
 #include <iostream>
 #include <string>
@@ -18,16 +17,16 @@ class FPT{
  	public:
 		struct Node {
 			std::vector<std::vector<unsigned>> nodeParents;
-			std::vector<std::vector<float>> edgeCost;
+			std::vector<std::vector<double>> edgeCost;
 			unsigned size;
-			float cost;
+			double cost;
 		};
 
 		FPT(
 			ConnectedComponent& cc,
-			float time_limit,
-			float stepSize,
-			float mockInf
+			double time_limit,
+			double stepSize,
+			double mockInf
 		);
 
 		void cluster(ClusteringResult &cr);
@@ -36,30 +35,30 @@ class FPT{
 
 		ConnectedComponent &cc;
 		std::chrono::time_point<std::chrono::system_clock> start; 
-		float time_limit;
-		float stepSize;
-		float maxK;
-		float inf;
+		double time_limit;
+		double stepSize;
+		double maxK;
+		double inf;
 		int LEVEL = 0;
 
 		bool solution_found;
-		float solution_cost;
+		double solution_cost;
 		std::vector<std::vector<unsigned>> solution_nodeParents;
-		std::vector<std::vector<float>> solution_edgeCost;
+		std::vector<std::vector<double>> solution_edgeCost;
 
 
-		inline float getDeltaTime()
+		inline double getDeltaTime()
 		{
-			std::chrono::duration<float> diff = (std::chrono::system_clock::now()-start);
+			std::chrono::duration<double> diff = (std::chrono::system_clock::now()-start);
 			return diff.count();
 		}
 		void reduce(Node& fptn);
-		float costSetForbidden(
+		double costSetForbidden(
 				Node& fptn, 
 				unsigned node_i,
 				unsigned node_j);
 
-		float costSetPermanent(
+		double costSetPermanent(
 				Node& fptn, 
 				unsigned node_i,
 				unsigned node_j);
@@ -68,7 +67,7 @@ class FPT{
 			Node& fptn, 
 			unsigned i,
 			unsigned j, 
-			float costForMerging);
+			double costForMerging);
 		
 		void buildSolution(ClusteringResult &cr);
 		void clone_node(Node& fptn0,Node& fptn1);

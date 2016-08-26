@@ -1,6 +1,5 @@
 #include "Result.hpp"
 #include <limits>
-#include <algorithm>
 #include <map>
 #include <unordered_map>
 #include <iomanip>
@@ -13,6 +12,7 @@ Result::Result(std::vector<std::string> id2object)
 
 void Result::add(ConnectedComponent& cc, ClusteringResult& cr)
 {
+
 	// update cost
 	if(cost.find(cc.getThreshold()) == cost.end())
 	{
@@ -51,22 +51,30 @@ void Result::add(ConnectedComponent& cc, ClusteringResult& cr)
 
 void Result::dump()
 {
-	for(auto& c:cost)
-	{
-		float threshold = c.first;
-		float cost = c.second;
-		std::cout << threshold << "\t";
-		std::cout << cost << "\t";
-		std::string output = "";
-		for(auto& clstr:clusters.at(threshold))
+
+	if(cost.size() > 0 ){
+		for(auto& c:cost)
 		{
-			for(auto& oid:clstr)
+			double threshold = c.first;
+			double cost = c.second;
+			std::cout << threshold << "\t";
+			std::cout << cost << "\t";
+			std::string output = "";
+
+			unsigned count_objects = 0;
+			for(auto& clstr:clusters.at(threshold))
 			{
-				output += id2object[oid] + ",";
+				for(auto& oid:clstr)
+				{
+					output += id2object[oid] + ",";
+					count_objects++;
+				}
+				output.pop_back();
+				output += ";";
 			}
-			output.pop_back();
-			output += ";";
+			assert(count_objects == id2object.size());
+
+			std::cout << output << std::endl;
 		}
-		std::cout << output << std::endl;
 	}
 }
