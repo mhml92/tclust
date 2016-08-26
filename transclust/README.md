@@ -12,7 +12,11 @@ From the root run:
 #Run example
 From the build folder run:
 ```Bash
-   ./bin/transclust ../data/brown/sfld_brown_et_al_amidohydrolases_protein_similarities_for_beh.txt
+   ./bin/transclust ../data/karateclub/Zachary_karate_club_similarities.sim
+```
+For help run:
+```Bash
+   ./bin/transclust --help
 ```
 
 #Rebuild doc
