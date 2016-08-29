@@ -268,7 +268,29 @@ int main(int argc, char** argv){
 		/*************************************************************************
 		 * Cluster
 		 ************************************************************************/
-		transclust.cluster();
+		clustering clusters = transclust.cluster();
+
+		/*************************************************************************
+		 * Print result
+		 ************************************************************************/
+		for(unsigned i = 0; i < clusters.threshold.size(); i++){
+			std::cout << 
+				clusters.threshold.at(i) << 
+				"\t" << 
+				clusters.cost.at(i) << 
+				"\t";
+
+			for(auto & cluster:clusters.clusters.at(i)){
+				std::string c = "";
+				for(auto & o:cluster){
+					c += o + ",";
+				}
+				c.pop_back();
+				std::cout << c + ";";
+			}
+			std::cout << std::endl;
+			
+		}
 
 	}catch (TCLAP::ArgException &e){
 		std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;

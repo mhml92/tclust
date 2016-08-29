@@ -10,6 +10,7 @@
 #include "Result.hpp"
 #include <plog/Log.h>
 
+
 class TransClust{
 
 	public:
@@ -33,11 +34,11 @@ class TransClust{
 	  	  	 double     f_s                   =   0.01,
 	  	  	 double     fpt_time_limit        =   60,
 	  	  	 double     fpt_max_cost          =   5000,
-	  	  	 double     fpt_step_size         =   5000,
+	  	  	 double     fpt_step_size         =   10,
 	  	  	 bool       disable_force         =   false,
 	  	  	 bool       disable_fpt           =   false
 		);
-		void cluster();
+		clustering cluster();
 	private:
 		std::string ref;
 

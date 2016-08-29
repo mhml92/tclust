@@ -73,7 +73,7 @@ TransClust::TransClust(
 }
 
 
-void TransClust::cluster()
+clustering TransClust::cluster()
 {
 
 	Result result(id2object);
@@ -185,5 +185,6 @@ void TransClust::cluster()
 	//std::cout << "// d_maximal    " << d_maximal<< std::endl;
 	//std::cout << "// s_init       " << s_init<< std::endl;
 	//std::cout << "// f_s          " << f_s<< std::endl;
-	result.dump();
+//	result.dump();
+	return result.get();
 }

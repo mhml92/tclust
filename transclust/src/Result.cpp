@@ -49,6 +49,32 @@ void Result::add(ConnectedComponent& cc, ClusteringResult& cr)
 	}
 }
 
+clustering Result::get(){
+	clustering res;
+	for(auto& c:cost)
+	{
+		res.threshold.push_back( c.first );
+		res.cost.push_back( c.second );
+
+
+		std::vector<std::vector<std::string>> _clusters;
+
+		for(auto& clstr:clusters.at(c.first))
+		{
+
+			std::cout << "myellow" << std::endl;
+			std::vector<std::string> cluster;
+			for(auto& oid:clstr)
+			{
+				cluster.push_back(id2object[oid]);
+			}
+			_clusters.push_back(cluster);
+		}
+		res.clusters.push_back(_clusters);
+	}
+	return res;	
+}
+
 void Result::dump()
 {
 
@@ -72,7 +98,6 @@ void Result::dump()
 				output.pop_back();
 				output += ";";
 			}
-			assert(count_objects == id2object.size());
 
 			std::cout << output << std::endl;
 		}
