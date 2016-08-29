@@ -61,8 +61,6 @@ clustering Result::get(){
 
 		for(auto& clstr:clusters.at(c.first))
 		{
-
-			std::cout << "myellow" << std::endl;
 			std::vector<std::string> cluster;
 			for(auto& oid:clstr)
 			{
