@@ -29,6 +29,7 @@ TransClust::TransClust(
 		double f_s,
 		double fpt_time_limit,
 		double fpt_max_cost,
+		double fpt_step_size,
 		bool disable_force,
 		bool disable_fpt 
 		)
@@ -51,6 +52,7 @@ TransClust::TransClust(
 		f_s(f_s),
 		fpt_time_limit(fpt_time_limit),
 		fpt_max_cost(fpt_max_cost),
+		fpt_step_size(fpt_step_size),
 		disable_force(disable_force),
 		disable_fpt(disable_fpt)
 {
@@ -124,8 +126,7 @@ void TransClust::cluster()
 				LOG_VERBOSE << "Clustering cc-" << cc.getId() << " with FTP";
 				// temp hack
 				double tmp_force_cost = cr.cost;
-				FPT fpt(cc,fpt_time_limit,5,cr.cost+1); // DEBUG TEST 1000000 mockInf
-				//New_FPT fpt(cc,cr,time_limit,cr.cost/10);
+				FPT fpt(cc,fpt_time_limit,fpt_step_size,cr.cost+1);
 				fpt.cluster(cr);   
 
 				// temp hack continued

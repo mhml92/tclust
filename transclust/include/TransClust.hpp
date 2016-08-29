@@ -33,6 +33,7 @@ class TransClust{
 	  	  	 double     f_s                   =   0.01,
 	  	  	 double     fpt_time_limit        =   60,
 	  	  	 double     fpt_max_cost          =   5000,
+	  	  	 double     fpt_step_size         =   5000,
 	  	  	 bool       disable_force         =   false,
 	  	  	 bool       disable_fpt           =   false
 		);
@@ -64,7 +65,8 @@ class TransClust{
 
 		// FPT values
 		double fpt_time_limit;
-		unsigned fpt_max_cost;
+		double fpt_max_cost;
+		double fpt_step_size;
 
 		bool disable_force;
 		bool disable_fpt; 

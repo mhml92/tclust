@@ -1,3 +1,10 @@
+# IMPORTANT!
+Run 
+```Bash
+git submodule update --recursive
+```
+To pull all submodules
+
 #How to build
 This project uses [CMake](https://cmake.org/) and [Doxygen](http://www.stack.nl/~dimitri/doxygen/index.html)
 

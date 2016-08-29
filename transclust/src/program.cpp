@@ -164,6 +164,14 @@ int main(int argc, char** argv){
 				5000.0,
 				"double");
 
+		TCLAP::ValueArg<double> fpt_step_size_Arg(
+				"",
+				"fpt_step_size",
+				"",
+				false,
+				10.0,
+				"double");
+
 		TCLAP::SwitchArg use_custom_range_Arg(
 				"",
 				"use_custom_range",
@@ -252,6 +260,7 @@ int main(int argc, char** argv){
 			f_s_Arg.getValue(),
 			fpt_time_limit_Arg.getValue(),
 			fpt_max_cost_Arg.getValue(),
+			fpt_step_size_Arg.getValue(),
 			disable_force_Arg.getValue(),
 			disable_fpt_Arg.getValue()
 		);
