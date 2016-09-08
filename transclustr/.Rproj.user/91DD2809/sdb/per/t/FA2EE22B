@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "#ifndef TRANSCLUST_HPP\n#define TRANSCLUST_HPP\n#include <string>\n#include <queue>\n#include <vector>\n#include <map>\n#include <cmath>\n#include \"ConnectedComponent.hpp\"\n#include \"ClusteringResult.hpp\"\n#include \"FPT.hpp\"\n#include \"Result.hpp\"\n\nclass TransClust{\n\n\tpublic:\n\t\tTransClust(\n\t\t\tconst std::string& filename,\n\t  \t  \t bool       use_custom_fallback   =   true,\n\t  \t  \t double     sim_fallback          =   0.0,\n\t  \t  \t bool       deafult_interval      =   true,\n\t  \t  \t double     th_min                =   0.0,\n\t  \t  \t double     th_max                =   100,\n\t  \t  \t double     th_step               =   1.0,\n\t  \t  \t double     p                     =   1.0,\n\t  \t  \t double     f_att                 =   100.0,\n\t  \t  \t double     f_rep                 =   100.0,\n\t  \t  \t unsigned   R                     =   100,\n\t  \t  \t unsigned   dim                   =   3,\n\t  \t  \t double     start_t               =   100,\n\t  \t  \t double     d_init                =   0.01,\n\t  \t  \t double     d_maximal             =   5.0,\n\t  \t  \t double     s_init                =   0.01,\n\t  \t  \t double     f_s                   =   0.01,\n\t  \t  \t double     fpt_time_limit        =   60,\n\t  \t  \t double     fpt_max_cost          =   5000,\n\t  \t  \t double     fpt_step_size         =   10,\n\t  \t  \t bool       disable_force         =   false,\n\t  \t  \t bool       disable_fpt           =   true\n\t\t);\n\t\tclustering cluster();\n\tprivate:\n\t\tstd::string ref;\n\n\t\t// general vars\n\t\tbool use_custom_fallback;\n\t\tdouble sim_fallback;\n\t\tbool use_custom_range;\n\t\tdouble threshold_min;\n\t\tdouble threshold_max;\n\t\tdouble threshold_step;\n\n\t\t// Layout values\n\t\tdouble p;\n\t\tdouble f_att;\n\t\tdouble f_rep;\n\t\tunsigned R;\n\t\tdouble start_t;\n\t\tunsigned dim;\n\n\t\t// partitioning values\n\t\tdouble d_init;\n\t\tdouble d_maximal;\n\t\tdouble s_init;\n\t\tdouble f_s;\n\n\t\t// FPT values\n\t\tdouble fpt_time_limit;\n\t\tdouble fpt_max_cost;\n\t\tdouble fpt_step_size;\n\n\t\tbool disable_force;\n\t\tbool disable_fpt;\n\t\tstd::queue<ConnectedComponent> ccs;\n\n\t\tstd::vector<std::string> id2object;\n};\n#endif\n",
+    "created" : 1473157201080.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "564925207",
+    "id" : "FA2EE22B",
+    "lastKnownWriteTime" : 1473323946,
+    "last_content_update" : 1473323946161,
+    "path" : "~/Dropbox/Datalogi/Speciale/code/transclustr/src/TransClust.hpp",
+    "project_path" : "src/TransClust.hpp",
+    "properties" : {
+        "marks" : "<:10,21\n>:10,21"
+    },
+    "relative_order" : 16,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "hpp"
+}

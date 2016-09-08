@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "#include \"Result.hpp\"\n#include <limits>\n#include <map>\n#include <unordered_map>\n#include <iomanip>\n#include <Rcpp.h>\n\nResult::Result(std::vector<std::string> id2object)\n\t:\n\t\tid2object(id2object)\n\n{ }\n\nvoid Result::add(ConnectedComponent& cc, ClusteringResult& cr)\n{\n\n\t// update cost\n\tif(cost.find(cc.getThreshold()) == cost.end())\n\t{\n\t\tcost.insert({cc.getThreshold(),0});\n\t}\n\tcost.at(cc.getThreshold()) += cr.cost;\n\n\t// update clusters\n\tstd::vector<std::vector<unsigned>> clstrs;\n\tstd::unordered_map<unsigned,unsigned>clstr_index;\n\tfor(unsigned i = 0; i < cr.membership.size(); i++)\n\t{\n\t\tunsigned clster_num = cr.membership.at(i);\n\t\t// if cluster number is not present in map\n\t\tif(clstr_index.find(clster_num) == clstr_index.end())\n\t\t{\n\t\t\tclstr_index.insert({clster_num,clstrs.size()});\n\t\t\tclstrs.push_back(std::vector<unsigned>());\n\t\t}\n\t\tunsigned ci = clstr_index.at(clster_num);\n\t\tunsigned objId = cc.getObjectId(i);\n\t\tclstrs.at(ci).push_back(objId);\n\t}\n\n\t// check if threshold exists in map\n\tif(clusters.find(cc.getThreshold()) == clusters.end())\n\t{\n\t\tclusters.insert({cc.getThreshold(),std::vector<std::vector<unsigned>>()});\n\t}\n\n\tfor(auto& clstr:clstrs)\n\t{\n\t\tclusters.at(cc.getThreshold()).push_back(clstr);\n\t}\n}\n\nclustering Result::get(){\n\tclustering res;\n\tfor(auto& c:cost)\n\t{\n\t\tres.threshold.push_back( c.first );\n\t\tres.cost.push_back( c.second );\n\n\n\t\tstd::vector<std::vector<std::string>> _clusters;\n\n\t\tfor(auto& clstr:clusters.at(c.first))\n\t\t{\n\t\t\tstd::vector<std::string> cluster;\n\t\t\tfor(auto& oid:clstr)\n\t\t\t{\n\t\t\t\tcluster.push_back(id2object[oid]);\n\t\t\t}\n\t\t\t_clusters.push_back(cluster);\n\t\t}\n\t\tres.clusters.push_back(_clusters);\n\t}\n\treturn res;\n}\n\nvoid Result::dump()\n{\n\n\tif(cost.size() > 0 ){\n\t\tfor(auto& c:cost)\n\t\t{\n\t\t\tdouble threshold = c.first;\n\t\t\tdouble cost = c.second;\n\t\t\tRcpp::Rcout << threshold << \"\\t\";\n\t\t\tRcpp::Rcout << cost << \"\\t\";\n\t\t\tstd::string output = \"\";\n\n\t\t\tunsigned count_objects = 0;\n\t\t\tfor(auto& clstr:clusters.at(threshold))\n\t\t\t{\n\t\t\t\tfor(auto& oid:clstr)\n\t\t\t\t{\n\t\t\t\t\toutput += id2object[oid] + \",\";\n\t\t\t\t\tcount_objects++;\n\t\t\t\t}\n\t\t\t\toutput.pop_back();\n\t\t\t\toutput += \";\";\n\t\t\t}\n\n\t\t\tRcpp::Rcout << output << std::endl;\n\t\t}\n\t}\n}\n",
+    "created" : 1473323911403.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1653470829",
+    "id" : "1EF144A0",
+    "lastKnownWriteTime" : 1473158403,
+    "last_content_update" : 1473158403,
+    "path" : "~/Dropbox/Datalogi/Speciale/code/transclustr/src/Result.cpp",
+    "project_path" : "src/Result.cpp",
+    "properties" : {
+        "docOutlineVisible" : "1",
+        "marks" : "<:0,0\n>:0,0"
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "cpp"
+}
