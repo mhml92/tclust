@@ -5,11 +5,11 @@
 #include <list>
 #include <queue>
 #include <algorithm>
-#include "ConnectedComponent.hpp"
-#include "FindConnectedComponents.hpp"
-#include "FORCE.hpp"
-#include "ClusteringResult.hpp"
 #include <chrono>
+#include "transclust/ConnectedComponent.hpp"
+#include "transclust/FindConnectedComponents.hpp"
+#include "transclust/FORCE.hpp"
+#include "transclust/ClusteringResult.hpp"
 
 namespace FORCE
 {
@@ -49,7 +49,6 @@ namespace FORCE
 			}
 		}else{
 			// uniform hsphere layout
-			//std::default_random_engine generator;
 			unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 			std::mt19937 generator(seed);
 			std::uniform_real_distribution<double> distribution(-1.0,1.0);
@@ -74,13 +73,11 @@ namespace FORCE
 		 ************************************************************************/
 		std::vector<std::vector<double>> delta;
 		delta.resize(pos.size(), std::vector<double>(dim,0.0));
-		//std::cout << "x,y,z" << std::endl;
+
 		f_att /= static_cast<double>(cc.size());
 		f_rep /= static_cast<double>(cc.size());
 		for(unsigned r = 0; r < R; r++)
 		{
-			//DEBUG_position(cc,pos,r);
-			
 			// zero delta vectors
 			for(auto& v:delta){std::fill(v.begin(),v.end(),0.0);}
 			
@@ -94,10 +91,10 @@ namespace FORCE
 			{
 				for(unsigned j = i+1; j < pos.size(); j++)
 				{
-					double distance = dist(pos,i,j);
-					if(distance > 0.0)
+					double _distance = dist(pos,i,j);
+					if(_distance > 0.0)
 					{
-						double log_d = std::log(distance+1);
+						double log_d = std::log(_distance+1);
 
 						double force = 0.0;
 
@@ -106,27 +103,10 @@ namespace FORCE
 						//std::cout << cc.size() << "\t" << edge_weight << std::endl;
 						if(edge_weight > 0)
 						{
-							force = (edge_weight * f_att * log_d)/distance;
+							force = (edge_weight * f_att * log_d)/_distance;
 						}else{
-							force = ((edge_weight * f_rep)/log_d)/distance;
+							force = ((edge_weight * f_rep)/log_d)/_distance;
 						}
-
-						/*
-						std::cout << 
-							log_d << "," << 
-							temp << "," <<
-							r << "," <<
-							f_att << "," <<
-							f_rep  << "," <<
-							cc.size() << "," <<
-							cc.getThreshold() << "," <<
-							cc.getObjectName(i) << "," <<
-							cc.getObjectName(j) << "," <<
-							edge_weight << "," <<
-							distance << "," <<
-							force << std::endl;
-							*/
-
 
 						for(unsigned d = 0; d < dim; d++)
 						{
@@ -157,52 +137,8 @@ namespace FORCE
 					pos[i][d] += delta[i][d];
 				}
 			}
-			/*
-			for(unsigned i = 0; i < pos.size(); i++)
-			{
-				for(unsigned d = 0; d < dim;d++)
-				{
-					pos[i][d] += delta[i][d];
-				}
-				
-			}
-			*/
-			
-			//DEBUG_position(cc,pos,r);
-			//DEBUG_delta(cc,pos,delta,r);
 		} 
-		//DEBUG_position(cc,pos,0);
-		//if(cc.getThreshold() == 3){
-		//	std::cout << "x,y,z," << std::endl;
-		//	for(unsigned i = 0; i < pos.size(); i++){
-		//		for(unsigned d = 0; d < dim; d++){
-		//			std::cout << pos[i][d] <<",";
-		//		}
-		//		std::cout << std::endl;
-		//	}
-		//}
-		//std::cout << "-----------------------------------------------" << std::endl;
-		
 	}
-
-	/*
-	void binarySearchPartition(
-			const ConnectedComponent& cc,
-			std::vector<std::vector<double>>& pos,
-			ClusteringResult& cr)
-	{
-		std::vector<double> distances;
-		for(unsigned i = 0; i < cc.size(); i++){
-			for(unsigned j = 0; j < cc.size(); j++){
-				distances.push_back(dist(pos,i,j));
-			}
-		}
-		std::sort(distances.begin(),distances.end());
-
-
-	}
-	*/
-
 
 	void partition(
 			const ConnectedComponent& cc,
@@ -240,12 +176,6 @@ namespace FORCE
 				}
 				clusterId++;
 			}
-			/*for(unsigned i = 0; i < membership.size();i++){
-				if(membership.at(i) == std::numeric_limits<unsigned>::max()){
-					std::cout << "IS MAX AT " << __LINE__ << " IN " __FILE__ << std::endl; 
-				}
-			}*/
-
 			
 			double cost = 0;
 			for(unsigned i = 0; i< membership.size(); i++)

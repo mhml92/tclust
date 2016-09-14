@@ -4,7 +4,6 @@
 #include <map>
 #include <vector>
 #include <iostream>
-#include <plog/Log.h>
 class TriangularMatrix{
 	public:
 		// Create connected component based on TriangularMatrix and threshold

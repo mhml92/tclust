@@ -1,4 +1,3 @@
-#include <TriangularMatrix.hpp>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -6,7 +5,7 @@
 #include <limits>
 #include <utility>
 #include <stdlib.h>
-#include <plog/Log.h>
+#include "transclust/TriangularMatrix.hpp"
 
 TriangularMatrix::TriangularMatrix(
 		const TriangularMatrix &m,

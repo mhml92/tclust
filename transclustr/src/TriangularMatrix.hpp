@@ -4,8 +4,6 @@
 #include <map>
 #include <vector>
 #include <iostream>
-#include <Rcpp.h>
-//#include <plog/Log.h>
 class TriangularMatrix{
 	public:
 		// Create connected component based on TriangularMatrix and threshold
@@ -39,7 +37,7 @@ class TriangularMatrix{
 				i = j;
 				j = tmp;
 			}else if(i == j){
-				Rcpp::Rcout << "Error: attempt to index diagonal in TriangularMatrix" << std::endl;
+				std::cout << "Error: attempt to index diagonal in TriangularMatrix" << std::endl;
 				return 0;
 			}
 			return (((i*(i-1))/2)+j);

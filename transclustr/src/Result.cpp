@@ -3,7 +3,6 @@
 #include <map>
 #include <unordered_map>
 #include <iomanip>
-#include <Rcpp.h>
 
 Result::Result(std::vector<std::string> id2object)
 	:
@@ -41,7 +40,7 @@ void Result::add(ConnectedComponent& cc, ClusteringResult& cr)
 	// check if threshold exists in map
 	if(clusters.find(cc.getThreshold()) == clusters.end())
 	{
-		clusters.insert({cc.getThreshold(),std::vector<std::vector<unsigned>>()});
+		clusters.insert({cc.getThreshold(),std::vector<std::vector<unsigned>>()}); 
 	}
 
 	for(auto& clstr:clstrs)
@@ -52,26 +51,29 @@ void Result::add(ConnectedComponent& cc, ClusteringResult& cr)
 
 clustering Result::get(){
 	clustering res;
+
+	res.id2object = id2object;
+
 	for(auto& c:cost)
 	{
 		res.threshold.push_back( c.first );
 		res.cost.push_back( c.second );
 
 
-		std::vector<std::vector<std::string>> _clusters;
+		std::vector< std::vector<unsigned> > _clusters;
 
 		for(auto& clstr:clusters.at(c.first))
 		{
-			std::vector<std::string> cluster;
+			std::vector<unsigned> cluster;
 			for(auto& oid:clstr)
 			{
-				cluster.push_back(id2object[oid]);
+				cluster.push_back(oid);
 			}
 			_clusters.push_back(cluster);
 		}
 		res.clusters.push_back(_clusters);
 	}
-	return res;
+	return res;	
 }
 
 void Result::dump()
@@ -82,8 +84,8 @@ void Result::dump()
 		{
 			double threshold = c.first;
 			double cost = c.second;
-			Rcpp::Rcout << threshold << "\t";
-			Rcpp::Rcout << cost << "\t";
+			std::cout << threshold << "\t";
+			std::cout << cost << "\t";
 			std::string output = "";
 
 			unsigned count_objects = 0;
@@ -98,7 +100,7 @@ void Result::dump()
 				output += ";";
 			}
 
-			Rcpp::Rcout << output << std::endl;
+			std::cout << output << std::endl;
 		}
 	}
 }

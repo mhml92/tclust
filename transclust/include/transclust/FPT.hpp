@@ -5,11 +5,10 @@
 #include <list>
 #include <iostream>
 #include <string>
-#include "ConnectedComponent.hpp"
-#include "ClusteringResult.hpp"
 #include <limits>
 #include <chrono>
-#include <plog/Log.h>
+#include "transclust/ConnectedComponent.hpp"
+#include "transclust/ClusteringResult.hpp"
 
 
 class FPT{

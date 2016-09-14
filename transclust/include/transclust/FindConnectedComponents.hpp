@@ -2,7 +2,7 @@
 #define FINDCONNECTEDCOMPONENTS_HPP
 #include <vector>
 #include <queue> 
-#include "ConnectedComponent.hpp"
+#include "transclust/ConnectedComponent.hpp"
 
 namespace FCC{
 

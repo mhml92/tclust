@@ -6,7 +6,6 @@
 #include <limits>
 #include <utility>
 #include <stdlib.h>
-//#include <plog/Log.h>
 
 TriangularMatrix::TriangularMatrix(
 		const TriangularMatrix &m,

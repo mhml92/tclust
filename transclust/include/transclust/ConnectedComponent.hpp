@@ -2,7 +2,8 @@
 #define CONNECTEDCOMPONENT_HPP
 #include <string>
 #include <vector>
-#include "TriangularMatrix.hpp"
+#include <cmath>
+#include "transclust/TriangularMatrix.hpp"
 
 static unsigned _cc_id(0);
 
@@ -30,7 +31,7 @@ class ConnectedComponent
 			{
 				//double cost = (m(i, j) - threshold) / normalization_context;
 				//if(cost < -1 || cost > 1){std::cout << cost << std::endl;}
-				return ( std::rint( ((m(i, j) - threshold)*100000))/100000) / normalization_context;
+				return ( std::rint( ( (m(i, j) - threshold ) / normalization_context )*100000)/100000);
 			}
 			else
 			{

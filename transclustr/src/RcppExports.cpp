@@ -5,13 +5,14 @@
 
 using namespace Rcpp;
 
-// transcluster
-void transcluster(std::string x);
-RcppExport SEXP transclustr_transcluster(SEXP xSEXP) {
+// cluster
+NumericVector cluster(std::string filename);
+RcppExport SEXP transclustr_cluster(SEXP filenameSEXP) {
 BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type x(xSEXP);
-    transcluster(x);
-    return R_NilValue;
+    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
+    rcpp_result_gen = Rcpp::wrap(cluster(filename));
+    return rcpp_result_gen;
 END_RCPP
 }

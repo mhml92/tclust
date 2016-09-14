@@ -1,9 +1,9 @@
-#include <FindConnectedComponents.hpp>
-#include <ConnectedComponent.hpp>
 #include <cmath> 
 #include <iomanip>
 #include <list>
 #include <limits>
+#include "transclust/FindConnectedComponents.hpp"
+#include "transclust/ConnectedComponent.hpp"
 
 namespace FCC{
 	/*******************************************************************************

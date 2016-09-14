@@ -1,13 +1,10 @@
-#include "TransClust.hpp"
-#include "ConnectedComponent.hpp"
-#include "FindConnectedComponents.hpp"
-#include "FORCE.hpp"
-//#include "New_FPT.hpp"
-#include "FPT.hpp"
-#include "ClusteringResult.hpp"
-#include "Result.hpp"
-#include "DEBUG.hpp"
-#include <plog/Log.h>
+#include "transclust/TransClust.hpp"
+#include "transclust/ConnectedComponent.hpp"
+#include "transclust/FindConnectedComponents.hpp"
+#include "transclust/FORCE.hpp"
+#include "transclust/FPT.hpp"
+#include "transclust/ClusteringResult.hpp"
+#include "transclust/Result.hpp"
 
 TransClust::TransClust(
 		const std::string& filename,
@@ -56,7 +53,6 @@ TransClust::TransClust(
 		disable_force(disable_force),
 		disable_fpt(disable_fpt)
 {
-	LOG_DEBUG << "Reading input file " << filename;
 
 	// Read input similarity file
 	ConnectedComponent sim_matrix(filename,use_custom_fallback,sim_fallback);
@@ -65,7 +61,8 @@ TransClust::TransClust(
 	if(!use_custom_range){
 		threshold_min = sim_matrix.getMinSimilarity();
 		threshold_max = sim_matrix.getMaxSimilarity();
-		threshold_step =(std::rint((threshold_max-threshold_min)*100000)/100000)/100;
+		//threshold_step =(std::rint((threshold_max-threshold_min)*100000)/100000)/100;
+		threshold_step = round(threshold_max-threshold_min)/100;
 	}	
 	//std::cout << std::setprecision(std::numeric_limits<double>::digits10 + 1) << threshold_step << std::endl;
 
@@ -80,10 +77,6 @@ clustering TransClust::cluster()
 
 	while(!ccs.empty()){
 		ConnectedComponent& cc = ccs.front();   
-
-		LOG_DEBUG << "Processing ConnectedComponent with id: " << cc.getId() 
-			<< " of size: " << cc.size() 
-			<< " and threshold: " << cc.getThreshold() ;
 
 		ClusteringResult cr;
 		// set initial cost to negativ, indicating 'no solution found (yet)'
@@ -113,17 +106,11 @@ clustering TransClust::cluster()
 				// partition
 				FORCE::partition(cc,pos,cr,d_init,d_maximal,s_init,f_s);
 
-				LOG_DEBUG << "FORCE found solution with " << DEBUG::num_clusters(cr.membership) 
-					<< " clusters and  cost: " << cr.cost
-					<< ", cost should be: " << DEBUG::calculate_cluster_cost(cc,cr);
-
 			}
 			/**********************************************************************
 			 * Cluster using FPT
 			 *********************************************************************/
 			if(cr.cost <= fpt_max_cost && !disable_fpt){
-				LOG_DEBUG << "Cost small enough to try and solve it with FPT";
-				LOG_VERBOSE << "Clustering cc-" << cc.getId() << " with FTP";
 				// temp hack
 				double tmp_force_cost = cr.cost;
 				FPT fpt(cc,fpt_time_limit,fpt_step_size,cr.cost+1);
@@ -132,24 +119,18 @@ clustering TransClust::cluster()
 				// temp hack continued
 				if(cr.cost < 0){
 					cr.cost = tmp_force_cost;
-				}else{
-					LOG_DEBUG << "FPT found solution with " 
-						<< DEBUG::num_clusters(cr.membership) 
-						<< " clusters and  cost: " << cr.cost
-						<< ", cost should be: " << DEBUG::calculate_cluster_cost(cc,cr);
 				}
 			}
 		}else{
-			LOG_VERBOSE << "CC is only one or two nodes";
 			// cc consist of 1 or 2 nodes and is a cluster
 			cr.cost = 0;
 			cr.membership = std::vector<unsigned>(cc.size(),0);
 		}
 		result.add(cc,cr);
 		//FORCE::DEBUG_linking(res.getClusters(),pos,cc.getThreshold(),cc.getId());
-		double new_threshold = std::rint((cc.getThreshold()+threshold_step)*100000)/100000;
+		//double new_threshold = std::rint((cc.getThreshold()+threshold_step)*100000)/100000;
+		double new_threshold = round(cc.getThreshold()+threshold_step);
 
-		LOG_VERBOSE << "Increasing threshold to " << new_threshold;
 
 		//std::cout  
 		//	<< "1 found new threshold: " 

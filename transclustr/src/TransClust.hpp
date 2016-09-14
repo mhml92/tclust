@@ -4,7 +4,6 @@
 #include <queue>
 #include <vector>
 #include <map>
-#include <cmath>
 #include "ConnectedComponent.hpp"
 #include "ClusteringResult.hpp"
 #include "FPT.hpp"
@@ -31,14 +30,19 @@ class TransClust{
 	  	  	 double     d_maximal             =   5.0,
 	  	  	 double     s_init                =   0.01,
 	  	  	 double     f_s                   =   0.01,
-	  	  	 double     fpt_time_limit        =   60,
+	  	  	 double     fpt_time_limit        =   20,
 	  	  	 double     fpt_max_cost          =   5000,
 	  	  	 double     fpt_step_size         =   10,
 	  	  	 bool       disable_force         =   false,
-	  	  	 bool       disable_fpt           =   true
+	  	  	 bool       disable_fpt           =   false
 		);
 		clustering cluster();
 	private:
+
+		inline double round(double d){
+			return std::rint((d)*100000)/100000;
+		};
+
 		std::string ref;
 
 		// general vars
@@ -70,8 +74,8 @@ class TransClust{
 
 		bool disable_force;
 		bool disable_fpt;
-		std::queue<ConnectedComponent> ccs;
 
+		std::queue<ConnectedComponent> ccs;
 		std::vector<std::string> id2object;
 };
 #endif

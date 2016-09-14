@@ -1,10 +1,9 @@
-#include "FPT.hpp"
 #include <chrono>
 #include <limits>
 #include <iomanip>
 #include <queue>
-#include "DEBUG.hpp"
 #include <iomanip>
+#include "transclust/FPT.hpp"
 
 FPT::FPT(
 		ConnectedComponent& cc,
@@ -27,7 +26,6 @@ void FPT::cluster(ClusteringResult &cr)
 	cr.cost = -1;
 	start = std::chrono::system_clock::now(); 
 	while(!solution_found){
-		LOG_DEBUG << "FPT START, maxK: " << maxK;
 		/**********************************************************************
 		 * Track time
 		 *********************************************************************/
@@ -74,7 +72,6 @@ void FPT::cluster(ClusteringResult &cr)
 		 * Start recursion
 		 ************************************************************************/
 		find_solution(fptn);
-		LOG_DEBUG << "AFTER find_solution";
 
 		/*************************************************************************
 		 * Increase K
@@ -117,10 +114,8 @@ reduceLoopStart:
 				goto reduceLoopStart;
 			}
 
-			//LOG_DEBUG << "nothing, going to next";
 		}
 	}
-	//LOG_DEBUG << "reduce loop done, fptn size: " << fptn.size;
 }
 double FPT::costSetForbidden(
 		Node& fptn, 
@@ -202,10 +197,8 @@ void FPT::find_solution(Node& fptn0)
 				if (occurence > highestoccurence) 
 				{
 					highestoccurence = occurence;
-					//LOG_DEBUG << "highestoccurence: " << highestoccurence;
 					edge[0] = u;
 					edge[1] = v;
-					//LOG_DEBUG << "EDGE: " << edge[0] << "," << edge[1];
 				}
 			}
 		}
@@ -217,7 +210,6 @@ void FPT::find_solution(Node& fptn0)
 		solution_edgeCost = fptn0.edgeCost;
 		solution_nodeParents = fptn0.nodeParents;
 		maxK = fptn0.cost;
-		LOG_DEBUG << "FOUND SOLUTION new maxK: " << maxK;
 		return;
 	}
 
@@ -234,7 +226,6 @@ void FPT::find_solution(Node& fptn0)
 		Node fptn1;
 		clone_node(fptn0,fptn1);
 
-		//LOG_DEBUG << "Branching permanent: " << node_i<<", "<< node_j;
 		mergeNodes(fptn1,u,v, csp);
 		find_solution(fptn1);
 	}
@@ -257,15 +248,12 @@ void FPT::find_solution(Node& fptn0)
 		fptn0.edgeCost[u][v] = origCost;
 		fptn0.edgeCost[v][u] = origCost;
 	}
-	//LOG_DEBUG << "BACKTACKING";
 
 }
 void FPT::mergeNodes(Node& fptn, unsigned node_i,unsigned node_j, double costForMerging)
 {
-	//	<< ", COST FOR MERGING: " << costForMerging;
 	unsigned l = std::min(node_i,node_j);
 	unsigned h = std::max(node_i,node_j);
-	LOG_VERBOSE << "MERGING NODES " << l << " and " << h; 
 	/* EDGECOST MATRIX */
 
 	// add costs from the node with the higher index to the node with the
@@ -307,7 +295,6 @@ void FPT::clone_node(Node& fptn0,Node& fptn1){
 	fptn1.size = fptn0.size;
 	fptn1.nodeParents = fptn0.nodeParents;
 	fptn1.edgeCost = fptn0.edgeCost;
-	//fptn1.forbidden = fptn0.forbidden;
 }
 
 void FPT::buildSolution(ClusteringResult &cr)

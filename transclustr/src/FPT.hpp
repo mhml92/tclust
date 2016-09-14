@@ -9,7 +9,6 @@
 #include "ClusteringResult.hpp"
 #include <limits>
 #include <chrono>
-//#include <plog/Log.h>
 
 
 class FPT{

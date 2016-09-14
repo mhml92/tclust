@@ -1,8 +1,8 @@
-#include "Result.hpp"
 #include <limits>
 #include <map>
 #include <unordered_map>
 #include <iomanip>
+#include "transclust/Result.hpp"
 
 Result::Result(std::vector<std::string> id2object)
 	:
@@ -51,20 +51,23 @@ void Result::add(ConnectedComponent& cc, ClusteringResult& cr)
 
 clustering Result::get(){
 	clustering res;
+
+	res.id2object = id2object;
+
 	for(auto& c:cost)
 	{
 		res.threshold.push_back( c.first );
 		res.cost.push_back( c.second );
 
 
-		std::vector<std::vector<std::string>> _clusters;
+		std::vector< std::vector<unsigned> > _clusters;
 
 		for(auto& clstr:clusters.at(c.first))
 		{
-			std::vector<std::string> cluster;
+			std::vector<unsigned> cluster;
 			for(auto& oid:clstr)
 			{
-				cluster.push_back(id2object[oid]);
+				cluster.push_back(oid);
 			}
 			_clusters.push_back(cluster);
 		}

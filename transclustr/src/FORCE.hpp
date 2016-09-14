@@ -56,7 +56,7 @@ namespace FORCE{
 				len += pow(delta[i][j],2);
 			}
 			len = sqrt(len);
-			Rcpp::Rcout << cc.getThreshold() << "\t" << r << "\t" << len << "\t" << std::endl;
+			std::cout << cc.getThreshold() << "\t" << r << "\t" << len << "\t" << std::endl;
 		}
 	}
 
@@ -67,11 +67,11 @@ namespace FORCE{
 	{
 		//std::cout << "threshold\tr\tx\ty" << std::endl;
 		for(unsigned i = 0; i < pos.size();i++){
-			Rcpp::Rcout << cc.getId() << "\t" << cc.getThreshold() << "\t" << r << "\t";
+			std::cout << cc.getId() << "\t" << cc.getThreshold() << "\t" << r << "\t";
 			for(unsigned d = 0;d < pos[0].size();d++){
-				Rcpp::Rcout << pos[i][d] << "\t";
+				std::cout << pos[i][d] << "\t";
 			}
-			Rcpp::Rcout << std::endl;
+			std::cout << std::endl;
 		}
 	}
 

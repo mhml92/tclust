@@ -38,16 +38,16 @@ ConnectedComponent::ConnectedComponent(
 void ConnectedComponent::dump()
 {
 	unsigned num_o = size();
-	Rcpp::Rcout << num_o << std::endl;
+	std::cout << num_o << std::endl;
 	for(auto &name:m.getObjectNames()){
-		Rcpp::Rcout << name << std::endl;
+		std::cout << name << std::endl;
 	}
 	for(unsigned i = 0; i < num_o;i++){
 		for(unsigned j = i+1;j < num_o;j++){
-			Rcpp::Rcout << at(i,j,false)<< "\t";
+			std::cout << at(i,j,false)<< "\t";
 		}
-		Rcpp::Rcout << std::endl;
+		std::cout << std::endl;
 	}
-	Rcpp::Rcout << std::endl;
+	std::cout << std::endl;
 }
 

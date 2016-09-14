@@ -1,11 +1,11 @@
 #include <string>
 #include <time.h>
 #include <stdio.h>
-#include <TransClust.hpp>
 #include <iostream>
 #include <tclap/CmdLine.h>
 #include <plog/Log.h>
 #include <plog/Appenders/ColorConsoleAppender.h>
+#include "transclust/TransClust.hpp"
 
 /*******************************************************************************
  * Set logging verbosity
@@ -283,7 +283,7 @@ int main(int argc, char** argv){
 			for(auto & cluster:clusters.clusters.at(i)){
 				std::string c = "";
 				for(auto & o:cluster){
-					c += o + ",";
+					c += std::to_string(o) + ",";
 				}
 				c.pop_back();
 				std::cout << c + ";";
