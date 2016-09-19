@@ -10,7 +10,7 @@ static unsigned _cc_id(0);
 class ConnectedComponent
 {
 	public:
-		ConnectedComponent(const std::string &filename,bool use_custom_fallback,double sim_fallback);
+		ConnectedComponent(const std::string &filename,bool use_custom_fallback,double sim_fallback,FileType ft);
 		ConnectedComponent(const ConnectedComponent& cc,
 				const std::vector<unsigned>& objects, double th);
 		/*

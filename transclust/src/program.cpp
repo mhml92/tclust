@@ -2,6 +2,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <iostream>
+#include <string>
 #include <tclap/CmdLine.h>
 #include <plog/Log.h>
 #include <plog/Appenders/ColorConsoleAppender.h>
@@ -25,6 +26,9 @@ int main(int argc, char** argv){
 	static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
 	plog::init(VERBOSITY, &consoleAppender);
 
+	std::map<std::string,FileType> ft_map;
+	ft_map["SIMPLE"] = FileType::SIMPLE;
+	ft_map["LEGACY"] = FileType::LEGACY;
 	/****************************************************************************
 	 * Parse input arguments
 	 ***************************************************************************/
@@ -38,6 +42,14 @@ int main(int argc, char** argv){
 				"not there",               // default val
 				"string"                   // type descripttion
 				);
+
+		TCLAP::ValueArg<std::string> simFileType_Arg(
+				"",
+				"simfile_type",
+				"",
+				false,
+				"SIMPLE",
+				"enum: 'SIMPLE','LEGACY', (default: 'SIMPLE')");
 
 		// layout vars
 		TCLAP::ValueArg<double> f_att_Arg(
@@ -59,7 +71,7 @@ int main(int argc, char** argv){
 				"R",
 				"Layout iterations",
 				false,
-				100,
+				200,
 				"unsigned integer");
 		TCLAP::ValueArg<unsigned> dim_Arg(
 				"",
@@ -202,6 +214,7 @@ int main(int argc, char** argv){
 
 
 		cmd.add(fallback_value_Arg);
+		cmd.add(simFileType_Arg);
 		cmd.add(simFilenameArg);
 		cmd.add(threshold_min_Arg);
 		cmd.add(threshold_max_Arg);
@@ -262,7 +275,8 @@ int main(int argc, char** argv){
 			fpt_max_cost_Arg.getValue(),
 			fpt_step_size_Arg.getValue(),
 			disable_force_Arg.getValue(),
-			disable_fpt_Arg.getValue()
+			disable_fpt_Arg.getValue(),
+			ft_map[simFileType_Arg.getValue()]
 		);
 
 		/*************************************************************************
@@ -283,7 +297,7 @@ int main(int argc, char** argv){
 			for(auto & cluster:clusters.clusters.at(i)){
 				std::string c = "";
 				for(auto & o:cluster){
-					c += std::to_string(o) + ",";
+					c += clusters.id2object.at(o) + ",";
 				}
 				c.pop_back();
 				std::cout << c + ";";

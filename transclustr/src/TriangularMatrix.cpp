@@ -1,4 +1,4 @@
-#include "TriangularMatrix.hpp"
+#include "transclust/TriangularMatrix.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>

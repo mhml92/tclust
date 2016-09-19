@@ -35,18 +35,33 @@ include_directories(
    ${CMAKE_SOURCE_DIR}/lib/tclap/include
    ${CMAKE_SOURCE_DIR}/lib/plog/include
 )
+message(STATUS "${CMAKE_CXX_COMPILER_ID}") 
+
+#if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
+#	message(STATUS "GNU") 
+#endif()
+#
+#if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+#	message(STATUS "CLANG") 
+#endif()
+
  
 # Set the output folder where your program will be created
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pedantic -Wall -g -O0")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pedantic -Wall -pg -fopenmp")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -O3")
+#find_package(OpenMP)
+#if (OPENMP_FOUND)
+#	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+#endif()
 
 #However, the file(GLOB...) allows for wildcard additions:
 file(GLOB SOURCES "src/*.cpp")
- 
+message(STATUS "${CMAKE_CXX_FLAGS}") 
 add_executable(transclust ${SOURCES}) 
 
 #list(REMOVE_ITEM SOURCES "src/program.cpp")

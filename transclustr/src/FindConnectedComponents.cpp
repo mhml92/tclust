@@ -1,5 +1,5 @@
-#include "FindConnectedComponents.hpp"
-#include "ConnectedComponent.hpp"
+#include "transclust/FindConnectedComponents.hpp"
+#include "transclust/ConnectedComponent.hpp"
 #include <cmath>
 #include <iomanip>
 #include <list>

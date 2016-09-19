@@ -1,11 +1,10 @@
-#include "TransClust.hpp"
-#include "ConnectedComponent.hpp"
-#include "FindConnectedComponents.hpp"
-#include "FORCE.hpp"
-//#include "New_FPT.hpp"
-#include "FPT.hpp"
-#include "ClusteringResult.hpp"
-#include "Result.hpp"
+#include "transclust/TransClust.hpp"
+#include "transclust/ConnectedComponent.hpp"
+#include "transclust/FindConnectedComponents.hpp"
+#include "transclust/FORCE.hpp"
+#include "transclust/FPT.hpp"
+#include "transclust/ClusteringResult.hpp"
+#include "transclust/Result.hpp"
 
 TransClust::TransClust(
 		const std::string& filename,

@@ -3,9 +3,10 @@
 ConnectedComponent::ConnectedComponent(
 		const std::string &filename,
 		bool use_custom_fallback,
-		double sim_fallback)
+		double sim_fallback,
+		FileType ft)
 	:
-		m(filename,use_custom_fallback,sim_fallback),
+		m(filename,use_custom_fallback,sim_fallback,ft),
 		threshold(0.0),
 		normalization_context(
 			std::max(

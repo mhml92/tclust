@@ -1,4 +1,4 @@
-#include "ConnectedComponent.hpp"
+#include "transclust/ConnectedComponent.hpp"
 
 ConnectedComponent::ConnectedComponent(
 		const std::string &filename,

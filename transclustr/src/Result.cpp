@@ -1,4 +1,4 @@
-#include "Result.hpp"
+#include "transclust/Result.hpp"
 #include <limits>
 #include <map>
 #include <unordered_map>
@@ -40,7 +40,7 @@ void Result::add(ConnectedComponent& cc, ClusteringResult& cr)
 	// check if threshold exists in map
 	if(clusters.find(cc.getThreshold()) == clusters.end())
 	{
-		clusters.insert({cc.getThreshold(),std::vector<std::vector<unsigned>>()}); 
+		clusters.insert({cc.getThreshold(),std::vector<std::vector<unsigned>>()});
 	}
 
 	for(auto& clstr:clstrs)
@@ -73,7 +73,7 @@ clustering Result::get(){
 		}
 		res.clusters.push_back(_clusters);
 	}
-	return res;	
+	return res;
 }
 
 void Result::dump()

@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <queue>
 #include <iomanip>
-#include "FPT.hpp"
+#include "transclust/FPT.hpp"
 
 FPT::FPT(
 		ConnectedComponent& cc,

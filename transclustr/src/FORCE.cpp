@@ -1,14 +1,14 @@
-#include <iomanip> 
+#include <iomanip>
 #include <iostream>
 #include <random>
 #include <limits>
 #include <list>
 #include <queue>
 #include <algorithm>
-#include "ConnectedComponent.hpp"
-#include "FindConnectedComponents.hpp"
-#include "FORCE.hpp"
-#include "ClusteringResult.hpp"
+#include "transclust/ConnectedComponent.hpp"
+#include "transclust/FindConnectedComponents.hpp"
+#include "transclust/FORCE.hpp"
+#include "transclust/ClusteringResult.hpp"
 #include <chrono>
 
 namespace FORCE
@@ -17,12 +17,12 @@ namespace FORCE
 	{
 		double res = 0;
 		for(unsigned d = 0; d < pos[0].size(); d++){
-			double side = pos[i][d] - pos[j][d]; 
+			double side = pos[i][d] - pos[j][d];
 			res += side*side;
 		}
 		return std::sqrt(res);
 	}
-	
+
 	void layout(
 			const ConnectedComponent& cc,
 			std::vector<std::vector<double>>& pos,
@@ -32,7 +32,7 @@ namespace FORCE
 			unsigned R,
 			double start_t,
 			unsigned dim)
-	{ 
+	{
 		/*************************************************************************
 		 * INITIAL LAYOUT
 		 ************************************************************************/
@@ -80,10 +80,10 @@ namespace FORCE
 		for(unsigned r = 0; r < R; r++)
 		{
 			//DEBUG_position(cc,pos,r);
-			
+
 			// zero delta vectors
 			for(auto& v:delta){std::fill(v.begin(),v.end(),0.0);}
-			
+
 
 			double temp = (start_t*static_cast<double>(cc.size()))*std::pow((1.0/(r+1.0)),2);
 			//double temp = start_t - r;//(start_t*static_cast<double>(cc.size()))*std::pow((1.0/(r+1.0)),2);
@@ -112,8 +112,8 @@ namespace FORCE
 						}
 
 						/*
-						std::cout << 
-							log_d << "," << 
+						std::cout <<
+							log_d << "," <<
 							temp << "," <<
 							r << "," <<
 							f_att << "," <<
@@ -164,13 +164,13 @@ namespace FORCE
 				{
 					pos[i][d] += delta[i][d];
 				}
-				
+
 			}
 			*/
-			
+
 			//DEBUG_position(cc,pos,r);
 			//DEBUG_delta(cc,pos,delta,r);
-		} 
+		}
 		//DEBUG_position(cc,pos,0);
 		//if(cc.getThreshold() == 3){
 		//	std::cout << "x,y,z," << std::endl;
@@ -182,7 +182,7 @@ namespace FORCE
 		//	}
 		//}
 		//std::cout << "-----------------------------------------------" << std::endl;
-		
+
 	}
 
 	/*
@@ -212,7 +212,7 @@ namespace FORCE
 			double d_maximal,
 			double s_init,
 			double f_s)
-	{ 
+	{
 		double d = d_init;
 		double s = s_init;
 		std::vector<double> D;
@@ -242,21 +242,21 @@ namespace FORCE
 			}
 			/*for(unsigned i = 0; i < membership.size();i++){
 				if(membership.at(i) == std::numeric_limits<unsigned>::max()){
-					std::cout << "IS MAX AT " << __LINE__ << " IN " __FILE__ << std::endl; 
+					std::cout << "IS MAX AT " << __LINE__ << " IN " __FILE__ << std::endl;
 				}
 			}*/
 
-			
+
 			double cost = 0;
 			for(unsigned i = 0; i< membership.size(); i++)
 			{
 				for(unsigned j = i+1; j < membership.size(); j++)
 				{
-					if((membership.at(i) != membership.at(j)) 
+					if((membership.at(i) != membership.at(j))
 							&& cc.at(i,j,false) > 0.0)
 					{
 						cost += cc.at(i,j,false);
-					}else if((membership.at(i) == membership.at(j)) 
+					}else if((membership.at(i) == membership.at(j))
 							&& cc.at(i,j,false) < 0.0)
 					{
 						cost -= cc.at(i,j,false);
@@ -272,7 +272,7 @@ namespace FORCE
 	}
 
 	/*******************************************************************************
-	 * DETERMINE MEMBERSHIP IN POS 
+	 * DETERMINE MEMBERSHIP IN POS
 	 ******************************************************************************/
 	std::vector<std::vector<unsigned>> geometricLinking(
 			std::vector<std::vector<double>>& pos,
@@ -283,7 +283,7 @@ namespace FORCE
 
 		for(auto& obj:objects)
 		{
-			std::list<unsigned> nodes;	
+			std::list<unsigned> nodes;
 			// fill list of nodes
 			for (unsigned i=1; i < obj.size();i++)
 			{
@@ -298,7 +298,7 @@ namespace FORCE
 			while(!nodes.empty()){
 
 				unsigned i = Q.front();
-				for (auto it = nodes.begin(); it != nodes.end();) 
+				for (auto it = nodes.begin(); it != nodes.end();)
 				{
 					unsigned j = *it;
 					if(j != i)

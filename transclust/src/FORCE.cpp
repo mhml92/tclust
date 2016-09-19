@@ -6,6 +6,7 @@
 #include <queue>
 #include <algorithm>
 #include <chrono>
+#include <omp.h>
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/FindConnectedComponents.hpp"
 #include "transclust/FORCE.hpp"
@@ -52,6 +53,7 @@ namespace FORCE
 			unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 			std::mt19937 generator(seed);
 			std::uniform_real_distribution<double> distribution(-1.0,1.0);
+			#pragma omp parallel for 
 			for(unsigned i = 0; i < pos.size(); i++)
 			{
 				double r = 0;
@@ -76,6 +78,7 @@ namespace FORCE
 
 		f_att /= static_cast<double>(cc.size());
 		f_rep /= static_cast<double>(cc.size());
+
 		for(unsigned r = 0; r < R; r++)
 		{
 			// zero delta vectors
@@ -87,54 +90,82 @@ namespace FORCE
 			/**********************************************************************
 			 * CALCULATE DELTA VECTOR
 			 *********************************************************************/
-			for(unsigned i = 0; i < pos.size();i++)
+			#pragma omp parallel
 			{
-				for(unsigned j = i+1; j < pos.size(); j++)
+				int tid,nthreads;
+				tid = omp_get_thread_num();
+				nthreads = omp_get_num_threads();
+				// thread private delta vector
+				std::vector<std::vector<double>> _delta;
+				_delta.resize(pos.size(), std::vector<double>(dim,0.0));
+
+
+				//#pragma omp for 
+				//for(unsigned i = 0; i < pos.size();i++)
+				for(unsigned i = tid; i < pos.size();i = i + nthreads)
 				{
-					double _distance = dist(pos,i,j);
-					if(_distance > 0.0)
+					for(unsigned j = i+1; j < pos.size(); j++)
 					{
-						double log_d = std::log(_distance+1);
-
-						double force = 0.0;
-
-						// normalized edge weight
-						double edge_weight = cc.at(i,j);
-						//std::cout << cc.size() << "\t" << edge_weight << std::endl;
-						if(edge_weight > 0)
+						double _distance = dist(pos,i,j);
+						if(_distance > 0.0)
 						{
-							force = (edge_weight * f_att * log_d)/_distance;
-						}else{
-							force = ((edge_weight * f_rep)/log_d)/_distance;
-						}
+							double log_d = std::log(_distance+1);
 
-						for(unsigned d = 0; d < dim; d++)
-						{
-							double displacement = (force * (pos[j][d]-pos[i][d]));
-							delta[i][d] += displacement;
-							delta[j][d] -= displacement;
+							double force = 0.0;
+
+							// normalized edge weight
+							double edge_weight = cc.at(i,j);
+							if(edge_weight > 0)
+							{
+								force = (edge_weight * f_att * log_d)/_distance;
+							}else{
+								force = ((edge_weight * f_rep)/log_d)/_distance;
+							}
+							for(unsigned d = 0; d < dim; d++)
+							{
+								double displacement = (force * (pos[j][d]-pos[i][d]));
+								_delta[i][d] += displacement;
+								_delta[j][d] -= displacement;
+								//delta[i][d] += displacement;
+								//delta[j][d] -= displacement;
+							}
 						}
+					}
+				}
+				#pragma omp for 
+				for(unsigned i = 0; i < _delta.size(); i++){
+					for(unsigned d = 0; d < dim; d++){
+						delta[i][d] += _delta[i][d];
 					}
 				}
 			}
+
 			/**********************************************************************
 			 * APPLY COOLING FUNCTION AND UPDATE POSITIONS
 			 *********************************************************************/
-			for(unsigned i = 0; i < pos.size(); i++)
+			#pragma omp parallel
 			{
-				double len = 0.0;
-				for(unsigned d = 0; d < dim;d++){
-					len += delta[i][d]*delta[i][d];
-				}
-				len = std::sqrt(len);
-				//std::cout << len << std::endl;
-				for(unsigned d = 0; d < dim;d++)
+				int tid,nthreads;
+				tid = omp_get_thread_num();
+				nthreads = omp_get_num_threads();
+				for(unsigned i = tid ; i < pos.size(); i = i+nthreads)
 				{
-					if(len > temp)
-					{
-						delta[i][d] = (delta[i][d]/len)*temp;
+					double len = 0.0;
+					for(unsigned d = 0; d < dim;d++){
+						len += delta[i][d]*delta[i][d];
 					}
-					pos[i][d] += delta[i][d];
+					len = std::sqrt(len);
+					//std::cout << len << std::endl;
+					for(unsigned d = 0; d < dim;d++)
+					{
+						double pd = delta[i][d];
+						if(len > temp)
+						{
+							//delta[i][d] = (delta[i][d]/len)*temp;
+							pd = (pd/len)*temp;
+						}
+						pos[i][d] += pd;
+					}
 				}
 			}
 		} 

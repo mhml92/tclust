@@ -1,3 +1,5 @@
 build/
 doc/
+data/astral
+data/actino
 .Rproj.user

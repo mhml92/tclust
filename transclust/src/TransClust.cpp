@@ -28,7 +28,8 @@ TransClust::TransClust(
 		double fpt_max_cost,
 		double fpt_step_size,
 		bool disable_force,
-		bool disable_fpt 
+		bool disable_fpt,
+		FileType file_type
 		)
 	:
 		use_custom_fallback(use_custom_fallback),
@@ -55,7 +56,7 @@ TransClust::TransClust(
 {
 
 	// Read input similarity file
-	ConnectedComponent sim_matrix(filename,use_custom_fallback,sim_fallback);
+	ConnectedComponent sim_matrix(filename,use_custom_fallback,sim_fallback,file_type);
 	id2object = sim_matrix.getObjectNames();
 
 	if(!use_custom_range){
@@ -152,20 +153,20 @@ clustering TransClust::cluster()
 	}
 
 	// print vars
-	//std::cout << "// sim_fallback " << sim_fallback<< std::endl;
-	//std::cout << "// th_min       " << threshold_min<< std::endl;
-	//std::cout << "// th_max       " << threshold_max<< std::endl;
-	//std::cout << "// th_step      " << threshold_step<< std::endl;
-	//std::cout << "// p            " << p<< std::endl;
-	//std::cout << "// f_att        " << f_att<< std::endl;
-	//std::cout << "// f_rep        " << f_rep<< std::endl;
-	//std::cout << "// R            " << R<< std::endl;
-	//std::cout << "// dim          " << dim<< std::endl;
-	//std::cout << "// start_t      " << start_t<< std::endl;
-	//std::cout << "// d_init       " << d_init<< std::endl;
-	//std::cout << "// d_maximal    " << d_maximal<< std::endl;
-	//std::cout << "// s_init       " << s_init<< std::endl;
-	//std::cout << "// f_s          " << f_s<< std::endl;
+	std::cout << "// sim_fallback " << sim_fallback<< std::endl;
+	std::cout << "// th_min       " << threshold_min<< std::endl;
+	std::cout << "// th_max       " << threshold_max<< std::endl;
+	std::cout << "// th_step      " << threshold_step<< std::endl;
+	std::cout << "// p            " << p<< std::endl;
+	std::cout << "// f_att        " << f_att<< std::endl;
+	std::cout << "// f_rep        " << f_rep<< std::endl;
+	std::cout << "// R            " << R<< std::endl;
+	std::cout << "// dim          " << dim<< std::endl;
+	std::cout << "// start_t      " << start_t<< std::endl;
+	std::cout << "// d_init       " << d_init<< std::endl;
+	std::cout << "// d_maximal    " << d_maximal<< std::endl;
+	std::cout << "// s_init       " << s_init<< std::endl;
+	std::cout << "// f_s          " << f_s<< std::endl;
 //	result.dump();
 	return result.get();
 }
