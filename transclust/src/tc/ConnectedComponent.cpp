@@ -18,6 +18,22 @@ ConnectedComponent::ConnectedComponent(
 		id(getNewId())
 { }
 
+ConnectedComponent::ConnectedComponent(
+		std::vector<std::vector<double>>& sim_matrix,
+		bool use_custom_fallback,
+		double sim_fallback)
+	:
+		m(sim_matrix,use_custom_fallback,sim_fallback),
+		threshold(0.0),
+		normalization_context(
+			std::max(
+				std::abs(m.getMaxValue()-threshold),
+				std::abs(m.getMinValue()-threshold)
+			)
+		),
+		cost(-1),
+		id(getNewId())
+{ }
 
 ConnectedComponent::ConnectedComponent(
 		const ConnectedComponent &cc,

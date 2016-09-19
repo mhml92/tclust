@@ -60,9 +60,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -O3")
 #endif()
 
 #However, the file(GLOB...) allows for wildcard additions:
-file(GLOB SOURCES "src/*.cpp")
-message(STATUS "${CMAKE_CXX_FLAGS}") 
-add_executable(transclust ${SOURCES}) 
+#file(GLOB SOURCES "src/*.cpp")
+#message(STATUS "${CMAKE_CXX_FLAGS}") 
+#add_executable(transclust ${SOURCES}) 
+add_executable(transclust src/tccli.cpp) 
+target_link_libraries(transclust 
+	tc_core
+)
+add_subdirectory(src/tc)
 
 #list(REMOVE_ITEM SOURCES "src/program.cpp")
 #add_library(TransClust SHARED ${SOURCES})

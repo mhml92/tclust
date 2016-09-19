@@ -38,6 +38,31 @@ class TransClust{
 	  	  	 bool       disable_fpt         = false,
 			FileType file_type              = FileType::LEGACY
 		);
+
+		TransClust(
+			 std::vector<std::vector<double>>& simmatrix,
+	  	  	 bool       use_custom_fallback = false,
+	  	  	 double     sim_fallback        = 0.0,
+	  	  	 bool       deafult_interval    = true,
+	  	  	 double     th_min              = 0.0,
+	  	  	 double     th_max              = 100,
+	  	  	 double     th_step             = 1.0,
+	  	  	 double     p                   = 1.0,
+	  	  	 double     f_att               = 100.0,
+	  	  	 double     f_rep               = 100.0,
+	  	  	 unsigned   R                   = 100,
+	  	  	 unsigned   dim                 = 3,
+	  	  	 double     start_t             = 100,
+	  	  	 double     d_init              = 0.01,
+	  	  	 double     d_maximal           = 5.0,
+	  	  	 double     s_init              = 0.01,
+	  	  	 double     f_s                 = 0.01,
+	  	  	 double     fpt_time_limit      = 20,
+	  	  	 double     fpt_max_cost        = 5000,
+	  	  	 double     fpt_step_size       = 10,
+	  	  	 bool       disable_force       = false,
+	  	  	 bool       disable_fpt         = false
+		);
 		clustering cluster();
 	private:
 

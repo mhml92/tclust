@@ -236,6 +236,38 @@ void TriangularMatrix::readFile(
 }
 
 TriangularMatrix::TriangularMatrix(
+		std::vector<std::vector<double>>& sim_matrix,
+		bool use_custom_fallback,
+		double sim_fallback)
+{
+	unsigned num_o = sim_matrix.size();
+	unsigned msize = ((num_o * num_o) - num_o) / 2;
+	matrix.resize(msize);
+
+	maxValue = std::numeric_limits<double>::lowest();
+	minValue = std::numeric_limits<double>::max();
+
+	index2ObjName.resize(num_o);
+	index2ObjId.resize(num_o);
+	for(unsigned i = 0; i < index2ObjName.size();i++){
+		index2ObjName.at(i) = std::to_string(i);
+		index2ObjId.at(i) = i;
+	}
+
+	for(unsigned i = 0; i < sim_matrix.size(); i++)
+	{
+		for(unsigned j = i + 1; j < sim_matrix.size(); j++)
+		{
+			double val = std::min(sim_matrix.at(i).at(j),sim_matrix.at(j).at(i));
+			if (maxValue < val){maxValue = val;}
+			if (minValue > val){minValue = val;}
+			matrix.at(index(i,j)) = val;
+		}
+
+	}
+	
+}
+TriangularMatrix::TriangularMatrix(
 		const std::string &filename,
 		bool use_custom_fallback,
 		double sim_fallback,

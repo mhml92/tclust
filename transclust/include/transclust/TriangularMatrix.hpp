@@ -15,6 +15,9 @@ class TriangularMatrix{
 		// Read input similarity file and create similarity matrix
 		TriangularMatrix(const std::string &filename,bool use_custom_fallback, double sim_fallback,FileType ft);  
 
+		// Read input similarity matrix 
+		TriangularMatrix(std::vector<std::vector<double>>& sim_matrix,bool use_custom_fallback, double sim_fallback);  
+
 		// read from x_1,x_2,...,x_n coordinates
 		TriangularMatrix(const std::vector<std::vector<double> > &pos);
 

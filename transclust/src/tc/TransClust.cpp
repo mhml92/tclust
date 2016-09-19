@@ -70,6 +70,67 @@ TransClust::TransClust(
 	FCC::findConnectedComponents(sim_matrix,ccs,threshold_min);
 }
 
+TransClust::TransClust(
+		std::vector<std::vector<double>>& simmatrix,
+		bool use_custom_fallback,
+		double sim_fallback,
+		bool use_custom_range,
+		double th_min,
+		double th_max,
+		double th_step,
+		double p,
+		double f_att,
+		double f_rep,
+		unsigned R,
+		unsigned dim,
+		double start_t,
+		double d_init,
+		double d_maximal,
+		double s_init,
+		double f_s,
+		double fpt_time_limit,
+		double fpt_max_cost,
+		double fpt_step_size,
+		bool disable_force,
+		bool disable_fpt
+		)
+	:
+		use_custom_fallback(use_custom_fallback),
+		sim_fallback(sim_fallback),
+		use_custom_range(use_custom_range),
+		threshold_min(th_min),
+		threshold_max(th_max),
+		threshold_step(th_step),
+		p(p),
+		f_att(f_att),
+		f_rep(f_rep),
+		R(R),
+		start_t(start_t),
+		dim(dim),
+		d_init(d_init),
+		d_maximal(d_maximal),
+		s_init(s_init),
+		f_s(f_s),
+		fpt_time_limit(fpt_time_limit),
+		fpt_max_cost(fpt_max_cost),
+		fpt_step_size(fpt_step_size),
+		disable_force(disable_force),
+		disable_fpt(disable_fpt)
+{
+	// Read input similarity file
+	ConnectedComponent sim_matrix(simmatrix,use_custom_fallback,sim_fallback);
+	id2object = sim_matrix.getObjectNames();
+
+	if(!use_custom_range){
+		threshold_min = sim_matrix.getMinSimilarity();
+		threshold_max = sim_matrix.getMaxSimilarity();
+		//threshold_step =(std::rint((threshold_max-threshold_min)*100000)/100000)/100;
+		threshold_step = round(threshold_max-threshold_min)/100;
+	}	
+	//std::cout << std::setprecision(std::numeric_limits<double>::digits10 + 1) << threshold_step << std::endl;
+
+	FCC::findConnectedComponents(sim_matrix,ccs,threshold_min);
+}
 
 clustering TransClust::cluster()
 {
