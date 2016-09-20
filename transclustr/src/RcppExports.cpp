@@ -6,13 +6,13 @@
 using namespace Rcpp;
 
 // transclust
-List transclust(std::string filename);
-RcppExport SEXP transclustr_transclust(SEXP filenameSEXP) {
+List transclust(NumericMatrix simmatrix);
+RcppExport SEXP transclustr_transclust(SEXP simmatrixSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
-    rcpp_result_gen = Rcpp::wrap(transclust(filename));
+    Rcpp::traits::input_parameter< NumericMatrix >::type simmatrix(simmatrixSEXP);
+    rcpp_result_gen = Rcpp::wrap(transclust(simmatrix));
     return rcpp_result_gen;
 END_RCPP
 }

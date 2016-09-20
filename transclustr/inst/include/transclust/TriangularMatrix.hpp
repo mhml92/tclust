@@ -4,13 +4,19 @@
 #include <map>
 #include <vector>
 #include <iostream>
+
+enum class FileType {LEGACY,SIMPLE};
+
 class TriangularMatrix{
 	public:
 		// Create connected component based on TriangularMatrix and threshold
-		TriangularMatrix(const TriangularMatrix &m,const std::vector<unsigned> &objects);
+		TriangularMatrix(const TriangularMatrix &m,const std::vector<unsigned> &objects);  
 
 		// Read input similarity file and create similarity matrix
-		TriangularMatrix(const std::string &filename,bool use_custom_fallback, double sim_fallback);
+		TriangularMatrix(const std::string &filename,bool use_custom_fallback, double sim_fallback,FileType ft);  
+
+		// Read input similarity matrix 
+		TriangularMatrix(std::vector<std::vector<double>>& sim_matrix,bool use_custom_fallback, double sim_fallback);  
 
 		// read from x_1,x_2,...,x_n coordinates
 		TriangularMatrix(const std::vector<std::vector<double> > &pos);
@@ -30,6 +36,25 @@ class TriangularMatrix{
 		inline const unsigned getMatrixSize() const {return matrix.size();};
 
 	private:
+		void parseLegacySimDataFile(
+				std::map<std::string, unsigned> &object2index,
+				std::map<std::pair<std::string, std::string>, double> & sim_value,
+				std::map<std::pair<std::string, std::string>, bool> &hasPartner,
+				bool use_custom_fallback,
+				double sim_fallback);
+		void parseSimpleSimDataFile(
+				std::map<std::string, unsigned> &object2index,
+				std::map<std::pair<std::string, std::string>, double> & sim_value,
+				std::map<std::pair<std::string, std::string>, bool> &hasPartner,
+				bool use_custom_fallback,
+				double sim_fallback);
+		void readFile(
+				const std::string &filename,
+				std::map<std::string, unsigned> &object2index,
+				std::map<std::pair<std::string, std::string>, double> & sim_value,
+				std::map<std::pair<std::string, std::string>, bool> &hasPartner
+				);
+		
 		// indexing the symetric matrix
 		inline unsigned index(unsigned i,unsigned j) const {
 			if(j > i){

@@ -1,15 +1,16 @@
-#include <iomanip>
+#include <iomanip> 
 #include <iostream>
 #include <random>
 #include <limits>
 #include <list>
 #include <queue>
 #include <algorithm>
+#include <chrono>
+#include <omp.h>
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/FindConnectedComponents.hpp"
 #include "transclust/FORCE.hpp"
 #include "transclust/ClusteringResult.hpp"
-#include <chrono>
 
 namespace FORCE
 {
@@ -17,12 +18,12 @@ namespace FORCE
 	{
 		double res = 0;
 		for(unsigned d = 0; d < pos[0].size(); d++){
-			double side = pos[i][d] - pos[j][d];
+			double side = pos[i][d] - pos[j][d]; 
 			res += side*side;
 		}
 		return std::sqrt(res);
 	}
-
+	
 	void layout(
 			const ConnectedComponent& cc,
 			std::vector<std::vector<double>>& pos,
@@ -32,7 +33,7 @@ namespace FORCE
 			unsigned R,
 			double start_t,
 			unsigned dim)
-	{
+	{ 
 		/*************************************************************************
 		 * INITIAL LAYOUT
 		 ************************************************************************/
@@ -49,10 +50,10 @@ namespace FORCE
 			}
 		}else{
 			// uniform hsphere layout
-			//std::default_random_engine generator;
 			unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 			std::mt19937 generator(seed);
 			std::uniform_real_distribution<double> distribution(-1.0,1.0);
+			#pragma omp parallel for 
 			for(unsigned i = 0; i < pos.size(); i++)
 			{
 				double r = 0;
@@ -74,135 +75,101 @@ namespace FORCE
 		 ************************************************************************/
 		std::vector<std::vector<double>> delta;
 		delta.resize(pos.size(), std::vector<double>(dim,0.0));
-		//std::cout << "x,y,z" << std::endl;
+
 		f_att /= static_cast<double>(cc.size());
 		f_rep /= static_cast<double>(cc.size());
+
 		for(unsigned r = 0; r < R; r++)
 		{
-			//DEBUG_position(cc,pos,r);
-
 			// zero delta vectors
 			for(auto& v:delta){std::fill(v.begin(),v.end(),0.0);}
-
+			
 
 			double temp = (start_t*static_cast<double>(cc.size()))*std::pow((1.0/(r+1.0)),2);
 			//double temp = start_t - r;//(start_t*static_cast<double>(cc.size()))*std::pow((1.0/(r+1.0)),2);
 			/**********************************************************************
 			 * CALCULATE DELTA VECTOR
 			 *********************************************************************/
-			for(unsigned i = 0; i < pos.size();i++)
+			#pragma omp parallel
 			{
-				for(unsigned j = i+1; j < pos.size(); j++)
+				int tid,nthreads;
+				tid = omp_get_thread_num();
+				nthreads = omp_get_num_threads();
+				// thread private delta vector
+				std::vector<std::vector<double>> _delta;
+				_delta.resize(pos.size(), std::vector<double>(dim,0.0));
+
+
+				//#pragma omp for 
+				//for(unsigned i = 0; i < pos.size();i++)
+				for(unsigned i = tid; i < pos.size();i = i + nthreads)
 				{
-					double distance = dist(pos,i,j);
-					if(distance > 0.0)
+					for(unsigned j = i+1; j < pos.size(); j++)
 					{
-						double log_d = std::log(distance+1);
-
-						double force = 0.0;
-
-						// normalized edge weight
-						double edge_weight = cc.at(i,j);
-						//std::cout << cc.size() << "\t" << edge_weight << std::endl;
-						if(edge_weight > 0)
+						double _distance = dist(pos,i,j);
+						if(_distance > 0.0)
 						{
-							force = (edge_weight * f_att * log_d)/distance;
-						}else{
-							force = ((edge_weight * f_rep)/log_d)/distance;
-						}
+							double log_d = std::log(_distance+1);
 
-						/*
-						std::cout <<
-							log_d << "," <<
-							temp << "," <<
-							r << "," <<
-							f_att << "," <<
-							f_rep  << "," <<
-							cc.size() << "," <<
-							cc.getThreshold() << "," <<
-							cc.getObjectName(i) << "," <<
-							cc.getObjectName(j) << "," <<
-							edge_weight << "," <<
-							distance << "," <<
-							force << std::endl;
-							*/
+							double force = 0.0;
 
-
-						for(unsigned d = 0; d < dim; d++)
-						{
-							double displacement = (force * (pos[j][d]-pos[i][d]));
-							delta[i][d] += displacement;
-							delta[j][d] -= displacement;
+							// normalized edge weight
+							double edge_weight = cc.at(i,j);
+							if(edge_weight > 0)
+							{
+								force = (edge_weight * f_att * log_d)/_distance;
+							}else{
+								force = ((edge_weight * f_rep)/log_d)/_distance;
+							}
+							for(unsigned d = 0; d < dim; d++)
+							{
+								double displacement = (force * (pos[j][d]-pos[i][d]));
+								_delta[i][d] += displacement;
+								_delta[j][d] -= displacement;
+								//delta[i][d] += displacement;
+								//delta[j][d] -= displacement;
+							}
 						}
 					}
 				}
+				#pragma omp for 
+				for(unsigned i = 0; i < _delta.size(); i++){
+					for(unsigned d = 0; d < dim; d++){
+						delta[i][d] += _delta[i][d];
+					}
+				}
 			}
+
 			/**********************************************************************
 			 * APPLY COOLING FUNCTION AND UPDATE POSITIONS
 			 *********************************************************************/
-			for(unsigned i = 0; i < pos.size(); i++)
+			#pragma omp parallel
 			{
-				double len = 0.0;
-				for(unsigned d = 0; d < dim;d++){
-					len += delta[i][d]*delta[i][d];
-				}
-				len = std::sqrt(len);
-				//std::cout << len << std::endl;
-				for(unsigned d = 0; d < dim;d++)
+				int tid,nthreads;
+				tid = omp_get_thread_num();
+				nthreads = omp_get_num_threads();
+				for(unsigned i = tid ; i < pos.size(); i = i+nthreads)
 				{
-					if(len > temp)
-					{
-						delta[i][d] = (delta[i][d]/len)*temp;
+					double len = 0.0;
+					for(unsigned d = 0; d < dim;d++){
+						len += delta[i][d]*delta[i][d];
 					}
-					pos[i][d] += delta[i][d];
+					len = std::sqrt(len);
+					//std::cout << len << std::endl;
+					for(unsigned d = 0; d < dim;d++)
+					{
+						double pd = delta[i][d];
+						if(len > temp)
+						{
+							//delta[i][d] = (delta[i][d]/len)*temp;
+							pd = (pd/len)*temp;
+						}
+						pos[i][d] += pd;
+					}
 				}
 			}
-			/*
-			for(unsigned i = 0; i < pos.size(); i++)
-			{
-				for(unsigned d = 0; d < dim;d++)
-				{
-					pos[i][d] += delta[i][d];
-				}
-
-			}
-			*/
-
-			//DEBUG_position(cc,pos,r);
-			//DEBUG_delta(cc,pos,delta,r);
-		}
-		//DEBUG_position(cc,pos,0);
-		//if(cc.getThreshold() == 3){
-		//	std::cout << "x,y,z," << std::endl;
-		//	for(unsigned i = 0; i < pos.size(); i++){
-		//		for(unsigned d = 0; d < dim; d++){
-		//			std::cout << pos[i][d] <<",";
-		//		}
-		//		std::cout << std::endl;
-		//	}
-		//}
-		//std::cout << "-----------------------------------------------" << std::endl;
-
+		} 
 	}
-
-	/*
-	void binarySearchPartition(
-			const ConnectedComponent& cc,
-			std::vector<std::vector<double>>& pos,
-			ClusteringResult& cr)
-	{
-		std::vector<double> distances;
-		for(unsigned i = 0; i < cc.size(); i++){
-			for(unsigned j = 0; j < cc.size(); j++){
-				distances.push_back(dist(pos,i,j));
-			}
-		}
-		std::sort(distances.begin(),distances.end());
-
-
-	}
-	*/
-
 
 	void partition(
 			const ConnectedComponent& cc,
@@ -212,7 +179,7 @@ namespace FORCE
 			double d_maximal,
 			double s_init,
 			double f_s)
-	{
+	{ 
 		double d = d_init;
 		double s = s_init;
 		std::vector<double> D;
@@ -240,23 +207,17 @@ namespace FORCE
 				}
 				clusterId++;
 			}
-			/*for(unsigned i = 0; i < membership.size();i++){
-				if(membership.at(i) == std::numeric_limits<unsigned>::max()){
-					std::cout << "IS MAX AT " << __LINE__ << " IN " __FILE__ << std::endl;
-				}
-			}*/
-
-
+			
 			double cost = 0;
 			for(unsigned i = 0; i< membership.size(); i++)
 			{
 				for(unsigned j = i+1; j < membership.size(); j++)
 				{
-					if((membership.at(i) != membership.at(j))
+					if((membership.at(i) != membership.at(j)) 
 							&& cc.at(i,j,false) > 0.0)
 					{
 						cost += cc.at(i,j,false);
-					}else if((membership.at(i) == membership.at(j))
+					}else if((membership.at(i) == membership.at(j)) 
 							&& cc.at(i,j,false) < 0.0)
 					{
 						cost -= cc.at(i,j,false);
@@ -272,7 +233,7 @@ namespace FORCE
 	}
 
 	/*******************************************************************************
-	 * DETERMINE MEMBERSHIP IN POS
+	 * DETERMINE MEMBERSHIP IN POS 
 	 ******************************************************************************/
 	std::vector<std::vector<unsigned>> geometricLinking(
 			std::vector<std::vector<double>>& pos,
@@ -283,7 +244,7 @@ namespace FORCE
 
 		for(auto& obj:objects)
 		{
-			std::list<unsigned> nodes;
+			std::list<unsigned> nodes;	
 			// fill list of nodes
 			for (unsigned i=1; i < obj.size();i++)
 			{
@@ -298,7 +259,7 @@ namespace FORCE
 			while(!nodes.empty()){
 
 				unsigned i = Q.front();
-				for (auto it = nodes.begin(); it != nodes.end();)
+				for (auto it = nodes.begin(); it != nodes.end();) 
 				{
 					unsigned j = *it;
 					if(j != i)

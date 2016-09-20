@@ -2,8 +2,8 @@
 #define FORCE_HPP
 #include <vector>
 #include <iostream>
-#include "ConnectedComponent.hpp"
-#include "ClusteringResult.hpp"
+#include "transclust/ConnectedComponent.hpp"
+#include "transclust/ClusteringResult.hpp"
 
 namespace FORCE{
 

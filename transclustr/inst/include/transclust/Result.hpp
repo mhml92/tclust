@@ -2,9 +2,9 @@
 #define RESULT_HPP
 #include <vector>
 #include <map>
-#include "ConnectedComponent.hpp"
-#include "ClusteringResult.hpp"
-#include "TransClust.hpp"
+#include "transclust/ConnectedComponent.hpp"
+#include "transclust/ClusteringResult.hpp"
+#include "transclust/TransClust.hpp"
 
 class Result{
 	public:

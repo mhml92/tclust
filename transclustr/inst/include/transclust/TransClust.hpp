@@ -4,40 +4,68 @@
 #include <queue>
 #include <vector>
 #include <map>
-#include "ConnectedComponent.hpp"
-#include "ClusteringResult.hpp"
-#include "FPT.hpp"
-#include "Result.hpp"
+#include <cmath>
+#include "transclust/ConnectedComponent.hpp"
+#include "transclust/ClusteringResult.hpp"
+#include "transclust/FPT.hpp"
+#include "transclust/Result.hpp"
 
 class TransClust{
 
 	public:
 		TransClust(
 			const std::string& filename,
-	  	  	 bool       use_custom_fallback   =   true,
-	  	  	 double     sim_fallback          =   0.0,
-	  	  	 bool       deafult_interval      =   true,
-	  	  	 double     th_min                =   0.0,
-	  	  	 double     th_max                =   100,
-	  	  	 double     th_step               =   1.0,
-	  	  	 double     p                     =   1.0,
-	  	  	 double     f_att                 =   100.0,
-	  	  	 double     f_rep                 =   100.0,
-	  	  	 unsigned   R                     =   100,
-	  	  	 unsigned   dim                   =   3,
-	  	  	 double     start_t               =   100,
-	  	  	 double     d_init                =   0.01,
-	  	  	 double     d_maximal             =   5.0,
-	  	  	 double     s_init                =   0.01,
-	  	  	 double     f_s                   =   0.01,
-	  	  	 double     fpt_time_limit        =   20,
-	  	  	 double     fpt_max_cost          =   5000,
-	  	  	 double     fpt_step_size         =   10,
-	  	  	 bool       disable_force         =   false,
-	  	  	 bool       disable_fpt           =   false
+	  	  	 bool       use_custom_fallback = false,
+	  	  	 double     sim_fallback        = 0.0,
+	  	  	 bool       deafult_interval    = true,
+	  	  	 double     th_min              = 0.0,
+	  	  	 double     th_max              = 100,
+	  	  	 double     th_step             = 1.0,
+	  	  	 double     p                   = 1.0,
+	  	  	 double     f_att               = 100.0,
+	  	  	 double     f_rep               = 100.0,
+	  	  	 unsigned   R                   = 100,
+	  	  	 unsigned   dim                 = 3,
+	  	  	 double     start_t             = 100,
+	  	  	 double     d_init              = 0.01,
+	  	  	 double     d_maximal           = 5.0,
+	  	  	 double     s_init              = 0.01,
+	  	  	 double     f_s                 = 0.01,
+	  	  	 double     fpt_time_limit      = 20,
+	  	  	 double     fpt_max_cost        = 5000,
+	  	  	 double     fpt_step_size       = 10,
+	  	  	 bool       disable_force       = false,
+	  	  	 bool       disable_fpt         = false,
+			FileType file_type              = FileType::LEGACY
+		);
+
+		TransClust(
+			 std::vector<std::vector<double>>& simmatrix,
+	  	  	 bool       use_custom_fallback = false,
+	  	  	 double     sim_fallback        = 0.0,
+	  	  	 bool       deafult_interval    = true,
+	  	  	 double     th_min              = 0.0,
+	  	  	 double     th_max              = 100,
+	  	  	 double     th_step             = 1.0,
+	  	  	 double     p                   = 1.0,
+	  	  	 double     f_att               = 100.0,
+	  	  	 double     f_rep               = 100.0,
+	  	  	 unsigned   R                   = 100,
+	  	  	 unsigned   dim                 = 3,
+	  	  	 double     start_t             = 100,
+	  	  	 double     d_init              = 0.01,
+	  	  	 double     d_maximal           = 5.0,
+	  	  	 double     s_init              = 0.01,
+	  	  	 double     f_s                 = 0.01,
+	  	  	 double     fpt_time_limit      = 20,
+	  	  	 double     fpt_max_cost        = 5000,
+	  	  	 double     fpt_step_size       = 10,
+	  	  	 bool       disable_force       = false,
+	  	  	 bool       disable_fpt         = false
 		);
 		clustering cluster();
 	private:
+	   void init();
 
 		inline double round(double d){
 			return std::rint((d)*100000)/100000;

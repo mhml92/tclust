@@ -5,10 +5,10 @@
 #include <list>
 #include <iostream>
 #include <string>
-#include "ConnectedComponent.hpp"
-#include "ClusteringResult.hpp"
 #include <limits>
 #include <chrono>
+#include "transclust/ConnectedComponent.hpp"
+#include "transclust/ClusteringResult.hpp"
 
 
 class FPT{
@@ -33,7 +33,7 @@ class FPT{
 	private:
 
 		ConnectedComponent &cc;
-		std::chrono::time_point<std::chrono::system_clock> start;
+		std::chrono::time_point<std::chrono::system_clock> start; 
 		double time_limit;
 		double stepSize;
 		double maxK;
@@ -53,21 +53,21 @@ class FPT{
 		}
 		void reduce(Node& fptn);
 		double costSetForbidden(
-				Node& fptn,
+				Node& fptn, 
 				unsigned node_i,
 				unsigned node_j);
 
 		double costSetPermanent(
-				Node& fptn,
+				Node& fptn, 
 				unsigned node_i,
 				unsigned node_j);
 		void find_solution(Node& fptn0);
 		void mergeNodes(
-			Node& fptn,
+			Node& fptn, 
 			unsigned i,
-			unsigned j,
+			unsigned j, 
 			double costForMerging);
-
+		
 		void buildSolution(ClusteringResult &cr);
 		void clone_node(Node& fptn0,Node& fptn1);
 };
