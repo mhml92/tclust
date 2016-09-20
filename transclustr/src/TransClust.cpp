@@ -146,7 +146,6 @@ TransClust::TransClust(
 		//threshold_step =(std::rint((threshold_max-threshold_min)*100000)/100000)/100;
 		threshold_step = round(threshold_max-threshold_min)/100;
 	}
-	//std::cout << std::setprecision(std::numeric_limits<double>::digits10 + 1) << threshold_step << std::endl;
 
 	FCC::findConnectedComponents(sim_matrix,ccs,threshold_min);
 }
@@ -182,7 +181,6 @@ clustering TransClust::cluster()
 						R,
 						start_t,
 						dim);
-				//FORCE::DEBUG_position(cc,pos,cc.getThreshold());
 				// partition
 				FORCE::partition(cc,pos,cr,d_init,d_maximal,s_init,f_s);
 
@@ -207,25 +205,9 @@ clustering TransClust::cluster()
 			cr.membership = std::vector<unsigned>(cc.size(),0);
 		}
 		result.add(cc,cr);
-		//FORCE::DEBUG_linking(res.getClusters(),pos,cc.getThreshold(),cc.getId());
-		//double new_threshold = std::rint((cc.getThreshold()+threshold_step)*100000)/100000;
 		double new_threshold = round(cc.getThreshold()+threshold_step);
 
-
-		//std::cout
-		//	<< "1 found new threshold: "
-		//	<<std::setprecision(std::numeric_limits<double>::digits10 )
-		//	<<  new_threshold << std::endl;
-
-		//std::cout
-		//	<< "2 threshold_max: "
-		//	<< std::setprecision(std::numeric_limits<double>::digits10)
-		//	<< threshold_max << std::endl;
-
 		if(new_threshold <= threshold_max){
-			//std::cout
-			//	<< std::setprecision(std::numeric_limits<double>::digits10)
-			//	<< "3 new threshold: " << new_threshold << std::endl;
 			FCC::findConnectedComponents(cc,ccs,new_threshold);
 		}
 		ccs.pop();
@@ -235,5 +217,5 @@ clustering TransClust::cluster()
 
 void TransClust::init(){
    static plog::RcppAppender<plog::FuncMessageFormatter> myRcppAppender;
-   plog::init(plog::debug, &myRcppAppender); // Initialize the logger with our appender.
+   plog::init(plog::info, &myRcppAppender); // Initialize the logger with our appender.
 }
