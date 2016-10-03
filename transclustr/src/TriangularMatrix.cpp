@@ -15,7 +15,7 @@ TriangularMatrix::TriangularMatrix(
 	maxValue = std::numeric_limits<double>::lowest();
 	minValue = std::numeric_limits<double>::max();
 
-	unsigned num_o = objects.size();
+	num_o = objects.size();
 	unsigned msize = ((num_o * num_o) - num_o) / 2;
 
 	// indexes
@@ -33,7 +33,7 @@ TriangularMatrix::TriangularMatrix(
 			double val = m(objects.at(i), objects.at(j));
 			if (maxValue < val){maxValue = val;}
 			if (minValue > val){minValue = val;}
-			
+
 			matrix.at(index(i, j)) = val;
 		}
 	}
@@ -46,10 +46,10 @@ void TriangularMatrix::parseLegacySimDataFile(
 		bool use_custom_fallback,
 		double sim_fallback)
 {
-	// for each pair of object, tjeck if it has a partner and if so assign the 
-	// minimum similarity value. If a pair only has similarity data in one 
+	// for each pair of object, tjeck if it has a partner and if so assign the
+	// minimum similarity value. If a pair only has similarity data in one
 	// direction then assign the defautl similarity value
-	unsigned num_o = index2ObjName.size();
+	num_o = index2ObjName.size();
 	for (unsigned i = 0; i < num_o; i++)
 	{
 		for (unsigned j = i + 1; j < num_o; j++)
@@ -92,8 +92,7 @@ void TriangularMatrix::parseSimpleSimDataFile(
 		double sim_fallback)
 {
 	std::vector<std::pair<unsigned,unsigned>> positive_inf;
-	unsigned num_o = index2ObjName.size();
-	#pragma omp parallel for 
+	num_o = index2ObjName.size();
 	for (unsigned i = 0; i < num_o; i++)
 	{
 		for (unsigned j = i + 1; j < num_o; j++)
@@ -123,20 +122,14 @@ void TriangularMatrix::parseSimpleSimDataFile(
 						val = std::min(o1_o2,o2_o1);
 					}
 				}else{
-					val = o1_o2; 
+					val = o1_o2;
 				}
 			}
 
 			if(val == std::numeric_limits<double>::max()){
-				#pragma omp critical 
-				{
-					positive_inf.push_back(std::make_pair(i,j));
-				}
+			   positive_inf.push_back(std::make_pair(i,j));
 			}else if(maxValue < val){
-				#pragma omp critical 
-				{
-					maxValue = val;
-				}
+			   maxValue = val;
 			}
 			matrix.at(index(i, j)) = val;
 		}
@@ -162,7 +155,6 @@ void TriangularMatrix::readFile(
 	std::ifstream fs(filename);
 	for (std::string line; std::getline(fs, line); )
 	{
-		
 		// split line from similarity file <o1,o2,sim val>
 		std::istringstream buf(line);
 		std::istream_iterator<std::string> beg(buf), end;
@@ -177,13 +169,13 @@ void TriangularMatrix::readFile(
 		//double value = std::atof(tokens.at(2).c_str());
 		double value = std::stod(tokens.at(2));
 
-		// if inf/-inf 
+		// if inf/-inf
 		if(std::isinf(value))
 		{
 			if(value < 0 ){
-				value = std::numeric_limits<double>::lowest(); 
+				value = std::numeric_limits<double>::lowest();
 			}else{
-				value = std::numeric_limits<double>::max(); 
+				value = std::numeric_limits<double>::max();
 			}
 		}
 
@@ -225,24 +217,25 @@ void TriangularMatrix::readFile(
 		}
 
 		if (minValue > value && value != std::numeric_limits<double>::lowest())
-		{ 
-			minValue = value; 
+		{
+			minValue = value;
 		}
 		sim_value[std::make_pair(o1,o2)] = value;
 	}
-	unsigned num_o = index2ObjName.size();
+	num_o = index2ObjName.size();
 	unsigned msize = ((num_o * num_o) - num_o) / 2;
 	matrix.resize(msize);
 }
 
 TriangularMatrix::TriangularMatrix(
-		std::vector<std::vector<double>>& sim_matrix,
+		std::vector<double>& sim_matrix_1d,
+		unsigned _num_o,
 		bool use_custom_fallback,
-		double sim_fallback)
+		double sim_fallback
+   )
 {
-	unsigned num_o = sim_matrix.size();
-	unsigned msize = ((num_o * num_o) - num_o) / 2;
-	matrix.resize(msize);
+   num_o = _num_o;
+	matrix = sim_matrix_1d;
 
 	maxValue = std::numeric_limits<double>::lowest();
 	minValue = std::numeric_limits<double>::max();
@@ -253,25 +246,17 @@ TriangularMatrix::TriangularMatrix(
 		index2ObjName.at(i) = std::to_string(i);
 		index2ObjId.at(i) = i;
 	}
-
-	for(unsigned i = 0; i < sim_matrix.size(); i++)
-	{
-		for(unsigned j = i + 1; j < sim_matrix.size(); j++)
-		{
-			double val = std::min(sim_matrix.at(i).at(j),sim_matrix.at(j).at(i));
+	for(unsigned i = 0; i < matrix.size(); i++){
+			double val = matrix.at(i);
 			if (maxValue < val){maxValue = val;}
 			if (minValue > val){minValue = val;}
-			matrix.at(index(i,j)) = val;
-		}
-
 	}
-	
 }
 TriangularMatrix::TriangularMatrix(
 		const std::string &filename,
 		bool use_custom_fallback,
 		double sim_fallback,
-		FileType ft)
+		std::string ft)
 {
 	// map <object name> -> <index in matrix>
 	std::map<std::string, unsigned> object2index;
@@ -285,19 +270,19 @@ TriangularMatrix::TriangularMatrix(
 	// reads the input file and initializes the 'matrix' array
 	readFile(filename,object2index,sim_value,hasPartner);
 
-	if(ft == FileType::LEGACY){
+	if(ft == "LEGACY"){
 		parseLegacySimDataFile(
 				object2index,
 				sim_value,
 				hasPartner,
 				use_custom_fallback,
-				sim_fallback);		
-	}else if(ft == FileType::SIMPLE){
+				sim_fallback);
+	}else if(ft == "SIMPLE"){
 		parseSimpleSimDataFile(
 				object2index,
 				sim_value,
 				hasPartner,
 				use_custom_fallback,
-				sim_fallback);		
+				sim_fallback);
 	}
 }

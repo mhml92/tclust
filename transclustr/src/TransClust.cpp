@@ -1,6 +1,4 @@
-#include <plog/Log.h>
 #include <Rcpp.h>
-#include <plog/Formatters/FuncMessageFormatter.h>
 #include "transclust/TransClust.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/FindConnectedComponents.hpp"
@@ -9,152 +7,49 @@
 #include "transclust/ClusteringResult.hpp"
 #include "transclust/Result.hpp"
 
-// small plog appender redirecting logs to Rcout
-namespace plog
-{
-template<class Formatter>
-class RcppAppender : public IAppender
-{
-   public:
-      virtual void write(const Record& record)
-      {
-         util::nstring str = Formatter::format(record);
-         Rcpp::Rcout << str << std::endl;
-      }
-   };
-}
-
 TransClust::TransClust(
 		const std::string& filename,
-		bool use_custom_fallback,
-		double sim_fallback,
-		bool use_custom_range,
-		double th_min,
-		double th_max,
-		double th_step,
-		double p,
-		double f_att,
-		double f_rep,
-		unsigned R,
-		unsigned dim,
-		double start_t,
-		double d_init,
-		double d_maximal,
-		double s_init,
-		double f_s,
-		double fpt_time_limit,
-		double fpt_max_cost,
-		double fpt_step_size,
-		bool disable_force,
-		bool disable_fpt,
-		FileType file_type
+		std::string& file_type,
+		TransClustParams& tcp
 		)
-	:
-		use_custom_fallback(use_custom_fallback),
-		sim_fallback(sim_fallback),
-		use_custom_range(use_custom_range),
-		threshold_min(th_min),
-		threshold_max(th_max),
-		threshold_step(th_step),
-		p(p),
-		f_att(f_att),
-		f_rep(f_rep),
-		R(R),
-		start_t(start_t),
-		dim(dim),
-		d_init(d_init),
-		d_maximal(d_maximal),
-		s_init(s_init),
-		f_s(f_s),
-		fpt_time_limit(fpt_time_limit),
-		fpt_max_cost(fpt_max_cost),
-		fpt_step_size(fpt_step_size),
-		disable_force(disable_force),
-		disable_fpt(disable_fpt)
 {
-   init();
+   init(tcp);
 	// Read input similarity file
 	ConnectedComponent sim_matrix(filename,use_custom_fallback,sim_fallback,file_type);
 	id2object = sim_matrix.getObjectNames();
-
-	if(!use_custom_range){
+	if(use_custom_range){
 		threshold_min = sim_matrix.getMinSimilarity();
 		threshold_max = sim_matrix.getMaxSimilarity();
-		//threshold_step =(std::rint((threshold_max-threshold_min)*100000)/100000)/100;
 		threshold_step = round(threshold_max-threshold_min)/100;
 	}
-	//std::cout << std::setprecision(std::numeric_limits<double>::digits10 + 1) << threshold_step << std::endl;
-
-	FCC::findConnectedComponents(sim_matrix,ccs,threshold_min);
+	FCC::findConnectedComponents(sim_matrix,ccs,round(threshold_min+threshold_step));
 }
 
 TransClust::TransClust(
-		std::vector<std::vector<double>>& simmatrix,
-		bool use_custom_fallback,
-		double sim_fallback,
-		bool use_custom_range,
-		double th_min,
-		double th_max,
-		double th_step,
-		double p,
-		double f_att,
-		double f_rep,
-		unsigned R,
-		unsigned dim,
-		double start_t,
-		double d_init,
-		double d_maximal,
-		double s_init,
-		double f_s,
-		double fpt_time_limit,
-		double fpt_max_cost,
-		double fpt_step_size,
-		bool disable_force,
-		bool disable_fpt
+      std::vector<double>& sim_matrix_1d,
+      unsigned num_o,
+		TransClustParams& tcp
 		)
-	:
-		use_custom_fallback(use_custom_fallback),
-		sim_fallback(sim_fallback),
-		use_custom_range(use_custom_range),
-		threshold_min(th_min),
-		threshold_max(th_max),
-		threshold_step(th_step),
-		p(p),
-		f_att(f_att),
-		f_rep(f_rep),
-		R(R),
-		start_t(start_t),
-		dim(dim),
-		d_init(d_init),
-		d_maximal(d_maximal),
-		s_init(s_init),
-		f_s(f_s),
-		fpt_time_limit(fpt_time_limit),
-		fpt_max_cost(fpt_max_cost),
-		fpt_step_size(fpt_step_size),
-		disable_force(disable_force),
-		disable_fpt(disable_fpt)
 {
-   init();
-	// Read input similarity file
-	ConnectedComponent sim_matrix(simmatrix,use_custom_fallback,sim_fallback);
+   init(tcp);
+	ConnectedComponent sim_matrix(sim_matrix_1d,num_o,use_custom_fallback,sim_fallback);
 	id2object = sim_matrix.getObjectNames();
-
-	if(!use_custom_range){
+	if(use_custom_range){
 		threshold_min = sim_matrix.getMinSimilarity();
 		threshold_max = sim_matrix.getMaxSimilarity();
-		//threshold_step =(std::rint((threshold_max-threshold_min)*100000)/100000)/100;
 		threshold_step = round(threshold_max-threshold_min)/100;
 	}
-
-	FCC::findConnectedComponents(sim_matrix,ccs,threshold_min);
+	FCC::findConnectedComponents(sim_matrix,ccs,round(threshold_min+threshold_step));
 }
+
+
 clustering TransClust::cluster()
 {
 
 	Result result(id2object);
 
 	while(!ccs.empty()){
+	   Rcpp::checkUserInterrupt();
 		ConnectedComponent& cc = ccs.front();
 
 		ClusteringResult cr;
@@ -215,7 +110,38 @@ clustering TransClust::cluster()
 	return result.get();
 }
 
-void TransClust::init(){
-   static plog::RcppAppender<plog::FuncMessageFormatter> myRcppAppender;
-   plog::init(plog::info, &myRcppAppender); // Initialize the logger with our appender.
+void TransClust::init(TransClustParams& tcp){
+   // set class vars from tcp
+   // general vars
+   use_custom_fallback = tcp.use_custom_fallback;
+   sim_fallback = tcp.sim_fallback;
+   use_custom_range = tcp.use_default_interval;
+   threshold_min = tcp.th_min;
+   threshold_max = tcp.th_max;
+   threshold_step = tcp.th_step;
+
+   // Layout values
+   p = tcp.p;
+   f_att = tcp.f_att;
+   f_rep = tcp.f_rep;
+   R = tcp.R;
+   start_t = tcp.start_t;
+   dim = tcp.dim;
+
+   // partitioning values
+   d_init = tcp.d_init;
+   d_maximal = tcp.d_maximal;
+   s_init = tcp.s_init;
+   f_s = tcp.f_s;
+
+   // FPT values
+   fpt_time_limit = tcp.fpt_time_limit;
+   fpt_max_cost = tcp.fpt_max_cost;
+   fpt_step_size = tcp.fpt_step_size;
+
+   disable_force = tcp.disable_force;
+   disable_fpt = tcp.disable_fpt;
+
+   seed = tcp.seed;
+
 }

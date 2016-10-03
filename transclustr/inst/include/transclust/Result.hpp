@@ -2,9 +2,10 @@
 #define RESULT_HPP
 #include <vector>
 #include <map>
+#include <plog/Log.h>
+#include "transclust/TransClust.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/ClusteringResult.hpp"
-#include "transclust/TransClust.hpp"
 
 class Result{
 	public:
@@ -13,7 +14,7 @@ class Result{
 		clustering get();
 		void dump();
 
-		
+
 	private:
 		std::vector<std::string> id2object;
 		std::map<double,double> cost;

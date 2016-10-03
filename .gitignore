@@ -1,5 +1,6 @@
-build/
-doc/
-data/astral
-data/actino
+transclust/build/
+transclust/doc/
+transclust/tests/build/
+transclust/data/astral/
+transclust/data/actino/
 .Rproj.user

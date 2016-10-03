@@ -1,3 +1,4 @@
+#include <Rcpp.h>
 #include <chrono>
 #include <limits>
 #include <iomanip>
@@ -24,7 +25,7 @@ FPT::FPT(
 void FPT::cluster(ClusteringResult &cr)
 {
 	cr.cost = -1;
-	start = std::chrono::system_clock::now(); 
+	start = std::chrono::system_clock::now();
 	while(!solution_found){
 		/**********************************************************************
 		 * Track time
@@ -38,7 +39,7 @@ void FPT::cluster(ClusteringResult &cr)
 		fptn.size = cc.size();
 		fptn.cost = 0;
 
-		/* Construct 'nodeParents' 
+		/* Construct 'nodeParents'
 		 * vector of vectors with the index number of each node
 		 * [[0],[1],...,[n]]
 		 */
@@ -48,7 +49,7 @@ void FPT::cluster(ClusteringResult &cr)
 		}
 
 		/* Construct 'edgeCost'
-		 * A 2d matrix of edge costs, initially a copy of cc's similaritys 
+		 * A 2d matrix of edge costs, initially a copy of cc's similaritys
 		 */
 		for(unsigned i = 0; i < fptn.size;i++)
 		{
@@ -65,7 +66,7 @@ void FPT::cluster(ClusteringResult &cr)
 		}
 
 		/*************************************************************************
-		 * Reduce node 
+		 * Reduce node
 		 ************************************************************************/
 		reduce(fptn);
 		/*************************************************************************
@@ -118,18 +119,18 @@ reduceLoopStart:
 	}
 }
 double FPT::costSetForbidden(
-		Node& fptn, 
+		Node& fptn,
 		unsigned u,
 		unsigned v)
 {
 	double costs = 0;
 
-	for (unsigned w = 0; w < fptn.size; w++) 
+	for (unsigned w = 0; w < fptn.size; w++)
 	{
 		if( u == w || v == w){ continue; }
 
-		if (fptn.edgeCost.at(u).at(w) > 0 
-				&& fptn.edgeCost.at(v).at(w) > 0) 
+		if (fptn.edgeCost.at(u).at(w) > 0
+				&& fptn.edgeCost.at(v).at(w) > 0)
 		{
 			costs += std::min(
 					fptn.edgeCost.at(u).at(w),
@@ -140,20 +141,20 @@ double FPT::costSetForbidden(
 }
 
 double FPT::costSetPermanent(
-		Node& fptn, 
+		Node& fptn,
 		unsigned u,
-		unsigned v) 
+		unsigned v)
 {
 	double cost = 0;
 
-	for (unsigned  w = 0; w < fptn.size; w++) 
+	for (unsigned  w = 0; w < fptn.size; w++)
 	{
-		if (w == u || w == v) 
+		if (w == u || w == v)
 		{
 			continue;
 		}
 		// sum cost of symmetric set difference
-		if( (fptn.edgeCost.at(u).at(w) > 0) 
+		if( (fptn.edgeCost.at(u).at(w) > 0)
 				!= (fptn.edgeCost.at(v).at(w) > 0) )
 		{
 			cost += std::min(
@@ -167,6 +168,7 @@ double FPT::costSetPermanent(
 
 void FPT::find_solution(Node& fptn0)
 {
+   Rcpp::checkUserInterrupt();
 	// terminaiton conditions
 	if(getDeltaTime() > time_limit){
 		return;
@@ -178,23 +180,23 @@ void FPT::find_solution(Node& fptn0)
 	double highestoccurence = 0;
 	double occurence = 0;
 
-	for (unsigned u = 0; u < fptn0.size; u++) 
+	for (unsigned u = 0; u < fptn0.size; u++)
 	{
-		for (unsigned v = u + 1; v < fptn0.size; v++) 
+		for (unsigned v = u + 1; v < fptn0.size; v++)
 		{
 
 			if (fptn0.edgeCost[u][v] > 0) {
 
 				//occurence = std::abs(
-				//		costSetPermanent(fptn0, u, v) 
+				//		costSetPermanent(fptn0, u, v)
 				//		- costSetForbidden(fptn0,u, v)
 				//		);
 				occurence = std::max(
-						costSetPermanent(fptn0, u, v), 
+						costSetPermanent(fptn0, u, v),
 						costSetForbidden(fptn0, u, v)
 						);
 
-				if (occurence > highestoccurence) 
+				if (occurence > highestoccurence)
 				{
 					highestoccurence = occurence;
 					edge[0] = u;
@@ -221,7 +223,7 @@ void FPT::find_solution(Node& fptn0)
 	 * Branch merge
 	 ************************************************************************/
 	double csp = std::max(0.0,-cost_uv) + costSetPermanent(fptn0,u,v);
-	if (csp + fptn0.cost <= maxK) 
+	if (csp + fptn0.cost <= maxK)
 	{
 		Node fptn1;
 		clone_node(fptn0,fptn1);
@@ -235,7 +237,7 @@ void FPT::find_solution(Node& fptn0)
 	 ************************************************************************/
 	double csf = std::max(0.0,cost_uv) + costSetForbidden(fptn0,u,v);
 	if (csf + fptn0.cost <= maxK)
-	{ 
+	{
 		double origCost = fptn0.edgeCost[u][v];
 
 		fptn0.cost += std::max(0.0,cost_uv);
@@ -257,31 +259,31 @@ void FPT::mergeNodes(Node& fptn, unsigned node_i,unsigned node_j, double costFor
 	/* EDGECOST MATRIX */
 
 	// add costs from the node with the higher index to the node with the
-	// lower index 
+	// lower index
 	for(unsigned i = 0; i < fptn.size; i++)
 	{
 		if( i == l ){
-			fptn.edgeCost.at(l).at(i) = 0.0;    
+			fptn.edgeCost.at(l).at(i) = 0.0;
 		}else{
 
 
-			fptn.edgeCost.at(l).at(i) += fptn.edgeCost.at(h).at(i);    
-			fptn.edgeCost.at(i).at(l) += fptn.edgeCost.at(i).at(h);    
+			fptn.edgeCost.at(l).at(i) += fptn.edgeCost.at(h).at(i);
+			fptn.edgeCost.at(i).at(l) += fptn.edgeCost.at(i).at(h);
 		}
 	}
-	// remove the element with the higher index from the matrix (in both the 
+	// remove the element with the higher index from the matrix (in both the
 	// horizontal and vertical direction)
-	// vertial 
+	// vertial
 	fptn.edgeCost.erase(fptn.edgeCost.begin()+h);
 	// horizontal
 	for(unsigned i = 0; i < fptn.edgeCost.size(); i++)
 	{
-		fptn.edgeCost.at(i).erase(fptn.edgeCost.at(i).begin()+h);    
+		fptn.edgeCost.at(i).erase(fptn.edgeCost.at(i).begin()+h);
 	}
 	/* NODE PARENTS */
 	fptn.nodeParents.at(l).insert(
-			fptn.nodeParents.at(l).end(), 
-			fptn.nodeParents.at(h).begin(), 
+			fptn.nodeParents.at(l).end(),
+			fptn.nodeParents.at(h).begin(),
 			fptn.nodeParents.at(h).end());
 
 	fptn.nodeParents.erase(fptn.nodeParents.begin()+h);

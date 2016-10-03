@@ -5,62 +5,29 @@
 
 using namespace Rcpp;
 
-// cppTransclustFile
-List cppTransclustFile(std::string filename, double threshold, bool use_custom_fallback, double sim_fallback, double p, double f_att, double f_rep, unsigned R, unsigned dim, double start_t, double d_init, double d_maximal, double s_init, double f_s, double fpt_time_limit, double fpt_max_cost, double fpt_step_size, bool disable_force, bool disable_fpt, std::string file_type);
-RcppExport SEXP transclustr_cppTransclustFile(SEXP filenameSEXP, SEXP thresholdSEXP, SEXP use_custom_fallbackSEXP, SEXP sim_fallbackSEXP, SEXP pSEXP, SEXP f_attSEXP, SEXP f_repSEXP, SEXP RSEXP, SEXP dimSEXP, SEXP start_tSEXP, SEXP d_initSEXP, SEXP d_maximalSEXP, SEXP s_initSEXP, SEXP f_sSEXP, SEXP fpt_time_limitSEXP, SEXP fpt_max_costSEXP, SEXP fpt_step_sizeSEXP, SEXP disable_forceSEXP, SEXP disable_fptSEXP, SEXP file_typeSEXP) {
+// cppTransClustFile
+List cppTransClustFile(std::string filename, std::string file_type, List params);
+RcppExport SEXP transclustr_cppTransClustFile(SEXP filenameSEXP, SEXP file_typeSEXP, SEXP paramsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
-    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
-    Rcpp::traits::input_parameter< bool >::type use_custom_fallback(use_custom_fallbackSEXP);
-    Rcpp::traits::input_parameter< double >::type sim_fallback(sim_fallbackSEXP);
-    Rcpp::traits::input_parameter< double >::type p(pSEXP);
-    Rcpp::traits::input_parameter< double >::type f_att(f_attSEXP);
-    Rcpp::traits::input_parameter< double >::type f_rep(f_repSEXP);
-    Rcpp::traits::input_parameter< unsigned >::type R(RSEXP);
-    Rcpp::traits::input_parameter< unsigned >::type dim(dimSEXP);
-    Rcpp::traits::input_parameter< double >::type start_t(start_tSEXP);
-    Rcpp::traits::input_parameter< double >::type d_init(d_initSEXP);
-    Rcpp::traits::input_parameter< double >::type d_maximal(d_maximalSEXP);
-    Rcpp::traits::input_parameter< double >::type s_init(s_initSEXP);
-    Rcpp::traits::input_parameter< double >::type f_s(f_sSEXP);
-    Rcpp::traits::input_parameter< double >::type fpt_time_limit(fpt_time_limitSEXP);
-    Rcpp::traits::input_parameter< double >::type fpt_max_cost(fpt_max_costSEXP);
-    Rcpp::traits::input_parameter< double >::type fpt_step_size(fpt_step_sizeSEXP);
-    Rcpp::traits::input_parameter< bool >::type disable_force(disable_forceSEXP);
-    Rcpp::traits::input_parameter< bool >::type disable_fpt(disable_fptSEXP);
     Rcpp::traits::input_parameter< std::string >::type file_type(file_typeSEXP);
-    rcpp_result_gen = Rcpp::wrap(cppTransclustFile(filename, threshold, use_custom_fallback, sim_fallback, p, f_att, f_rep, R, dim, start_t, d_init, d_maximal, s_init, f_s, fpt_time_limit, fpt_max_cost, fpt_step_size, disable_force, disable_fpt, file_type));
+    Rcpp::traits::input_parameter< List >::type params(paramsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cppTransClustFile(filename, file_type, params));
     return rcpp_result_gen;
 END_RCPP
 }
-// cppTransclustMatrix
-List cppTransclustMatrix(NumericMatrix simmatrix, double threshold, bool use_custom_fallback, double sim_fallback, double p, double f_att, double f_rep, unsigned R, unsigned dim, double start_t, double d_init, double d_maximal, double s_init, double f_s, double fpt_time_limit, double fpt_max_cost, double fpt_step_size, bool disable_force, bool disable_fpt);
-RcppExport SEXP transclustr_cppTransclustMatrix(SEXP simmatrixSEXP, SEXP thresholdSEXP, SEXP use_custom_fallbackSEXP, SEXP sim_fallbackSEXP, SEXP pSEXP, SEXP f_attSEXP, SEXP f_repSEXP, SEXP RSEXP, SEXP dimSEXP, SEXP start_tSEXP, SEXP d_initSEXP, SEXP d_maximalSEXP, SEXP s_initSEXP, SEXP f_sSEXP, SEXP fpt_time_limitSEXP, SEXP fpt_max_costSEXP, SEXP fpt_step_sizeSEXP, SEXP disable_forceSEXP, SEXP disable_fptSEXP) {
+// cppTransClustDist
+List cppTransClustDist(NumericVector sim_matrix_1d, unsigned num_o, List params);
+RcppExport SEXP transclustr_cppTransClustDist(SEXP sim_matrix_1dSEXP, SEXP num_oSEXP, SEXP paramsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type simmatrix(simmatrixSEXP);
-    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
-    Rcpp::traits::input_parameter< bool >::type use_custom_fallback(use_custom_fallbackSEXP);
-    Rcpp::traits::input_parameter< double >::type sim_fallback(sim_fallbackSEXP);
-    Rcpp::traits::input_parameter< double >::type p(pSEXP);
-    Rcpp::traits::input_parameter< double >::type f_att(f_attSEXP);
-    Rcpp::traits::input_parameter< double >::type f_rep(f_repSEXP);
-    Rcpp::traits::input_parameter< unsigned >::type R(RSEXP);
-    Rcpp::traits::input_parameter< unsigned >::type dim(dimSEXP);
-    Rcpp::traits::input_parameter< double >::type start_t(start_tSEXP);
-    Rcpp::traits::input_parameter< double >::type d_init(d_initSEXP);
-    Rcpp::traits::input_parameter< double >::type d_maximal(d_maximalSEXP);
-    Rcpp::traits::input_parameter< double >::type s_init(s_initSEXP);
-    Rcpp::traits::input_parameter< double >::type f_s(f_sSEXP);
-    Rcpp::traits::input_parameter< double >::type fpt_time_limit(fpt_time_limitSEXP);
-    Rcpp::traits::input_parameter< double >::type fpt_max_cost(fpt_max_costSEXP);
-    Rcpp::traits::input_parameter< double >::type fpt_step_size(fpt_step_sizeSEXP);
-    Rcpp::traits::input_parameter< bool >::type disable_force(disable_forceSEXP);
-    Rcpp::traits::input_parameter< bool >::type disable_fpt(disable_fptSEXP);
-    rcpp_result_gen = Rcpp::wrap(cppTransclustMatrix(simmatrix, threshold, use_custom_fallback, sim_fallback, p, f_att, f_rep, R, dim, start_t, d_init, d_maximal, s_init, f_s, fpt_time_limit, fpt_max_cost, fpt_step_size, disable_force, disable_fpt));
+    Rcpp::traits::input_parameter< NumericVector >::type sim_matrix_1d(sim_matrix_1dSEXP);
+    Rcpp::traits::input_parameter< unsigned >::type num_o(num_oSEXP);
+    Rcpp::traits::input_parameter< List >::type params(paramsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cppTransClustDist(sim_matrix_1d, num_o, params));
     return rcpp_result_gen;
 END_RCPP
 }

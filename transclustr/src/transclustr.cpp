@@ -1,133 +1,90 @@
 #include <Rcpp.h>
-#include <omp.h>
 #include "transclust/TransClust.hpp"
+
 using namespace Rcpp;
 
 // Enable C++11 via this plugin (Rcpp 0.10.3 or later)
 // [[Rcpp::plugins(cpp11)]]
 
-// [[Rcpp::export]]
-List cppTransclustFile(
-      std::string filename,
-      double threshold,
-      bool       use_custom_fallback = false,
-      double     sim_fallback        = 0.0,
-      double     p                   = 1.0,
-      double     f_att               = 100.0,
-      double     f_rep               = 100.0,
-      unsigned   R                   = 100,
-      unsigned   dim                 = 3,
-      double     start_t             = 100,
-      double     d_init              = 0.01,
-      double     d_maximal           = 5.0,
-      double     s_init              = 0.01,
-      double     f_s                 = 0.01,
-      double     fpt_time_limit      = 20,
-      double     fpt_max_cost        = 5000,
-      double     fpt_step_size       = 10,
-      bool       disable_force       = false,
-      bool       disable_fpt         = false,
-      std::string file_type              = "SIMPLE"
-) {
-   FileType ft;
-   if(file_type == "SIMPLE"){
-      ft = FileType::SIMPLE;
-   }else if(file_type == "LEGACY"){
-      ft = FileType::LEGACY;
-   }
-   TransClust tc(
-         filename,
-         use_custom_fallback,
-         sim_fallback,
-         true,
-         threshold,
-         threshold,
-         threshold,
-         p,
-         f_att,
-         f_rep,
-         R,
-         dim,
-         start_t,
-         d_init,
-         d_maximal,
-         s_init,
-         f_s,
-         fpt_time_limit,
-         fpt_max_cost,
-         fpt_step_size,
-         disable_force,
-         disable_fpt,
-         ft
-   );
+List cppCluster(TransClust& tc){
    clustering res = tc.cluster();
+
    return List::create(
-      Named("id2object") = res.id2object,
-      Named("cost") = res.cost,
-      Named("clusters") = res.clusters,
-      Named("threshold") = res.threshold
+      Named("labels") = res.id2object,
+      Named("costs") = res.cost,
+      Named("thresholds") = res.threshold,
+      Named("clusters") = res.clusters
    );
 }
 
 // [[Rcpp::export]]
-List cppTransclustMatrix(
-      NumericMatrix simmatrix,
-      double threshold,
-      bool       use_custom_fallback = false,
-      double     sim_fallback        = 0.0,
-      double     p                   = 1.0,
-      double     f_att               = 100.0,
-      double     f_rep               = 100.0,
-      unsigned   R                   = 100,
-      unsigned   dim                 = 3,
-      double     start_t             = 100,
-      double     d_init              = 0.01,
-      double     d_maximal           = 5.0,
-      double     s_init              = 0.01,
-      double     f_s                 = 0.01,
-      double     fpt_time_limit      = 20,
-      double     fpt_max_cost        = 5000,
-      double     fpt_step_size       = 10,
-      bool       disable_force       = false,
-      bool       disable_fpt         = false
-) {
-   std::vector<std::vector<double>> sm;
+List cppTransClustFile(
+      std::string filename,
+      std::string file_type,
+      List params
+   ) {
+   TransClust tc(
+         filename,
+         file_type,
+         TransClustParams()
+            .set_use_custom_fallback(as<bool>(params["use_custom_fallback"]))
+            .set_sim_fallback(as<double>(params["sim_fallback"]))
+            .set_use_default_interval(as<bool>(params["use_default_interval"]))
+            .set_th_min(as<double>(params["th_min"]))
+            .set_th_max(as<double>(params["th_max"]))
+            .set_th_step(as<double>(params["th_step"]))
+            .set_p(as<unsigned>(params["p"]))
+            .set_f_att(as<double>(params["f_att"]))
+            .set_f_rep(as<double>(params["f_rep"]))
+            .set_R(as<unsigned>(params["R"]))
+            .set_dim(as<unsigned>(params["dim"]))
+            .set_start_t(as<unsigned>(params["start_t"]))
+            .set_d_init(as<double>(params["d_init"]))
+            .set_d_maximal(as<double>(params["d_maximal"]))
+            .set_s_init(as<double>(params["s_init"]))
+            .set_f_s(as<double>(params["f_s"]))
+            .set_fpt_time_limit(as<double>(params["fpt_time_limit"]))
+            .set_fpt_max_cost(as<double>(params["fpt_max_cost"]))
+            .set_fpt_step_size(as<unsigned>(params["fpt_step_size"]))
+            .set_disable_force(as<bool>(params["disable_force"]))
+            .set_disable_fpt(as<bool>(params["disable_fpt"]))
+            .set_seed(as<unsigned>(params["seed"]))
+   );
+   return cppCluster(tc);
+}
 
-   for(unsigned i = 0; i < simmatrix.cols();i++){
-      sm.push_back(std::vector<double>());
-      for(unsigned j = 0; j< simmatrix.rows();j++){
-         sm.at(i).push_back(simmatrix.at(i,j));
-      }
-   }
+// [[Rcpp::export]]
+List cppTransClustDist(
+      NumericVector sim_matrix_1d,
+      unsigned num_o,
+      List params) {
+   std::vector<double> sm(sim_matrix_1d.begin(),sim_matrix_1d.end());
    TransClust tc(
          sm,
-         use_custom_fallback,
-         sim_fallback,
-         true,
-         threshold,
-         threshold,
-         threshold,
-         p,
-         f_att,
-         f_rep,
-         R,
-         dim,
-         start_t,
-         d_init,
-         d_maximal,
-         s_init,
-         f_s,
-         fpt_time_limit,
-         fpt_max_cost,
-         fpt_step_size,
-         disable_force,
-         disable_fpt
-      );
-   clustering res = tc.cluster();
-   return List::create(
-      Named("id2object") = res.id2object,
-      Named("cost") = res.cost,
-      Named("clusters") = res.clusters,
-      Named("threshold") = res.threshold
+         num_o,
+         TransClustParams()
+            .set_use_custom_fallback(as<bool>(params["use_custom_fallback"]))
+            .set_sim_fallback(as<double>(params["sim_fallback"]))
+            .set_use_default_interval(as<bool>(params["use_default_interval"]))
+            .set_th_min(as<double>(params["th_min"]))
+            .set_th_max(as<double>(params["th_max"]))
+            .set_th_step(as<double>(params["th_step"]))
+            .set_p(as<unsigned>(params["p"]))
+            .set_f_att(as<double>(params["f_att"]))
+            .set_f_rep(as<double>(params["f_rep"]))
+            .set_R(as<unsigned>(params["R"]))
+            .set_dim(as<unsigned>(params["dim"]))
+            .set_start_t(as<unsigned>(params["start_t"]))
+            .set_d_init(as<double>(params["d_init"]))
+            .set_d_maximal(as<double>(params["d_maximal"]))
+            .set_s_init(as<double>(params["s_init"]))
+            .set_f_s(as<double>(params["f_s"]))
+            .set_fpt_time_limit(as<double>(params["fpt_time_limit"]))
+            .set_fpt_max_cost(as<double>(params["fpt_max_cost"]))
+            .set_fpt_step_size(as<unsigned>(params["fpt_step_size"]))
+            .set_disable_force(as<bool>(params["disable_force"]))
+            .set_disable_fpt(as<bool>(params["disable_fpt"]))
+            .set_seed(as<unsigned>(params["seed"]))
    );
+   return cppCluster(tc);
 }

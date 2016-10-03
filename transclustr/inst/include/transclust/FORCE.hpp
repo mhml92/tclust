@@ -18,7 +18,8 @@ namespace FORCE{
 			double f_rep,
 			const unsigned R,
 			double start_t,
-			const unsigned dim);
+			const unsigned dim,
+			unsigned seed = 42);
 
 
 	/*
