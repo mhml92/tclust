@@ -1,1 +1,0 @@
-/usr/bin/c++    -std=c++11 -Wall   CMakeFiles/libtest.dir/src/test.cpp.o  -o libtest  -L/home/mikkel/Dropbox/Datalogi/Speciale/code/transclust/build/lib -rdynamic -lTransClust -Wl,-rpath,/home/mikkel/Dropbox/Datalogi/Speciale/code/transclust/build/lib 
