@@ -30,7 +30,8 @@ flags = [
 
 # std is required
 # clang won't know which language to use compiling headers
-'-std=c++11 -fopenmp',
+'-std=c++11',
+'-fopenmp',
 
 # '-x' and 'c++' also required
 # use 'c' for C projects
@@ -39,7 +40,7 @@ flags = [
 
 
 '-I',
-WD + '/include/transclust/',
+WD + '/include/',
 '-I',
 WD + '/lib/tclap/include/',
 '-I',

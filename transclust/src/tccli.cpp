@@ -26,9 +26,6 @@ int main(int argc, char** argv){
 	static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
 	plog::init(VERBOSITY, &consoleAppender);
 
-	std::map<std::string,FileType> ft_map;
-	ft_map["SIMPLE"] = FileType::SIMPLE;
-	ft_map["LEGACY"] = FileType::LEGACY;
 	/****************************************************************************
 	 * Parse input arguments
 	 ***************************************************************************/
@@ -49,7 +46,7 @@ int main(int argc, char** argv){
 				"",
 				false,
 				"SIMPLE",
-				"enum: 'SIMPLE','LEGACY', (default: 'SIMPLE')");
+				"'SIMPLE','LEGACY' (default: 'SIMPLE')");
 
 		// layout vars
 		TCLAP::ValueArg<double> f_att_Arg(
@@ -184,9 +181,17 @@ int main(int argc, char** argv){
 				10.0,
 				"double");
 
-		TCLAP::SwitchArg use_custom_range_Arg(
+		TCLAP::ValueArg<unsigned> seed_Arg(
 				"",
-				"use_custom_range",
+				"seed",
+				"",
+				false,
+				42,
+				"unsigned int");
+
+		TCLAP::SwitchArg use_default_interval_Arg(
+				"",
+				"use_default_interval",
 				"If false; set threshold vars",
 				cmd,
 				false);
@@ -211,7 +216,7 @@ int main(int argc, char** argv){
 				"",
 				cmd,
 				false);
-
+		
 
 		cmd.add(fallback_value_Arg);
 		cmd.add(simFileType_Arg);
@@ -230,53 +235,43 @@ int main(int argc, char** argv){
 		cmd.add(s_init_Arg);
 		cmd.add(f_s_Arg);
 		cmd.add(fpt_time_limit_Arg);
+		cmd.add(fpt_step_size_Arg);
 		cmd.add(fpt_max_cost_Arg);
+		cmd.add(seed_Arg);
 
 		cmd.parse( argc, argv );
 		/*************************************************************************
 		 * Initialize transclust
 		 ************************************************************************/
+
+		TransClustParams tcp;
+
 		TransClust transclust(
 			// filename
 			simFilenameArg.getValue(),
-			// use default fallback
-			use_custom_fallback_Arg.getValue(),
-			// fallback value
-			fallback_value_Arg.getValue(),
-			// use default interval
-			use_custom_range_Arg.getValue(),
-			// threshold min
-			threshold_min_Arg.getValue(),
-			// threshold max
-			threshold_max_Arg.getValue(),
-			// threshold step size
-			threshold_step_Arg.getValue(),
-			// p radius
-			p_Arg.getValue(),
-			// attraction
-			f_att_Arg.getValue(),
-			// repulsion
-			f_rep_Arg.getValue(),
-			// force iterations
-			R_Arg.getValue(),
-			// dimantion
-			dim_Arg.getValue(),
-			// start temperature
-			start_t_Arg.getValue(),
-			// d_init
-			d_init_Arg.getValue(),
-			// d_maximal
-			d_maximal_Arg.getValue(),
-			// s_init
-			s_init_Arg.getValue(),
-			// f_s
-			f_s_Arg.getValue(),
-			fpt_time_limit_Arg.getValue(),
-			fpt_max_cost_Arg.getValue(),
-			fpt_step_size_Arg.getValue(),
-			disable_force_Arg.getValue(),
-			disable_fpt_Arg.getValue(),
-			ft_map[simFileType_Arg.getValue()]
+			simFileType_Arg.getValue(),
+			tcp.set_use_custom_fallback(use_custom_fallback_Arg.getValue())
+				.set_sim_fallback(fallback_value_Arg.getValue())
+				.set_use_default_interval(use_default_interval_Arg.getValue())
+				.set_th_min(threshold_min_Arg.getValue())
+				.set_th_max(threshold_max_Arg.getValue())
+				.set_th_step(threshold_step_Arg.getValue())
+				.set_p(p_Arg.getValue())
+				.set_f_att(f_att_Arg.getValue())
+				.set_f_rep(f_rep_Arg.getValue())
+				.set_R(R_Arg.getValue())
+				.set_dim(dim_Arg.getValue())
+				.set_start_t(start_t_Arg.getValue())
+				.set_d_init(d_init_Arg.getValue())
+				.set_d_maximal(d_maximal_Arg.getValue())
+				.set_s_init(s_init_Arg.getValue())
+				.set_f_s(f_s_Arg.getValue())
+				.set_fpt_time_limit(fpt_time_limit_Arg.getValue())
+				.set_fpt_max_cost(fpt_max_cost_Arg.getValue())
+				.set_fpt_step_size(fpt_step_size_Arg.getValue())
+				.set_disable_force(disable_force_Arg.getValue())
+				.set_disable_fpt(disable_fpt_Arg.getValue())
+				.set_seed(seed_Arg.getValue())
 		);
 
 		/*************************************************************************
@@ -285,7 +280,7 @@ int main(int argc, char** argv){
 		clustering clusters = transclust.cluster();
 
 		/*************************************************************************
-		 * Print result
+		 * Print result (java transclust style)
 		 ************************************************************************/
 		for(unsigned i = 0; i < clusters.threshold.size(); i++){
 			std::cout << 
@@ -294,16 +289,37 @@ int main(int argc, char** argv){
 				clusters.cost.at(i) << 
 				"\t";
 
-			for(auto & cluster:clusters.clusters.at(i)){
-				std::string c = "";
-				for(auto & o:cluster){
-					c += clusters.id2object.at(o) + ",";
-				}
-				c.pop_back();
-				std::cout << c + ";";
+			// membership vector
+			std::vector<unsigned>& m_vec = clusters.clusters.at(i);
+
+			std::list<unsigned> objects;
+			// fill list of indexes
+			for (unsigned i = 0; i < m_vec.size();i++)
+			{
+				objects.push_back(i);
 			}
-			std::cout << std::endl;
 			
+			std::string s = "";
+			while(!objects.empty())
+			{
+				unsigned c_num = m_vec.at(*objects.begin());
+				for (auto it = objects.begin(); it != objects.end();)
+				{
+					if(m_vec.at(*it) == c_num)
+					{
+						s += clusters.id2object.at(*it); 
+						s += ",";
+						it = objects.erase(it);
+
+					}else{
+						++it;
+					}
+				}
+				
+				s.pop_back();
+				s += ";";
+			}
+			std::cout << s << std::endl;
 		}
 
 	}catch (TCLAP::ArgException &e){

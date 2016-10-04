@@ -40,7 +40,7 @@ void Result::add(ConnectedComponent& cc, ClusteringResult& cr)
 	// check if threshold exists in map
 	if(clusters.find(cc.getThreshold()) == clusters.end())
 	{
-		clusters.insert({cc.getThreshold(),std::vector<std::vector<unsigned>>()}); 
+		clusters.insert({cc.getThreshold(),std::vector<std::vector<unsigned>>()});
 	}
 
 	for(auto& clstr:clstrs)
@@ -59,21 +59,23 @@ clustering Result::get(){
 		res.threshold.push_back( c.first );
 		res.cost.push_back( c.second );
 
+		std::vector< unsigned > _clusters;
+		_clusters.resize(id2object.size(),std::numeric_limits<unsigned>::max());
 
-		std::vector< std::vector<unsigned> > _clusters;
-
+		unsigned cid = 0;
 		for(auto& clstr:clusters.at(c.first))
 		{
-			std::vector<unsigned> cluster;
-			for(auto& oid:clstr)
+			//std::vector<unsigned> cluster;
+			for(unsigned oid:clstr)
 			{
-				cluster.push_back(oid);
+				_clusters.at(oid) = cid;
 			}
-			_clusters.push_back(cluster);
+		   cid++;
+			//_clusters.push_back(cluster);
 		}
 		res.clusters.push_back(_clusters);
 	}
-	return res;	
+	return res;
 }
 
 void Result::dump()
