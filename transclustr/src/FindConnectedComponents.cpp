@@ -15,10 +15,53 @@ namespace FCC{
 			std::queue<ConnectedComponent> &ccs,
 			const double threshold)
 	{
-		std::vector<std::vector<unsigned>> membership = findMembershipVector(cc,threshold);
-		for(auto &ccv:membership)
-		{
-			ccs.push(ConnectedComponent(cc,ccv,threshold));
+	   std::vector<std::vector<unsigned>> membership = findMembershipVector(cc,threshold);
+
+	   /*
+	   for(unsigned i = 0; i < membership.size(); i++){
+	      // test that in each member there is at least one other element with a
+	      // positive similarity
+	      for(auto& i_m:membership.at(i))
+	      {
+	         bool has_neighbor = false;
+	         for(auto& j_m:membership.at(i))
+	         {
+	            if(i_m != j_m){
+	               if(cc.getMatrix()(i_m,j_m)-threshold > 0){
+	                  has_neighbor = true;
+	               }
+	            }
+	         }
+	         if(!has_neighbor && membership.at(i).size() > 1){
+	            Rcpp::Rcout << __FILE__<< " " <<__LINE__ << " noooo" << std::endl;
+	            exit(1);
+	         }
+	      }
+
+
+	      // test that for each member in the i'th ccv there is no member in
+	      // the j'th ccv which has similarity > threshold
+	      for(unsigned j = i+1; j < membership.size(); j++){
+            for(auto& i_ccv:membership.at(i))
+            {
+               for(auto& j_ccv:membership.at(j))
+               {
+                  if((cc.getMatrix()(i_ccv,j_ccv) - threshold) > 0){
+                     Rcpp::Rcout << __FILE__<< " " <<__LINE__ << " noooo" << std::endl;
+	                  exit(1);
+
+                  }
+
+               }
+
+            }
+	      }
+	   }
+	   */
+
+	   for(auto &ccv:membership)
+	   {
+	      ccs.push(ConnectedComponent(cc,ccv,threshold));
 		}
 	}
 
@@ -52,14 +95,14 @@ namespace FCC{
 				unsigned j = *it;
 				if(j != i)
 				{
-					double cost = (std::rint((cc.getMatrix()(i,j)-threshold)*100000)/100000);
+
+					double cost = (std::rint( (cc.getMatrix()(i,j)-threshold) *100000)/100000.0);
 					if (cost > 0)
 					{
 						Q.push(j);
 						result.at(componentId).push_back(j);
 						it = nodes.erase(it);
 					}else{
-
 						//std::cout
 						//	<<std::setprecision(std::numeric_limits<double>::digits10 + 1)
 						//	<<  cost

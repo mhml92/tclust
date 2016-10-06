@@ -59,7 +59,6 @@ namespace FORCE
 			//unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 			std::mt19937 generator(seed);
 			std::uniform_real_distribution<double> distribution(-1.0,1.0);
-			#pragma omp parallel for
 			for(unsigned i = 0; i < pos.size(); i++)
 			{
 				double r = 0;
@@ -175,8 +174,43 @@ namespace FORCE
 		clustering.push_back(dummy);
 
 		for(std::vector<double>::reverse_iterator it = D.rbegin(); it != D.rend(); ++it) {
-			clustering = geometricLinking(pos,*it,clustering);
+		   clustering = geometricLinking(pos,*it,clustering);
 
+		   /* TESTING IF SINGLE LINKAGE WORKS */
+		   /*
+		   for(unsigned i = 0; i < clustering.size(); i++){
+		      // testing that each element has at least one other element <= max_dist
+		      for(auto& ie:clustering.at(i))
+		      {
+		         bool has_neighbor = false;
+		         for(auto& je:clustering.at(i))
+		         {
+		            if(ie != je){
+		               if(dist(pos,ie,je) <= *it){
+		                  has_neighbor = true;
+		               }
+		            }
+		         }
+		         if(!has_neighbor && clustering.at(i).size() > 1){
+		            Rcpp::Rcout << __FILE__<< " " <<__LINE__ << " noooo" << std::endl;
+		            exit(1);
+		         }
+		      }
+
+		      for(unsigned j = i+1; j < clustering.size(); j++){
+		         // testing that no element is closer to an element in another
+		         // cluster
+		         for(auto& ie:clustering.at(i)){
+		            for(auto& je:clustering.at(j)){
+		               if(dist(pos,ie,je) <= *it){
+		                  Rcpp::Rcout << __FILE__<< " " <<__LINE__ << " noooo" << std::endl;
+		                  exit(1);
+		               }
+		            }
+		         }
+		      }
+		   }
+		  */
 			std::vector<unsigned> membership(cc.size(),std::numeric_limits<unsigned>::max());
 			unsigned clusterId = 0;
 			for(auto& cluster:clustering){
@@ -204,6 +238,8 @@ namespace FORCE
 			}
 			if(cost < cr.cost)
 			{
+
+		      Rcpp::Rcout << "found " << clustering.size() << " number of clusters" << std::endl;
 				cr.cost = cost;
 				cr.membership = membership;
 			}

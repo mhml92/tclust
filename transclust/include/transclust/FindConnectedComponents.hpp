@@ -2,7 +2,9 @@
 #define FINDCONNECTEDCOMPONENTS_HPP
 #include <vector>
 #include <queue> 
+#include "transclust/Common.hpp"
 #include "transclust/ConnectedComponent.hpp"
+#include "transclust/DynamicUnionFind.hpp"
 
 namespace FCC{
 

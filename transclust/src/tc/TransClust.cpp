@@ -8,37 +8,37 @@
 
 TransClust::TransClust(
 		const std::string& filename,
-		std::string& file_type,
-		TransClustParams& tcp
+		TCC::TransClustParams& tcp
 		)
 {
    init(tcp);
 	// Read input similarity file
-	ConnectedComponent sim_matrix(filename,use_custom_fallback,sim_fallback,file_type);
+	//ConnectedComponent sim_matrix(filename,use_custom_fallback,sim_fallback,file_type);
+	ConnectedComponent sim_matrix(filename,tcp);
 	id2object = sim_matrix.getObjectNames();
 	if(use_custom_range){
 		threshold_min = sim_matrix.getMinSimilarity();
 		threshold_max = sim_matrix.getMaxSimilarity();
-		threshold_step = round(threshold_max-threshold_min)/100;
+		threshold_step = TCC::round(threshold_max-threshold_min)/100;
 	}
-	FCC::findConnectedComponents(sim_matrix,ccs,round(threshold_min+threshold_step));
+	FCC::findConnectedComponents(sim_matrix,ccs,TCC::round(threshold_min+threshold_step));
 }
 
 TransClust::TransClust(
       std::vector<double>& sim_matrix_1d,
       unsigned num_o,
-		TransClustParams& tcp
+		TCC::TransClustParams& tcp
 		)
 {
    init(tcp);
-	ConnectedComponent sim_matrix(sim_matrix_1d,num_o,use_custom_fallback,sim_fallback);
+	ConnectedComponent sim_matrix(sim_matrix_1d,num_o);//,use_custom_fallback,sim_fallback);
 	id2object = sim_matrix.getObjectNames();
 	if(use_custom_range){
 		threshold_min = sim_matrix.getMinSimilarity();
 		threshold_max = sim_matrix.getMaxSimilarity();
-		threshold_step = round(threshold_max-threshold_min)/100;
+		threshold_step = TCC::round(threshold_max-threshold_min)/100;
 	}
-	FCC::findConnectedComponents(sim_matrix,ccs,round(threshold_min+threshold_step));
+	FCC::findConnectedComponents(sim_matrix,ccs,TCC::round(threshold_min+threshold_step));
 }
 
 
@@ -98,7 +98,7 @@ clustering TransClust::cluster()
 			cr.membership = std::vector<unsigned>(cc.size(),0);
 		}
 		result.add(cc,cr);
-		double new_threshold = round(cc.getThreshold()+threshold_step);
+		double new_threshold = TCC::round(cc.getThreshold()+threshold_step);
 
 		if(new_threshold <= threshold_max){
 			FCC::findConnectedComponents(cc,ccs,new_threshold);
@@ -108,7 +108,7 @@ clustering TransClust::cluster()
 	return result.get();
 }
 
-void TransClust::init(TransClustParams& tcp){
+void TransClust::init(TCC::TransClustParams& tcp){
    // set class vars from tcp
    // general vars
    use_custom_fallback = tcp.use_custom_fallback;

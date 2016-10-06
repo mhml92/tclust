@@ -8,6 +8,46 @@
 #include <stdlib.h>
 #include "transclust/TriangularMatrix.hpp"
 
+//TriangularMatrix::TriangularMatrix(
+//		const std::string &filename,
+//		bool use_custom_fallback,
+//		double sim_fallback,
+//		std::string ft)
+TriangularMatrix::TriangularMatrix(
+		const std::string &filename,
+		TCC::TransClustParams& tcp)
+{
+	// map <object name> -> <index in matrix>
+	std::map<std::string, unsigned> object2index;
+
+	// map for similarity value <<object1 name>-<object2 name>> -> <value>
+	std::map<std::pair<std::string, std::string>, double> sim_value;
+
+	// map for findeing one-way sim values
+	std::map<std::pair<std::string, std::string>, bool> hasPartner;
+
+	// reads the input file and initializes the 'matrix' array
+	readFile(filename,object2index,sim_value,hasPartner);
+
+	if(tcp.file_type == "LEGACY"){
+		parseLegacySimDataFile(
+				object2index,
+				sim_value,
+				hasPartner,
+				tcp);
+				//use_custom_fallback,
+				//sim_fallback);
+	}else if(tcp.file_type == "SIMPLE"){
+		parseSimpleSimDataFile(
+				object2index,
+				sim_value,
+				hasPartner,
+				tcp);
+				//use_custom_fallback,
+				//sim_fallback);
+	}
+}
+
 TriangularMatrix::TriangularMatrix(
 		const TriangularMatrix &m,
 		const std::vector<unsigned> &objects)
@@ -43,8 +83,9 @@ void TriangularMatrix::parseLegacySimDataFile(
 		std::map<std::string, unsigned> &object2index,
 		std::map<std::pair<std::string, std::string>, double> & sim_value,
 		std::map<std::pair<std::string, std::string>, bool> &hasPartner,
-		bool use_custom_fallback,
-		double sim_fallback)
+		TCC::TransClustParams& tcp)
+		//bool use_custom_fallback,
+		//double sim_fallback)
 {
 	// for each pair of object, tjeck if it has a partner and if so assign the
 	// minimum similarity value. If a pair only has similarity data in one
@@ -58,8 +99,8 @@ void TriangularMatrix::parseLegacySimDataFile(
 			key = std::make_pair(index2ObjName[i], index2ObjName[j]);
 
 			// default value if pair is missing
-			double val = sim_fallback;
-			if(!use_custom_fallback)
+			double val = tcp.sim_fallback;
+			if(!tcp.use_custom_fallback)
 			{
 				val = minValue;
 			}
@@ -88,8 +129,9 @@ void TriangularMatrix::parseSimpleSimDataFile(
 		std::map<std::string, unsigned> &object2index,
 		std::map<std::pair<std::string, std::string>, double> & sim_value,
 		std::map<std::pair<std::string, std::string>, bool> &hasPartner,
-		bool use_custom_fallback,
-		double sim_fallback)
+		TCC::TransClustParams& tcp)
+		//bool use_custom_fallback,
+		//double sim_fallback)
 {
 	std::vector<std::pair<unsigned,unsigned>> positive_inf;
 	num_o = index2ObjName.size();
@@ -100,8 +142,8 @@ void TriangularMatrix::parseSimpleSimDataFile(
 			std::pair<std::string, std::string> key;
 			key = std::make_pair(index2ObjName[i], index2ObjName[j]);
 
-			double val = sim_fallback;
-			if(!use_custom_fallback)
+			double val = tcp.sim_fallback;
+			if(!tcp.use_custom_fallback)
 			{
 				val = minValue;
 			}
@@ -226,15 +268,14 @@ void TriangularMatrix::readFile(
 
 	num_o = index2ObjName.size();
 	unsigned msize = ((num_o * num_o) - num_o) / 2;
-	std::cout << num_o << ", msize: " << msize << std::endl;
 	matrix.resize(msize);
 }
 
 TriangularMatrix::TriangularMatrix(
 		std::vector<double>& sim_matrix_1d,
-		unsigned _num_o,
-		bool use_custom_fallback,
-		double sim_fallback
+		unsigned _num_o//),
+		//bool use_custom_fallback,
+		//double sim_fallback
    )
 {
    num_o = _num_o;
@@ -253,39 +294,5 @@ TriangularMatrix::TriangularMatrix(
 			double val = matrix.at(i);
 			if (maxValue < val){maxValue = val;}
 			if (minValue > val){minValue = val;}
-	}
-}
-TriangularMatrix::TriangularMatrix(
-		const std::string &filename,
-		bool use_custom_fallback,
-		double sim_fallback,
-		std::string ft)
-{
-	// map <object name> -> <index in matrix>
-	std::map<std::string, unsigned> object2index;
-
-	// map for similarity value <<object1 name>-<object2 name>> -> <value>
-	std::map<std::pair<std::string, std::string>, double> sim_value;
-
-	// map for findeing one-way sim values
-	std::map<std::pair<std::string, std::string>, bool> hasPartner;
-
-	// reads the input file and initializes the 'matrix' array
-	readFile(filename,object2index,sim_value,hasPartner);
-
-	if(ft == "LEGACY"){
-		parseLegacySimDataFile(
-				object2index,
-				sim_value,
-				hasPartner,
-				use_custom_fallback,
-				sim_fallback);
-	}else if(ft == "SIMPLE"){
-		parseSimpleSimDataFile(
-				object2index,
-				sim_value,
-				hasPartner,
-				use_custom_fallback,
-				sim_fallback);
 	}
 }

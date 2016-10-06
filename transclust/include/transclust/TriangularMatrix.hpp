@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <iostream>
+#include "transclust/Common.hpp"
 
 class TriangularMatrix{
 	public:
@@ -11,10 +12,11 @@ class TriangularMatrix{
 		TriangularMatrix(const TriangularMatrix &m,const std::vector<unsigned> &objects);
 
 		// Read input similarity file and create similarity matrix
-		TriangularMatrix(const std::string &filename,bool use_custom_fallback, double sim_fallback,std::string ft);
+		//TriangularMatrix(const std::string &filename,bool use_custom_fallback, double sim_fallback,std::string ft);
+		TriangularMatrix(const std::string &filename,TCC::TransClustParams& tcp);
 
 		// Read 1d similarity matrix
-		TriangularMatrix(std::vector<double>& sim_matrix_1d,unsigned _num_o,bool use_custom_fallback, double sim_fallback);
+		TriangularMatrix(std::vector<double>& sim_matrix_1d,unsigned _num_o);//,bool use_custom_fallback, double sim_fallback);
 
 		// read from x_1,x_2,...,x_n coordinates
 	   //	TriangularMatrix(const std::vector<std::vector<double> > &pos);
@@ -38,15 +40,17 @@ class TriangularMatrix{
 				std::map<std::string, unsigned> &object2index,
 				std::map<std::pair<std::string, std::string>, double> & sim_value,
 				std::map<std::pair<std::string, std::string>, bool> &hasPartner,
-				bool use_custom_fallback,
-				double sim_fallback);
-		void parseSimpleSimDataFile(
-				std::map<std::string, unsigned> &object2index,
-				std::map<std::pair<std::string, std::string>, double> & sim_value,
-				std::map<std::pair<std::string, std::string>, bool> &hasPartner,
-				bool use_custom_fallback,
-				double sim_fallback);
-		void readFile(
+				TCC::TransClustParams& tcp);
+			//bool use_custom_fallback,
+			//double sim_fallback)
+			void parseSimpleSimDataFile(
+					std::map<std::string, unsigned> &object2index,
+					std::map<std::pair<std::string, std::string>, double> & sim_value,
+					std::map<std::pair<std::string, std::string>, bool> &hasPartner,
+					TCC::TransClustParams& tcp);
+			//bool use_custom_fallback,
+			//double sim_fallback)
+			void readFile(
 				const std::string &filename,
 				std::map<std::string, unsigned> &object2index,
 				std::map<std::pair<std::string, std::string>, double> & sim_value,
@@ -65,7 +69,7 @@ class TriangularMatrix{
          //
 			//return (((i*(i-1))/2)+j);
 
-			/* column-wise index */
+			/* column-mojor index */
 			if(j < i){
 			   std::swap(j,i);
 			}else if(i == j){

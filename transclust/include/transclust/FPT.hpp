@@ -7,6 +7,7 @@
 #include <string>
 #include <limits>
 #include <chrono>
+#include "transclust/Common.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/ClusteringResult.hpp"
 

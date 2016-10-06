@@ -2,6 +2,7 @@
 #define FORCE_HPP
 #include <vector>
 #include <iostream>
+#include "transclust/Common.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/ClusteringResult.hpp"
 

@@ -3,28 +3,33 @@ tclust_params <- function(){
       use_custom_fallback = FALSE,
       sim_fallback        = 0.0,
       use_default_interval= TRUE,
+
       th_min              = 0.0,
       th_max              = 100,
       th_step             = 1.0,
+
       p                   = 1.0,
       f_att               = 100.0,
       f_rep               = 100.0,
       R                   = 100,
       dim                 = 3,
       start_t             = 100,
+
       d_init              = 0.01,
       d_maximal           = 5.0,
       s_init              = 0.01,
       f_s                 = 0.01,
+
       fpt_time_limit      = 20,
       fpt_max_cost        = 5000,
       fpt_step_size       = 10,
+
       disable_force       = FALSE,
       disable_fpt         = FALSE,
+
       seed                = 42
    )
 }
-
 #'@export
 tclust <- function(
    dist_obj = NULL,
@@ -33,27 +38,33 @@ tclust <- function(
    threshold = NULL,
    convert_dissimilarity_to_similarity = TRUE,
    file_type = "SIMPLE",
+
    use_custom_fallback = FALSE,
    sim_fallback        = 0.0,
+
    use_default_interval = TRUE,
    th_min              = 0.0,
    th_max              = 100,
    th_step             = 1.0,
+
    p                   = 1.0,
    f_att               = 100.0,
    f_rep               = 100.0,
    R                   = 100,
    dim                 = 3,
    start_t             = 100,
+
    d_init              = 0.01,
    d_maximal           = 5.0,
    s_init              = 0.01,
    f_s                 = 0.01,
+
    fpt_time_limit      = 20,
    fpt_max_cost        = 5000,
    fpt_step_size       = 10,
    disable_force       = FALSE,
    disable_fpt         = FALSE,
+
    seed                = 42
 )
 {
@@ -113,13 +124,12 @@ tclust <- function(
 
       # convert dissimilarity to similarity
       if(convert_dissimilarity_to_similarity){
-         d <- max(as.vector(dist_obj))-as.vector(dist_obj)
-      }else{
-         d <- as.vector(dist_obj)
+         dist_obj <- max(dist_obj) - dist_obj
+         #d <- max(as.vector(dist_obj))-as.vector(dist_obj)
       }
 
       res <- cppTransClustDist(
-         d,
+         as.vector(dist_obj),
          as.numeric(attr(dist_obj,"Size")),
          params
       )
@@ -135,7 +145,6 @@ tclust <- function(
       }else{
          d <- as.vector(dist_obj)
       }
-
       res <- cppTransClustDist(
          d,
          as.numeric(attr(dist_obj,"Size")),

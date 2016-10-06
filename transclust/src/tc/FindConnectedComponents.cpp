@@ -4,6 +4,7 @@
 #include <limits>
 #include "transclust/FindConnectedComponents.hpp"
 #include "transclust/ConnectedComponent.hpp"
+#include "transclust/DynamicUnionFind.hpp"
 
 namespace FCC{
 	/*******************************************************************************
@@ -14,11 +15,37 @@ namespace FCC{
 			std::queue<ConnectedComponent> &ccs,
 			const double threshold)
 	{
+
+
+		///* testing DUF */
+		//if(cc.size() > 1){
+		//	std::cout << "CC SIZE " << cc.size() << std::endl;
+		//	std::vector<int> _membership;
+		//	for(int i = 0; i < cc.size(); i++)
+		//	{
+		//		for(int j = i+1; j < cc.size(); j++)
+		//		{
+		//			if(cc.at(i,j) > 0){
+		//				DUF::funion(_membership,i,j);
+		//			}
+
+		//		}
+		//	}
+		//	for(unsigned i = 0; i < cc.size(); i++){
+		//		std::cout << _membership.at(i) << ", ";
+		//	}
+		//	std::cout << std::endl;
+		//}
+		///******************************/
+
+
+
 		std::vector<std::vector<unsigned>> membership = findMembershipVector(cc,threshold);
 		for(auto &ccv:membership)
 		{
 			ccs.push(ConnectedComponent(cc,ccv,threshold));
 		}
+
 	}
 
 	/*******************************************************************************
@@ -51,7 +78,8 @@ namespace FCC{
 				unsigned j = *it;
 				if(j != i)
 				{
-					double cost = (std::rint((cc.getMatrix()(i,j)-threshold)*100000)/100000);
+					//double cost = (std::rint((cc.getMatrix()(i,j)-threshold)*100000)/100000);
+					double cost = TCC::round(cc.getMatrix()(i,j)-threshold);
 					if (cost > 0)
 					{
 						Q.push(j);

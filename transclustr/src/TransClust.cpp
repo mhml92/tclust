@@ -22,7 +22,7 @@ TransClust::TransClust(
 		threshold_max = sim_matrix.getMaxSimilarity();
 		threshold_step = round(threshold_max-threshold_min)/100;
 	}
-	FCC::findConnectedComponents(sim_matrix,ccs,round(threshold_min+threshold_step));
+	FCC::findConnectedComponents(sim_matrix,ccs,round(threshold_min));
 }
 
 TransClust::TransClust(
@@ -39,7 +39,7 @@ TransClust::TransClust(
 		threshold_max = sim_matrix.getMaxSimilarity();
 		threshold_step = round(threshold_max-threshold_min)/100;
 	}
-	FCC::findConnectedComponents(sim_matrix,ccs,round(threshold_min+threshold_step));
+	FCC::findConnectedComponents(sim_matrix,ccs,round(threshold_min));
 }
 
 
@@ -51,7 +51,7 @@ clustering TransClust::cluster()
 	while(!ccs.empty()){
 	   Rcpp::checkUserInterrupt();
 		ConnectedComponent& cc = ccs.front();
-
+      Rcpp::Rcout << "clustering cc with " << cc.size() << " objects and threshold " << cc.getThreshold() << std::endl;
 		ClusteringResult cr;
 		// set initial cost to negativ, indicating 'no solution found (yet)'
 		cr.cost = -1;

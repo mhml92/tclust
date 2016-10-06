@@ -1,12 +1,16 @@
 #include "transclust/ConnectedComponent.hpp"
 
+//ConnectedComponent::ConnectedComponent(
+//		const std::string &filename,
+//		bool use_custom_fallback,
+//		double sim_fallback,
+//		std::string ft)
 ConnectedComponent::ConnectedComponent(
 		const std::string &filename,
-		bool use_custom_fallback,
-		double sim_fallback,
-		std::string ft)
+		TCC::TransClustParams& tcp)
 	:
-		m(filename,use_custom_fallback,sim_fallback,ft),
+		//m(filename,use_custom_fallback,sim_fallback,ft),
+		m(filename,tcp),
 		threshold(0.0),
 		normalization_context(
 			std::max(
@@ -20,11 +24,11 @@ ConnectedComponent::ConnectedComponent(
 
 ConnectedComponent::ConnectedComponent(
 		std::vector<double>& sim_matrix_1d,
-		unsigned num_o,
-		bool use_custom_fallback,
-		double sim_fallback)
+		unsigned num_o)//,
+		//bool use_custom_fallback,
+		//double sim_fallback)
 	:
-		m(sim_matrix_1d,num_o,use_custom_fallback,sim_fallback),
+		m(sim_matrix_1d,num_o),//,use_custom_fallback,sim_fallback),
 		threshold(0.0),
 		normalization_context(
 			std::max(
