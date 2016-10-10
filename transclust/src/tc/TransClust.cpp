@@ -21,7 +21,7 @@ TransClust::TransClust(
 		threshold_max = sim_matrix.getMaxSimilarity();
 		threshold_step = TCC::round(threshold_max-threshold_min)/100;
 	}
-	FCC::findConnectedComponents(sim_matrix,ccs,TCC::round(threshold_min+threshold_step));
+	FCC::findConnectedComponents(sim_matrix,ccs,TCC::round(threshold_min));
 }
 
 TransClust::TransClust(
@@ -38,7 +38,7 @@ TransClust::TransClust(
 		threshold_max = sim_matrix.getMaxSimilarity();
 		threshold_step = TCC::round(threshold_max-threshold_min)/100;
 	}
-	FCC::findConnectedComponents(sim_matrix,ccs,TCC::round(threshold_min+threshold_step));
+	FCC::findConnectedComponents(sim_matrix,ccs,TCC::round(threshold_min));
 }
 
 
@@ -51,43 +51,36 @@ clustering TransClust::cluster()
 		ConnectedComponent& cc = ccs.front();
 
 		ClusteringResult cr;
+
 		// set initial cost to negativ, indicating 'no solution found (yet)'
 		cr.cost = -1;
 
 		// if cc is at least a conflict tripple
 		if(cc.size() > 2){
+
+			/**********************************************************************
+			 * Cluster using FORCE
+			 *********************************************************************/
 			if(!disable_force){
-				/**********************************************************************
-				 * Cluster using FORCE
-				 *********************************************************************/
 				// init position array
 				std::vector<std::vector<double>> pos;
 				pos.resize(cc.size(), std::vector<double>(dim,0));
 
 				// layout
-				FORCE::layout(
-						cc,
-						pos,
-						p,
-						f_att,
-						f_rep,
-						R,
-						start_t,
-						dim);
+				FORCE::layout(cc, pos, p, f_att, f_rep, R, start_t, dim);
 				// partition
-				FORCE::partition(cc,pos,cr,d_init,d_maximal,s_init,f_s);
-
+				FORCE::partition(cc, pos, cr, d_init, d_maximal, s_init, f_s);
 			}
+
 			/**********************************************************************
 			 * Cluster using FPT
 			 *********************************************************************/
 			if(cr.cost <= fpt_max_cost && !disable_fpt){
-				// temp hack
+
 				double tmp_force_cost = cr.cost;
 				FPT fpt(cc,fpt_time_limit,fpt_step_size,cr.cost+1);
 				fpt.cluster(cr);
 
-				// temp hack continued
 				if(cr.cost < 0){
 					cr.cost = tmp_force_cost;
 				}

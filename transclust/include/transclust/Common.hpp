@@ -2,6 +2,7 @@
 #define TRANSCLUST_COMMON_HPP
 #include <string>
 #include <cmath>
+#include <vector>
 
 // TransClust Commons
 namespace TCC
@@ -62,6 +63,16 @@ namespace TCC
 
 	inline double round(double d){
 		return std::rint(d*100000)/100000;
+	}
+
+	inline double dist(std::vector<std::vector<double>>& pos,unsigned i, unsigned j)
+	{
+		double res = 0;
+		for(unsigned d = 0; d < pos[0].size(); d++){
+			double side = pos[i][d] - pos[j][d];
+			res += side*side;
+		}
+		return std::sqrt(res);
 	}
 }
 #endif

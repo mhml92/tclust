@@ -5,6 +5,12 @@
 #include "transclust/FindConnectedComponents.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/DynamicUnionFind.hpp"
+#ifndef NDEBUG
+#	include "transclust/DEBUG.hpp"
+#	define DEBUG_FCC(membership, cc, threshold) DEBUG::findConnectedComponents(membership,cc,threshold)
+#else
+#	define DEBUG_FCC(membership, cc, threshold) {}
+#endif
 
 namespace FCC{
 	/*******************************************************************************
@@ -41,6 +47,9 @@ namespace FCC{
 
 
 		std::vector<std::vector<unsigned>> membership = findMembershipVector(cc,threshold);
+
+		DEBUG_FCC(membership,cc,threshold);
+
 		for(auto &ccv:membership)
 		{
 			ccs.push(ConnectedComponent(cc,ccv,threshold));

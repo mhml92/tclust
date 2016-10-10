@@ -4,8 +4,8 @@
 #include <queue>
 #include <iomanip>
 
-#if defined(_OPENMP)
-#include <omp.h>
+#ifdef _OPENMP
+#	include <omp.h>
 #endif
 
 #include "transclust/FPT.hpp"

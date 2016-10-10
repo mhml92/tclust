@@ -12,12 +12,8 @@ ConnectedComponent::ConnectedComponent(
 		//m(filename,use_custom_fallback,sim_fallback,ft),
 		m(filename,tcp),
 		threshold(0.0),
-		normalization_context(
-			std::max(
-				std::abs(m.getMaxValue()-threshold),
-				std::abs(m.getMinValue()-threshold)
-			)
-		),
+		normalization_context_positive(std::abs(m.getMaxValue()-threshold)),
+		normalization_context_negative(std::abs(m.getMinValue()-threshold)),
 		cost(-1),
 		id(getNewId())
 { }
@@ -30,12 +26,8 @@ ConnectedComponent::ConnectedComponent(
 	:
 		m(sim_matrix_1d,num_o),//,use_custom_fallback,sim_fallback),
 		threshold(0.0),
-		normalization_context(
-			std::max(
-				std::abs(m.getMaxValue()-threshold),
-				std::abs(m.getMinValue()-threshold)
-			)
-		),
+		normalization_context_positive(std::abs(m.getMaxValue()-threshold)),
+		normalization_context_negative(std::abs(m.getMinValue()-threshold)),
 		cost(-1),
 		id(getNewId())
 { }
@@ -47,12 +39,8 @@ ConnectedComponent::ConnectedComponent(
 	:
 		m(cc.getMatrix(),objects),
 		threshold(th),
-		normalization_context(
-			std::max(
-				std::abs(m.getMaxValue()-threshold),
-				std::abs(m.getMinValue()-threshold)
-			)
-		),
+		normalization_context_positive(std::abs(m.getMaxValue()-threshold)),
+		normalization_context_negative(std::abs(m.getMinValue()-threshold)),
 		cost(-1.0),
 		id(getNewId())
 { }

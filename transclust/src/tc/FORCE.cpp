@@ -6,26 +6,22 @@
 #include <queue>
 #include <algorithm>
 #include <chrono>
-#if defined(_OPENMP)
-#include <omp.h>
+#ifdef _OPENMP
+#	include <omp.h>
 #endif
-
+#ifndef NDEBUG
+#	include "transclust/DEBUG.hpp"
+#	define DEBUG_GM(membership, cc, threshold) DEBUG::geometricLinking(membership,cc,threshold)
+#else
+#	define DEBUG_GM(membership, cc, threshold) {}
+#endif
+#include "transclust/Common.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/FindConnectedComponents.hpp"
 #include "transclust/FORCE.hpp"
 #include "transclust/ClusteringResult.hpp"
-
 namespace FORCE
 {
-	double dist(std::vector<std::vector<double>>& pos,unsigned i, unsigned j)
-	{
-		double res = 0;
-		for(unsigned d = 0; d < pos[0].size(); d++){
-			double side = pos[i][d] - pos[j][d];
-			res += side*side;
-		}
-		return std::sqrt(res);
-	}
 
 	void layout(
 			const ConnectedComponent& cc,
@@ -47,6 +43,8 @@ namespace FORCE
 			//uniform 2d layout
 			double radStep = (2*M_PI)/pos.size();
 			double radVal = 0;
+
+			#pragma omp parallel for
 			for(unsigned i = 0; i < pos.size(); i++)
 			{
 				pos[i][0] = cos(radVal)*p;
@@ -58,6 +56,7 @@ namespace FORCE
 			//unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 			std::mt19937 generator(seed);
 			std::uniform_real_distribution<double> distribution(-1.0,1.0);
+
 			#pragma omp parallel for
 			for(unsigned i = 0; i < pos.size(); i++)
 			{
@@ -99,13 +98,13 @@ namespace FORCE
 				// create local copy
 				std::vector< std::vector<double> > _delta = delta;
 
-				#pragma omp for nowait
+				#pragma omp for schedule(dynamic)
 				for(unsigned i = 0; i < pos.size();i++)
 				{
 					for(unsigned j = i+1; j < pos.size(); j++)
 					{
-						double _distance = dist(pos,i,j);
-						if(_distance > 0.0)
+						double _distance = TCC::dist(pos,i,j);
+						if(_distance > 0.00001)
 						{
 							double log_d = std::log(_distance+1);
 
@@ -117,7 +116,7 @@ namespace FORCE
 							{
 								force = (edge_weight * f_att * log_d)/_distance;
 							}else{
-								force = ((edge_weight * f_rep)/log_d)/_distance;
+								force = (edge_weight * f_rep)/log_d/_distance;
 							}
 							for(unsigned d = 0; d < dim; d++)
 							{
@@ -137,18 +136,18 @@ namespace FORCE
 						delta.at(i).at(j) += _delta.at(i).at(j);
 					}
 				}
-			/**********************************************************************
-			 * APPLY COOLING FUNCTION AND UPDATE POSITIONS
-			 *********************************************************************/
-				#pragma omp for 
-				for(unsigned i = 0 ; i < pos.size(); i++)
+				/*******************************************************************
+				 * APPLY COOLING FUNCTION AND UPDATE POSITIONS
+				 ******************************************************************/
+				#pragma omp for schedule(static) 
+				for(unsigned i = 0; i < pos.size(); i++)
 				{
 					double len = 0.0;
 					for(unsigned d = 0; d < dim;d++){
 						len += delta[i][d]*delta[i][d];
 					}
 					len = std::sqrt(len);
-					//std::cout << len << std::endl;
+
 					for(unsigned d = 0; d < dim;d++)
 					{
 						double pd = delta[i][d];
@@ -190,6 +189,8 @@ namespace FORCE
 
 		for(std::vector<double>::reverse_iterator it = D.rbegin(); it != D.rend(); ++it) {
 			clustering = geometricLinking(pos,*it,clustering);
+
+			DEBUG_GM(clustering,pos,*it);
 
 			std::vector<unsigned> membership(cc.size(),std::numeric_limits<unsigned>::max());
 			unsigned clusterId = 0;
@@ -256,7 +257,7 @@ namespace FORCE
 					unsigned j = *it;
 					if(j != i)
 					{
-						if (dist(pos,obj.at(i),obj.at(j)) <= maxDist)
+						if (TCC::dist(pos,obj.at(i),obj.at(j)) <= maxDist)
 						{
 							Q.push(j);
 							result.at(componentId).push_back(obj.at(j));

@@ -7,8 +7,6 @@
 #include "transclust/ClusteringResult.hpp"
 
 namespace FORCE{
-
-
 	double dist(std::vector<std::vector<double>>& pos,unsigned i, unsigned j);
 
 	void layout(

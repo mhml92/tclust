@@ -36,17 +36,25 @@ class ConnectedComponent
 				//double cost = (m(i, j) - threshold) / normalization_context;
 				//if(cost < -1 || cost > 1){std::cout << cost << std::endl;}
 				//return ( std::rint( ( (m(i, j) - threshold ) / normalization_context )*100000)/100000);
-				return TCC::round((m(i, j) - threshold ) / normalization_context);
+				
+				//return TCC::round((m(i, j) - threshold ) / normalization_context);
+				
+				double sim = m(i, j) - threshold;
+				if( sim > 0){
+					return TCC::round(sim / normalization_context_positive);
+				}else{
+					return TCC::round(sim / normalization_context_negative);
+				}
 			}
 			else
 			{
 				return m(i, j) - threshold;
 			}
 		}
-		inline const double getNormalizationContext() const
-		{
-			return normalization_context;
-		};
+		//inline const double getNormalizationContext() const
+		//{
+		//	return normalization_context;
+		//};
 		inline const double getThreshold() const
 		{
 			return threshold;
@@ -70,7 +78,8 @@ class ConnectedComponent
 	private:
 		TriangularMatrix m;
 		double threshold;
-		double normalization_context;
+		double normalization_context_positive;
+		double normalization_context_negative;
 		double cost;
 		unsigned id;
 

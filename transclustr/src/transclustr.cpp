@@ -25,8 +25,8 @@ List cppTransClustFile(
    ) {
    TransClust tc(
          filename,
-         file_type,
-         TransClustParams()
+         TCC::TransClustParams()
+            .set_file_type(file_type)
             .set_use_custom_fallback(as<bool>(params["use_custom_fallback"]))
             .set_sim_fallback(as<double>(params["sim_fallback"]))
             .set_use_default_interval(as<bool>(params["use_default_interval"]))
@@ -62,7 +62,7 @@ List cppTransClustDist(
    TransClust tc(
          sm,
          num_o,
-         TransClustParams()
+         TCC::TransClustParams()
             .set_use_custom_fallback(as<bool>(params["use_custom_fallback"]))
             .set_sim_fallback(as<double>(params["sim_fallback"]))
             .set_use_default_interval(as<bool>(params["use_default_interval"]))

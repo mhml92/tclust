@@ -2,7 +2,6 @@
 #define RESULT_HPP
 #include <vector>
 #include <map>
-#include <plog/Log.h>
 #include "transclust/TransClust.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/ClusteringResult.hpp"
