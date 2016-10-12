@@ -33,8 +33,6 @@ namespace TCC
 	  	 bool          disable_force          =   false;
 	  	 bool          disable_fpt            =   false;
 	  	 unsigned      seed                   =   42;
-	  	 std::string   tmp_dir                =   "/tmp/tclust/";
-	  	 bool          external               =   false;
 		TransClustParams& set_file_type(std::string val){file_type = val;return *this;}
 		TransClustParams& set_normalization(std::string val){normalization = val;return *this;}
 		TransClustParams& set_use_custom_fallback(bool val){use_custom_fallback = val;return *this;}
@@ -59,13 +57,11 @@ namespace TCC
 		TransClustParams& set_disable_force(bool val){disable_force = val;return *this;}
 		TransClustParams& set_disable_fpt(bool val){disable_fpt = val;return *this;}
 		TransClustParams& set_seed(bool val){seed = val;return *this;}
-		TransClustParams& set_tmp_dir(std::string val){tmp_dir = val;return *this;}
-		TransClustParams& set_external(bool val){external = val;return *this;}
 	};
 
 	inline double round(double d){
 		return std::rint(d*100000)/100000;
-		
+
 	}
 
 	inline double dist(std::vector<std::vector<double>>& pos,unsigned i, unsigned j)

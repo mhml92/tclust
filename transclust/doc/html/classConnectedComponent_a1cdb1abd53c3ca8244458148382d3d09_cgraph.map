@@ -1,8 +1,0 @@
-<map id="ConnectedComponent::getId" name="ConnectedComponent::getId">
-<area shape="rect" id="node2" href="$classConnectedComponent.html#ac94e68d23ee387217f23c05a5ba1047c" title="ConnectedComponent\l::dump" alt="" coords="205,70,357,111"/>
-<area shape="rect" id="node7" href="$ConnectedComponent_8hpp.html#a6a69b0f8fa6235cb9ec103446b24a274" title="_cc_id" alt="" coords="251,136,311,163"/>
-<area shape="rect" id="node3" href="$classConnectedComponent.html#ae8a62b4025a594b121452c329ef34cd3" title="ConnectedComponent\l::size" alt="" coords="419,5,571,46"/>
-<area shape="rect" id="node5" href="$classTriangularMatrix.html#a171bf2f7fc533eeaefca13fa3e386387" title="TriangularMatrix::getObject\lNames" alt="" coords="405,70,584,111"/>
-<area shape="rect" id="node6" href="$classConnectedComponent.html#af8b909a40a6854ad049e1742702aee60" title="ConnectedComponent::at" alt="" coords="409,136,580,163"/>
-<area shape="rect" id="node4" href="$classTriangularMatrix.html#a5d5b979b63a18d6bfd53e08df3f4b9ae" title="TriangularMatrix::getNum\lObjects" alt="" coords="633,5,802,46"/>
-</map>

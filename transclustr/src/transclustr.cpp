@@ -6,6 +6,9 @@ using namespace Rcpp;
 // Enable C++11 via this plugin (Rcpp 0.10.3 or later)
 // [[Rcpp::plugins(cpp11)]]
 
+// Add a flag to enable OpenMP at compile time
+// [[Rcpp::plugins(openmp)]]
+
 List cppCluster(TransClust& tc){
    clustering res = tc.cluster();
 
@@ -27,6 +30,7 @@ List cppTransClustFile(
          filename,
          TCC::TransClustParams()
             .set_file_type(file_type)
+            .set_normalization(params["normalization"])
             .set_use_custom_fallback(as<bool>(params["use_custom_fallback"]))
             .set_sim_fallback(as<double>(params["sim_fallback"]))
             .set_use_default_interval(as<bool>(params["use_default_interval"]))
@@ -63,6 +67,7 @@ List cppTransClustDist(
          sm,
          num_o,
          TCC::TransClustParams()
+            .set_normalization(params["normalization"])
             .set_use_custom_fallback(as<bool>(params["use_custom_fallback"]))
             .set_sim_fallback(as<double>(params["sim_fallback"]))
             .set_use_default_interval(as<bool>(params["use_default_interval"]))

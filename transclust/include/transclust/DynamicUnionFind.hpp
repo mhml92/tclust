@@ -14,9 +14,5 @@ namespace DUF
 	int find(
 			std::vector<int>& membership,
 			int x);
-
-	int numberOfSimilarities(
-			std::vector<int>& membership,
-			int x);
 }
 #endif

@@ -7,14 +7,14 @@
 //		std::string ft)
 ConnectedComponent::ConnectedComponent(
 		const std::string &filename,
-		TCC::TransClustParams& tcp)
+		TCC::TransClustParams& tcp
+   )
 	:
-		//m(filename,use_custom_fallback,sim_fallback,ft),
 		id(getNewId()),
 		m(filename,tcp,id),
 		threshold(0.0),
 		cost(-1)
-{ 
+{
 	init_normalization_context(tcp);
 }
 

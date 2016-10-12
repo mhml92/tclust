@@ -8,11 +8,6 @@
 #include <stdlib.h>
 #include "transclust/TriangularMatrix.hpp"
 
-//TriangularMatrix::TriangularMatrix(
-//		const std::string &filename,
-//		bool use_custom_fallback,
-//		double sim_fallback,
-//		std::string ft)
 TriangularMatrix::TriangularMatrix(
 		const std::string &filename,
 		TCC::TransClustParams& tcp,
@@ -28,7 +23,6 @@ TriangularMatrix::TriangularMatrix(
 	// map for findeing one-way sim values
 	std::map<std::pair<std::string, std::string>, bool> hasPartner;
 
-	is_external = tcp.external;
 
 	// reads the input file and initializes the 'matrix' array
 	readFile(filename,object2index,sim_value,hasPartner);
@@ -41,8 +35,6 @@ TriangularMatrix::TriangularMatrix(
 				sim_value,
 				hasPartner,
 				tcp);
-				//use_custom_fallback,
-				//sim_fallback);
 	}else if(tcp.file_type == "SIMPLE"){
 
 		parseSimpleSimDataFile(
@@ -50,8 +42,6 @@ TriangularMatrix::TriangularMatrix(
 				sim_value,
 				hasPartner,
 				tcp);
-				//use_custom_fallback,
-				//sim_fallback);
 	}
 }
 
@@ -66,10 +56,6 @@ TriangularMatrix::TriangularMatrix(
 
 	num_o = objects.size();
 	unsigned msize = ((num_o * num_o) - num_o) / 2;
-
-	// indexes
-	//index2ObjName.push_back(m.getObjectName(objects.at(0)));
-	//index2ObjId.push_back(m.getObjectId(objects.at(0)));
 
 	matrix.resize(msize);
 	for (unsigned i = 0; i < num_o; i++)
@@ -141,82 +127,11 @@ void TriangularMatrix::parseSimpleSimDataFile(
 		std::map<std::pair<std::string, std::string>, double> & sim_value,
 		std::map<std::pair<std::string, std::string>, bool> &hasPartner,
 		TCC::TransClustParams& tcp)
-		//bool use_custom_fallback,
-		//double sim_fallback)
 {
 
 	std::vector<std::pair<unsigned,unsigned>> positive_inf;
 	num_o = index2ObjName.size();
 	unsigned long msize = ((num_o * num_o) - num_o) / 2;
-	if(tcp.external){
-		/* EXTERNAL MEMORY VERSION */
-		boost::filesystem::path dir (tcp.tmp_dir);
-		boost::filesystem::path _file ("cm_" + std::to_string(id) + ".bcm");
-		boost::filesystem::path full_path = dir / _file;
-		bin_file_path = full_path.string();
-
-		std::ofstream fs;
-		fs.open(bin_file_path, std::fstream::out | std::fstream::binary);
-
-		std::cout << bin_file_path << std::endl;
-		if(fs.is_open()){
-
-			for (unsigned i = 0; i < num_o; i++)
-			{
-				for (unsigned j = i + 1; j < num_o; j++)
-				{
-					double val = parseSimpleEdge(positive_inf,object2index,sim_value,hasPartner,i,j,tcp);
-					fs.put(val);
-					//fs << val;
-					// <INSERT val AT i,j IN MM FILE>
-				}
-			}
-			//for(std::pair<unsigned,unsigned> &p:positive_inf){
-				// <INSERT DEFUALT VALUE IN MM FILE>
-				//data[index(p.first,p.second)] = maxValue;
-			//}
-
-		}else{
-			std::cout << "ERROR OPENING EXTERNAL FILE" << std::endl;
-		}
-		fs.close();
-
-		std::streampos size;
-		char * memblock;
-
-		int i=0;
-
-		std::ifstream file(bin_file_path, std::iostream::in|std::iostream::binary|std::iostream::ate);
-
-		if (file.is_open())
-		{
-			size = file.tellg();
-
-			std::cout << "size=" << size << "\n"; 
-
-			memblock = new char [size];
-			file.seekg (0, std::iostream::beg);
-			file.read (memblock, size);
-			file.close();
-
-			std::cout << "the entire file content is in memory \n";
-
-			for(i=0; i<=10; i++)
-			{
-				double value = memblock [i];
-				std::cout << "value ("<<i<<")=" << value << "\n";
-			}
-
-
-			delete[] memblock;
-		}
-		else{ 
-			std::cout << "Unable to open file"<<std::endl;
-		}
-
-
-	}else{
-		/* INTERNAL MEMORY VERSION */
 		matrix.resize(msize);
 
 		for (unsigned i = 0; i < num_o; i++)
@@ -230,8 +145,6 @@ void TriangularMatrix::parseSimpleSimDataFile(
 		for(std::pair<unsigned,unsigned> &p:positive_inf){
 			matrix.at(index(p.first,p.second)) = maxValue;
 		}
-	}
-
 }
 
 double TriangularMatrix::parseSimpleEdge(

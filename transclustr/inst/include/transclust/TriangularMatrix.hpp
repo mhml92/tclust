@@ -4,7 +4,6 @@
 #include <map>
 #include <vector>
 #include <iostream>
-#include <boost/filesystem.hpp>
 #include "transclust/Common.hpp"
 
 class TriangularMatrix{
@@ -13,14 +12,10 @@ class TriangularMatrix{
 		TriangularMatrix(const TriangularMatrix &m,const std::vector<unsigned> &objects,unsigned cc_id);
 
 		// Read input similarity file and create similarity matrix
-		//TriangularMatrix(const std::string &filename,bool use_custom_fallback, double sim_fallback,std::string ft);
 		TriangularMatrix(const std::string &filename,TCC::TransClustParams& tcp,unsigned cc_id);
 
 		// Read 1d similarity matrix
 		TriangularMatrix(std::vector<double>& sim_matrix_1d,unsigned _num_o,unsigned cc_id);//,bool use_custom_fallback, double sim_fallback);
-
-		// read from x_1,x_2,...,x_n coordinates
-	   //	TriangularMatrix(const std::vector<std::vector<double> > &pos);
 
 		// accessing values of the matrix
 		inline double &operator()(unsigned i,unsigned j) {return matrix.at(index(i,j));};
@@ -65,7 +60,6 @@ class TriangularMatrix{
 				std::map<std::pair<std::string, std::string>, double> & sim_value,
 				std::map<std::pair<std::string, std::string>, bool> &hasPartner
 				);
-		void init_external_file(TCC::TransClustParams& tcp){};
 
 		// indexing the symetric matrix (column-major)
 		inline unsigned index(unsigned i,unsigned j) const {
@@ -90,19 +84,12 @@ class TriangularMatrix{
 			return (num_o*i - (i+1)*(i)/2 + j-(i+1));
 		};
 		unsigned id;
-		bool is_external = false;
 		unsigned num_o;
 		std::vector<double> matrix;
 		double maxValue = 0;
 		double minValue = 0;
 		std::vector<std::string> index2ObjName;
 		std::vector<unsigned> index2ObjId;
-
-		/* EXTERNAL MEMORY */
-		std::string bin_file_path;
-
-		unsigned long numberOfElements;
-		unsigned long numberOfBytes;
 };
 
 #endif

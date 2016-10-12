@@ -1,7 +1,0 @@
-<map id="Result::add" name="Result::add">
-<area shape="rect" id="node2" href="$classConnectedComponent.html#af2cb7ead8d9bc01a32bb54a0195ae9ef" title="ConnectedComponent\l::getThreshold" alt="" coords="165,5,317,46"/>
-<area shape="rect" id="node3" href="$classClusteringResult.html#aa347d753942ad533e8a1638c368769dd" title="ClusteringResult::getCost" alt="" coords="155,71,328,97"/>
-<area shape="rect" id="node4" href="$classClusteringResult.html#a26acf557d1e3924438e813bd16e43f02" title="ClusteringResult::getClusters" alt="" coords="144,121,339,148"/>
-<area shape="rect" id="node5" href="$classConnectedComponent.html#a0458caa41f59d7ea80790a4d8dad3b06" title="ConnectedComponent\l::getObjectId" alt="" coords="165,173,317,214"/>
-<area shape="rect" id="node6" href="$classTriangularMatrix.html#ab037b97946243b88c889d9ed4be2a0c3" title="TriangularMatrix::getObjectId" alt="" coords="387,180,578,207"/>
-</map>
