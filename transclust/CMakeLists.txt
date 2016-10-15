@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.5.1)
 project(TransClust) 
 #set(CMAKE_BUILD_TYPE Debug)
  
+
 list(APPEND BOOST_REQUIRED_LIBRARIES iostreams)
 list(APPEND BOOST_REQUIRED_LIBRARIES system)
 list(APPEND BOOST_REQUIRED_LIBRARIES filesystem)
