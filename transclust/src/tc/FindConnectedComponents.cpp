@@ -18,9 +18,9 @@ namespace FCC{
 	 ***************************************************************************/
 	void findConnectedComponents(
 			TCC::TransClustParams& tcp,
-			const ConnectedComponent &cc,
+			ConnectedComponent &cc,
 			std::queue<ConnectedComponent> &ccs,
-			const double threshold)
+			const float threshold)
 	{
 		std::vector<std::vector<unsigned>>membership; 
 
@@ -36,7 +36,6 @@ namespace FCC{
 		{
 			ccs.push(ConnectedComponent(cc,ccv,threshold,tcp));
 		}
-
 	}
 
 	/****************************************************************************
@@ -45,8 +44,8 @@ namespace FCC{
 
 	void DUF_cc(
 			std::vector<std::vector<unsigned>>& membership,
-			const ConnectedComponent &cc,
-			const double threshold)
+			ConnectedComponent &cc,
+			const float threshold)
 	{
 		std::vector<int> duf_result;
 		for(int i = 0; i < cc.size(); i++)
@@ -81,8 +80,8 @@ namespace FCC{
 
 	void BFS_cc(
 			std::vector<std::vector<unsigned>>& membership,
-			const ConnectedComponent &cc,
-			const double threshold)
+			ConnectedComponent &cc,
+			const float threshold)
 	{
 		std::list<unsigned> nodes;
 		// fill list of nodes

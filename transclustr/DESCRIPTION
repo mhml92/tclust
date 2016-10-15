@@ -13,7 +13,8 @@ LinkingTo:
    Rcpp
 Imports:
     Rcpp,
-    tools
+    tools,
+    roxygen2
 RoxygenNote: 5.0.1
 SystemRequirements: C++11
 Suggests: knitr,

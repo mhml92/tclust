@@ -86,8 +86,8 @@ void Result::dump()
 	if(cost.size() > 0 ){
 		for(auto& c:cost)
 		{
-			double threshold = c.first;
-			double cost = c.second;
+			float threshold = c.first;
+			float cost = c.second;
 			std::cout << threshold << "\t";
 			std::cout << cost << "\t";
 			std::string output = "";

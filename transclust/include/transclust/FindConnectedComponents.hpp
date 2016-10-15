@@ -13,21 +13,21 @@ namespace FCC{
 	 ***************************************************************************/
 	void findConnectedComponents(
 			TCC::TransClustParams& tcp,
-			const ConnectedComponent &cc, 
+			ConnectedComponent &cc, 
 			std::queue<ConnectedComponent> &ccs,
-			const double threshold);
+			const float threshold);
 
 	/* Breadth-first search */
 	void BFS_cc(
 			std::vector<std::vector<unsigned>>& membership,
-			const ConnectedComponent &cc, 
-			const double threshold);
+			ConnectedComponent &cc, 
+			const float threshold);
 
 	/* Dynamic Union Find  */
 	void DUF_cc(
 			std::vector<std::vector<unsigned>>& membership,
-			const ConnectedComponent &cc, 
-			const double threshold);
+			ConnectedComponent &cc, 
+			const float threshold);
 
 }
 #endif

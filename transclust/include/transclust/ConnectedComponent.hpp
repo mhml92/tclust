@@ -12,31 +12,33 @@ static unsigned _cc_id(0);
 class ConnectedComponent
 {
 	public:
-		//ConnectedComponent(const std::string &filename,bool use_custom_fallback,double sim_fallback,std::string ft);
+		//ConnectedComponent(const std::string &filename,bool use_custom_fallback,float sim_fallback,std::string ft);
 		ConnectedComponent(const std::string &filename,TCC::TransClustParams& tcp);
-		//ConnectedComponent(std::vector<double>& sim_matrix_1d,unsigned num_o,bool use_custom_fallback,double sim_fallback);
-		ConnectedComponent(std::vector<double>& sim_matrix_1d,unsigned num_o,TCC::TransClustParams& tcp);//,bool use_custom_fallback,double sim_fallback);
-		ConnectedComponent(const ConnectedComponent& cc,const std::vector<unsigned>& objects, double th,TCC::TransClustParams& tcp);
+		//ConnectedComponent(std::vector<float>& sim_matrix_1d,unsigned num_o,bool use_custom_fallback,float sim_fallback);
+		ConnectedComponent(std::vector<float>& sim_matrix_1d,unsigned num_o,TCC::TransClustParams& tcp);//,bool use_custom_fallback,float sim_fallback);
+		ConnectedComponent(ConnectedComponent& cc,const std::vector<unsigned>& objects, float th,TCC::TransClustParams& tcp);
 		/*
-			ConnectedComponent(const std::vector<std::vector<double>>& pos,double th);
+			ConnectedComponent(const std::vector<std::vector<float>>& pos,float th);
 			*/
-		inline const TriangularMatrix& getMatrix() const { return m; }
+		inline TriangularMatrix& getMatrix(){ return m; }
 		inline const unsigned size()const { return m.getNumObjects(); }
-		inline const double getMinSimilarity() const{ return m.getMinValue(); }
-		inline const double getMaxSimilarity() const{ return m.getMaxValue(); }
+		inline const float getMinSimilarity() const{ return m.getMinValue(); }
+		inline const float getMaxSimilarity() const{ return m.getMaxValue(); }
 		inline const std::vector<std::string>& getObjectNames() const
 		{
 			return m.getObjectNames();
 		}
 		inline const std::string getObjectName(unsigned i)const { return m.getObjectName(i);}
+		inline void free(){m.free();};
+		inline void load(){m.load();};
 
 		// get cost for some threshold
-		inline const double getCost(unsigned i, unsigned j, double t) const { return TCC::round(m(i, j) - t);}
+		inline float getCost(unsigned i, unsigned j, float t){ return TCC::round(m.get(i, j) - t);}
 
 		// get the value of the edge in the cc 
-		inline const double at(unsigned i, unsigned j, bool normalized = true) const
+		inline float at(unsigned i, unsigned j, bool normalized = true)
 		{
-			double sim = m(i, j) - threshold;
+			float sim = m.get(i, j) - threshold;
 			if (normalized)
 			{
 
@@ -51,7 +53,7 @@ class ConnectedComponent
 				return TCC::round(sim);
 			}
 		}
-		inline const double getThreshold() const
+		inline const float getThreshold() const
 		{
 			return threshold;
 		};
@@ -75,20 +77,22 @@ class ConnectedComponent
 		inline void init_normalization_context(TCC::TransClustParams& tcp)
 		{
 			if(tcp.normalization == "RELATIVE"){
-				double max_val = TCC::round(std::abs(m.getMaxValue()-threshold));
+
+				float max_val = TCC::round(std::abs(m.getMaxValue()-threshold));
 				if(max_val != 0){
 					normalization_context_positive = max_val;	
 				}else{
 					normalization_context_positive = 1;	
 				}
-				double min_val = TCC::round(std::abs(m.getMinValue()-threshold));
+				float min_val = TCC::round(std::abs(m.getMinValue()-threshold));
 				if(min_val != 0){
 					normalization_context_negative = min_val;	
 				}else{
 					normalization_context_negative = 1;	
 				}
+
 			}else if(tcp.normalization == "ABSOLUTE"){
-				double max_val = std::max(
+				float max_val = std::max(
 						TCC::round(std::abs(m.getMaxValue()-threshold)),
 						TCC::round(std::abs(m.getMinValue()-threshold))
 						);
@@ -99,10 +103,10 @@ class ConnectedComponent
 		}
 		unsigned id;
 		TriangularMatrix m;
-		double threshold;
-		double normalization_context_positive;
-		double normalization_context_negative;
-		double cost;
+		float threshold;
+		float normalization_context_positive;
+		float normalization_context_negative;
+		float cost;
 
 		inline static unsigned getNewId()
 		{

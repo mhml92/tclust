@@ -15,8 +15,8 @@ class Result{
 
 	private:
 		std::vector<std::string> id2object;
-		std::map<double,double> cost;
-		std::map<double,std::vector<std::vector<unsigned>>> clusters;
+		std::map<float,float> cost;
+		std::map<float,std::vector<std::vector<unsigned>>> clusters;
 };
 
 

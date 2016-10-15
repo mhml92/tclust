@@ -8,8 +8,8 @@ namespace DEBUG
 {
 	inline void geometricLinking(
 			std::vector<std::vector<unsigned>>& clustering, 
-			std::vector<std::vector<double>>& pos, 
-			double distance)
+			std::vector<std::vector<float>>& pos, 
+			float distance)
 	{
 		//std::cout << "Debug geometricLinking" << std::endl;
 
@@ -55,8 +55,8 @@ namespace DEBUG
 
 	inline void findConnectedComponents(
 			std::vector<std::vector<unsigned>>& membership, 
-			const ConnectedComponent& cc, 
-			double threshold)
+			ConnectedComponent& cc, 
+			float threshold)
 	{
 		//std::cout << "Debug findConnectedComponents" << std::endl;
 
@@ -69,7 +69,7 @@ namespace DEBUG
 			while(!Q.empty()){
 				for(unsigned ei = 0; ei < membership.at(i).size(); ei++){
 					if( !assigned.at(ei) ){
-						if( cc.getMatrix()( membership.at(i).at(Q.front()), membership.at(i).at(ei) )-threshold > 0){
+						if( cc.getMatrix().get( membership.at(i).at(Q.front()), membership.at(i).at(ei) )-threshold > 0){
 							assigned.at(ei) = true;
 							Q.push(ei);
 						}
@@ -90,7 +90,7 @@ namespace DEBUG
 				{
 					for(auto& j_ccv:membership.at(j))
 					{
-						if((cc.getMatrix()(i_ccv,j_ccv) - threshold) > 0){
+						if((cc.getMatrix().get(i_ccv,j_ccv) - threshold) > 0){
 							std::cout << "[ERROR]" << __FILE__ << " at line: " << __LINE__ << std::endl;
 						}
 					}
@@ -100,7 +100,7 @@ namespace DEBUG
 		}
 	}
 
-	inline void round(double num){
+	inline void round(float num){
 		if(std::isnan(num)){
 			std::cout << "Number is NAN" << std::endl;
 		}

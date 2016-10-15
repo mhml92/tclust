@@ -7,31 +7,42 @@
 #include "transclust/ClusteringResult.hpp"
 
 namespace FORCE{
-	double dist(std::vector<std::vector<double>>& pos,unsigned i, unsigned j);
+	float dist(std::vector<std::vector<float>>& pos,unsigned i, unsigned j);
 
 	void layout(
-			const ConnectedComponent& cc,
-			std::vector<std::vector<double>>& pos,
-			double p,
-			double f_att,
-			double f_rep,
+			ConnectedComponent& cc,
+			std::vector<std::vector<float>>& pos,
+			float p,
+			float f_att,
+			float f_rep,
 			const unsigned R,
-			double start_t,
+			float start_t,
 			const unsigned dim,
 			unsigned seed = 42);
 
 	void partition(
-			const ConnectedComponent& cc,
-			std::vector<std::vector<double>>& pos,
+			ConnectedComponent& cc,
+			std::vector<std::vector<float>>& pos,
 			ClusteringResult& cs,
-			double d_init,
-			double d_maximal,
-			double s_init,
-			double f_s);
+			float d_init,
+			float d_maximal,
+			float s_init,
+			float f_s);
 
 	std::vector<std::vector<unsigned>> geometricLinking(
-			std::vector<std::vector<double>>& pos,
-			const double maxDist,
+			std::vector<std::vector<float>>& pos,
+			const float maxDist,
 			const std::vector<std::vector<unsigned>>& objects);
+
+	void inline DEBUG_force(std::vector<std::vector<float>>& pos,int iter){
+
+		for(unsigned i = 0; i < pos.size();i++){
+			std::cout << iter+1 << ",";
+			for(unsigned j = 0; j < pos[0].size();j++){
+				std::cout  << pos.at(i).at(j) << ",";	
+			}
+			std::cout << std::endl;
+		}
+	}
 }
 #endif

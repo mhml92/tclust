@@ -3,7 +3,7 @@
 //ConnectedComponent::ConnectedComponent(
 //		const std::string &filename,
 //		bool use_custom_fallback,
-//		double sim_fallback,
+//		float sim_fallback,
 //		std::string ft)
 ConnectedComponent::ConnectedComponent(
 		const std::string &filename,
@@ -19,11 +19,11 @@ ConnectedComponent::ConnectedComponent(
 }
 
 ConnectedComponent::ConnectedComponent(
-		std::vector<double>& sim_matrix_1d,
+		std::vector<float>& sim_matrix_1d,
 		unsigned num_o,
 		TCC::TransClustParams& tcp)//,
 		//bool use_custom_fallback,
-		//double sim_fallback)
+		//float sim_fallback)
 	:
 		id(getNewId()),
 		m(sim_matrix_1d,num_o,id),//,use_custom_fallback,sim_fallback),
@@ -34,9 +34,9 @@ ConnectedComponent::ConnectedComponent(
 }
 
 ConnectedComponent::ConnectedComponent(
-		const ConnectedComponent &cc,
+		ConnectedComponent &cc,
 		const std::vector<unsigned> &objects,
-		double th,
+		float th,
 		TCC::TransClustParams& tcp)
 	:
 		id(getNewId()),

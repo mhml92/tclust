@@ -5,14 +5,14 @@
 
 // Struct holding a partial clustering
 struct ClusteringResult {
-	double cost;
+	float cost;
 	std::vector<unsigned> membership;
 };
 
 typedef struct clustering {
 	std::vector<std::string> id2object;
-	std::vector<double> threshold;
-	std::vector<double> cost;
+	std::vector<float> threshold;
+	std::vector<float> cost;
 	std::vector< std::vector<unsigned> > clusters;
 }clustering;
 

@@ -8,27 +8,30 @@
 #include <stdlib.h>
 #include "transclust/TriangularMatrix.hpp"
 
-//TriangularMatrix::TriangularMatrix(
-//		const std::string &filename,
-//		bool use_custom_fallback,
-//		double sim_fallback,
-//		std::string ft)
+/**
+ * Contruct an TriangularMatrix based on an input file.
+ */
 TriangularMatrix::TriangularMatrix(
 		const std::string &filename,
-		TCC::TransClustParams& tcp,
+		TCC::TransClustParams& _tcp,
 		unsigned cc_id)
 {
 	id = cc_id;
+	tcp = _tcp;
 	// map <object name> -> <index in matrix>
 	std::map<std::string, unsigned> object2index;
 
-	// map for similarity value <<object1 name>-<object2 name>> -> <value>
-	std::map<std::pair<std::string, std::string>, double> sim_value;
+	// map for similarity value pair<<object1 name>-<object2 name>> -> <value>
+	std::map<std::pair<std::string, std::string>, float> sim_value;
 
 	// map for findeing one-way sim values
 	std::map<std::pair<std::string, std::string>, bool> hasPartner;
 
+	// should the data reside in memory or on disk ("external" from memory)
 	is_external = tcp.external;
+
+	// is the content of the external file loaded in to memory
+	is_loaded = false;
 
 	// reads the input file and initializes the 'matrix' array
 	readFile(filename,object2index,sim_value,hasPartner);
@@ -41,8 +44,6 @@ TriangularMatrix::TriangularMatrix(
 				sim_value,
 				hasPartner,
 				tcp);
-				//use_custom_fallback,
-				//sim_fallback);
 	}else if(tcp.file_type == "SIMPLE"){
 
 		parseSimpleSimDataFile(
@@ -50,57 +51,95 @@ TriangularMatrix::TriangularMatrix(
 				sim_value,
 				hasPartner,
 				tcp);
-				//use_custom_fallback,
-				//sim_fallback);
 	}
 }
 
 TriangularMatrix::TriangularMatrix(
-		const TriangularMatrix &m,
+		TriangularMatrix &m,
 		const std::vector<unsigned> &objects,
 		unsigned cc_id)
 {
+	tcp = m.getTcp();
 	id = cc_id;
-	maxValue = std::numeric_limits<double>::lowest();
-	minValue = std::numeric_limits<double>::max();
+	maxValue = std::numeric_limits<float>::lowest();
+	minValue = std::numeric_limits<float>::max();
 
 	num_o = objects.size();
-	unsigned msize = ((num_o * num_o) - num_o) / 2;
+	unsigned long msize = ((num_o * num_o) - num_o) / 2;
+	if(tcp.external){
 
-	// indexes
-	//index2ObjName.push_back(m.getObjectName(objects.at(0)));
-	//index2ObjId.push_back(m.getObjectId(objects.at(0)));
+		bin_file_path = getFilePath().string();
 
-	matrix.resize(msize);
-	for (unsigned i = 0; i < num_o; i++)
-	{
-		// indexes
-		index2ObjName.push_back(m.getObjectName(objects.at(i)));
-		index2ObjId.push_back(m.getObjectId(objects.at(i)));
-		for (unsigned j = i + 1; j < num_o; j++)
+		std::ofstream fs;
+
+		fs.open(bin_file_path, std::fstream::out | std::fstream::binary);
+
+		if(fs.is_open()){
+			for (unsigned i = 0; i < num_o; i++)
+			{
+				// indexes
+				index2ObjName.push_back(m.getObjectName(objects.at(i)));
+				index2ObjId.push_back(m.getObjectId(objects.at(i)));
+
+				for (unsigned j = i + 1; j < num_o; j++)
+				{
+					float val = m.get(objects.at(i), objects.at(j));
+					if (maxValue < val){maxValue = val;}
+					if (minValue > val){minValue = val;}
+
+					// read the similarity values and write the values (column-wise lower 
+					// right half of matrix) to the binary 1d matrix.
+					//
+					//		a
+					//		bc    -> 1d column-wise lower right half
+					//		def   ->	
+					//		ghij  -> [a,b,d,g,k,c,e,h,l,f,i,m,j,n,o]    
+					//		klmno
+					//
+					//		index 1d matrix at i,j => (#rows * i - (i+1)*(i)/2 + j-(i+1))
+					//
+
+					fs.write((char*)&val, sizeof(float));
+				}
+			}
+		}else{
+			std::cout << "ERROR OPENING EXTERNAL FILE" << std::endl;
+			exit(1);
+		}
+		fs.close();
+	}else{
+
+		matrix.resize(msize);
+		for (unsigned i = 0; i < num_o; i++)
 		{
-			double val = m(objects.at(i), objects.at(j));
-			if (maxValue < val){maxValue = val;}
-			if (minValue > val){minValue = val;}
+			// indexes
+			index2ObjName.push_back(m.getObjectName(objects.at(i)));
+			index2ObjId.push_back(m.getObjectId(objects.at(i)));
+			for (unsigned j = i + 1; j < num_o; j++)
+			{
+				float val = m.get(objects.at(i), objects.at(j));
+				if (maxValue < val){maxValue = val;}
+				if (minValue > val){minValue = val;}
 
-			matrix.at(index(i, j)) = val;
+				matrix.at(index(i, j)) = val;
+			}
 		}
 	}
 }
 
 void TriangularMatrix::parseLegacySimDataFile(
 		std::map<std::string, unsigned> &object2index,
-		std::map<std::pair<std::string, std::string>, double> & sim_value,
+		std::map<std::pair<std::string, std::string>, float> & sim_value,
 		std::map<std::pair<std::string, std::string>, bool> &hasPartner,
-		TCC::TransClustParams& tcp)
+		TCC::TransClustParams& _tcp)
 {
 
-
+	tcp = _tcp;
 	// for each pair of object, tjeck if it has a partner and if so assign the
 	// minimum similarity value. If a pair only has similarity data in one
 	// direction then assign the defautl similarity value
 	num_o = index2ObjName.size();
-	unsigned msize = ((num_o * num_o) - num_o) / 2;
+	unsigned long msize = ((num_o * num_o) - num_o) / 2;
 	matrix.resize(msize);
 	for (unsigned i = 0; i < num_o; i++)
 	{
@@ -110,7 +149,7 @@ void TriangularMatrix::parseLegacySimDataFile(
 			key = std::make_pair(index2ObjName[i], index2ObjName[j]);
 
 			// default value if pair is missing
-			double val = tcp.sim_fallback;
+			float val = tcp.sim_fallback;
 			if(!tcp.use_custom_fallback)
 			{
 				val = minValue;
@@ -138,84 +177,63 @@ void TriangularMatrix::parseLegacySimDataFile(
 
 void TriangularMatrix::parseSimpleSimDataFile(
 		std::map<std::string, unsigned> &object2index,
-		std::map<std::pair<std::string, std::string>, double> & sim_value,
+		std::map<std::pair<std::string, std::string>, float> & sim_value,
 		std::map<std::pair<std::string, std::string>, bool> &hasPartner,
 		TCC::TransClustParams& tcp)
-		//bool use_custom_fallback,
-		//double sim_fallback)
 {
 
+	// vector of indexes of similarity values which have Inf value. These indexes 
+	// will be set to maxValue after all other values have been assigned
 	std::vector<std::pair<unsigned,unsigned>> positive_inf;
+
+	// Initialize the 1d matrix based on the number of objects
 	num_o = index2ObjName.size();
 	unsigned long msize = ((num_o * num_o) - num_o) / 2;
+
 	if(tcp.external){
 		/* EXTERNAL MEMORY VERSION */
-		boost::filesystem::path dir (tcp.tmp_dir);
-		boost::filesystem::path _file ("cm_" + std::to_string(id) + ".bcm");
-		boost::filesystem::path full_path = dir / _file;
-		bin_file_path = full_path.string();
+		/* EXTERNAL MEMORY VERSION */
+		/* EXTERNAL MEMORY VERSION */
 
+		// initialize (os agnostic) path to the temporary directory of the 
+		// external memory file
+
+		// set class variable with path to file
+		bin_file_path = getFilePath().string();
+
+
+		// read the similarity values and write the values (column-wise lower 
+		// right half of matrix) to the binary 1d matrix.
+		//
+		//		a
+		//		bc    -> 1d column-wise lower right half
+		//		def   ->	
+		//		ghij  -> [a,b,d,g,k,c,e,h,l,f,i,m,j,n,o]    
+		//		klmno
+		//
+		//		index 1d matrix at i,j => (#rows * i - (i+1)*(i)/2 + j-(i+1))
+		//
 		std::ofstream fs;
 		fs.open(bin_file_path, std::fstream::out | std::fstream::binary);
 
-		std::cout << bin_file_path << std::endl;
 		if(fs.is_open()){
-
 			for (unsigned i = 0; i < num_o; i++)
 			{
 				for (unsigned j = i + 1; j < num_o; j++)
 				{
-					double val = parseSimpleEdge(positive_inf,object2index,sim_value,hasPartner,i,j,tcp);
-					fs.put(val);
-					//fs << val;
-					// <INSERT val AT i,j IN MM FILE>
+					float val = parseSimpleEdge(positive_inf,object2index,sim_value,hasPartner,i,j);
+					fs.write((char*)&val, sizeof(float));
 				}
 			}
-			//for(std::pair<unsigned,unsigned> &p:positive_inf){
-				// <INSERT DEFUALT VALUE IN MM FILE>
-				//data[index(p.first,p.second)] = maxValue;
-			//}
-
 		}else{
 			std::cout << "ERROR OPENING EXTERNAL FILE" << std::endl;
+			exit(1);
 		}
 		fs.close();
 
-		std::streampos size;
-		char * memblock;
-
-		int i=0;
-
-		std::ifstream file(bin_file_path, std::iostream::in|std::iostream::binary|std::iostream::ate);
-
-		if (file.is_open())
-		{
-			size = file.tellg();
-
-			std::cout << "size=" << size << "\n"; 
-
-			memblock = new char [size];
-			file.seekg (0, std::iostream::beg);
-			file.read (memblock, size);
-			file.close();
-
-			std::cout << "the entire file content is in memory \n";
-
-			for(i=0; i<=10; i++)
-			{
-				double value = memblock [i];
-				std::cout << "value ("<<i<<")=" << value << "\n";
-			}
-
-
-			delete[] memblock;
-		}
-		else{ 
-			std::cout << "Unable to open file"<<std::endl;
-		}
-
-
 	}else{
+		/* INTERNAL MEMORY VERSION */
+		/* INTERNAL MEMORY VERSION */
 		/* INTERNAL MEMORY VERSION */
 		matrix.resize(msize);
 
@@ -223,7 +241,7 @@ void TriangularMatrix::parseSimpleSimDataFile(
 		{
 			for (unsigned j = i + 1; j < num_o; j++)
 			{
-				double val = parseSimpleEdge(positive_inf,object2index,sim_value,hasPartner,i,j,tcp);
+				float val = parseSimpleEdge(positive_inf,object2index,sim_value,hasPartner,i,j);
 				matrix.at(index(i, j)) = val;
 			}
 		}
@@ -231,22 +249,20 @@ void TriangularMatrix::parseSimpleSimDataFile(
 			matrix.at(index(p.first,p.second)) = maxValue;
 		}
 	}
-
 }
 
-double TriangularMatrix::parseSimpleEdge(
+float TriangularMatrix::parseSimpleEdge(
 		std::vector<std::pair<unsigned,unsigned>>& positive_inf,
 		std::map<std::string, unsigned>& object2index,
-		std::map<std::pair<std::string, std::string>, double> & sim_value,
+		std::map<std::pair<std::string, std::string>, float> & sim_value,
 		std::map<std::pair<std::string, std::string>, bool> &hasPartner,
 		unsigned i,
-		unsigned j,
-		TCC::TransClustParams& tcp)
+		unsigned j)
 {
 	std::pair<std::string, std::string> key;
 	key = std::make_pair(index2ObjName[i], index2ObjName[j]);
 
-	double val = tcp.sim_fallback;
+	float val = tcp.sim_fallback;
 	if(!tcp.use_custom_fallback)
 	{
 		val = minValue;
@@ -254,15 +270,15 @@ double TriangularMatrix::parseSimpleEdge(
 
 	if(sim_value.find(key) != sim_value.end())
 	{
-		double o1_o2 = sim_value[key];
+		float o1_o2 = sim_value[key];
 
 		if(hasPartner[key])
 		{
 			std::pair<std::string, std::string> rkey;
 			rkey = std::make_pair(index2ObjName[j], index2ObjName[i]);
 
-			double o2_o1 = sim_value[rkey];
-			if(std::min(o1_o2,o2_o1) == std::numeric_limits<double>::lowest()){
+			float o2_o1 = sim_value[rkey];
+			if(std::min(o1_o2,o2_o1) == std::numeric_limits<float>::lowest()){
 				val = std::max(o1_o2,o2_o1);
 			}else{
 				val = std::min(o1_o2,o2_o1);
@@ -272,7 +288,7 @@ double TriangularMatrix::parseSimpleEdge(
 		}
 	}
 
-	if(val == std::numeric_limits<double>::max()){
+	if(val == std::numeric_limits<float>::max()){
 		positive_inf.push_back(std::make_pair(i,j));
 	}else if(maxValue < val){
 		maxValue = val;
@@ -284,12 +300,12 @@ double TriangularMatrix::parseSimpleEdge(
 void TriangularMatrix::readFile(
 	const std::string &filename,
 	std::map<std::string, unsigned> &object2index,
-	std::map<std::pair<std::string, std::string>, double> & sim_value,
+	std::map<std::pair<std::string, std::string>, float> & sim_value,
 	std::map<std::pair<std::string, std::string>, bool> &hasPartner
 	)
 {
-	maxValue = std::numeric_limits<double>::lowest();
-	minValue = std::numeric_limits<double>::max();
+	maxValue = std::numeric_limits<float>::lowest();
+	minValue = std::numeric_limits<float>::max();
 	/*********************************
 	 * Read the input similarity file
 	 ********************************/
@@ -307,16 +323,16 @@ void TriangularMatrix::readFile(
 		std::string o2 = tokens.at(1);
 
 		// o1,o2 similarity
-		//double value = std::atof(tokens.at(2).c_str());
-		double value = std::stod(tokens.at(2));
+		//float value = std::atof(tokens.at(2).c_str());
+		float value = std::stod(tokens.at(2));
 
 		// if inf/-inf
 		if(std::isinf(value))
 		{
 			if(value < 0 ){
-				value = std::numeric_limits<double>::lowest();
+				value = std::numeric_limits<float>::lowest();
 			}else{
-				value = std::numeric_limits<double>::max();
+				value = std::numeric_limits<float>::max();
 			}
 		}
 
@@ -357,7 +373,7 @@ void TriangularMatrix::readFile(
 			hasPartner[key] = false;
 		}
 
-		if (minValue > value && value != std::numeric_limits<double>::lowest())
+		if (minValue > value && value != std::numeric_limits<float>::lowest())
 		{
 			minValue = value;
 		}
@@ -368,7 +384,7 @@ void TriangularMatrix::readFile(
 }
 
 TriangularMatrix::TriangularMatrix(
-		std::vector<double>& sim_matrix_1d,
+		std::vector<float>& sim_matrix_1d,
 		unsigned _num_o,
 		unsigned cc_id
    )
@@ -377,8 +393,8 @@ TriangularMatrix::TriangularMatrix(
    num_o = _num_o;
 	matrix = sim_matrix_1d;
 
-	maxValue = std::numeric_limits<double>::lowest();
-	minValue = std::numeric_limits<double>::max();
+	maxValue = std::numeric_limits<float>::lowest();
+	minValue = std::numeric_limits<float>::max();
 
 	index2ObjName.resize(num_o);
 	index2ObjId.resize(num_o);
@@ -387,8 +403,9 @@ TriangularMatrix::TriangularMatrix(
 		index2ObjId.at(i) = i;
 	}
 	for(unsigned i = 0; i < matrix.size(); i++){
-			double val = matrix.at(i);
+			float val = matrix.at(i);
 			if (maxValue < val){maxValue = val;}
 			if (minValue > val){minValue = val;}
 	}
 }
+

@@ -21,7 +21,7 @@ public:
    );
 
    TransClust(
-      std::vector<double>& sim_matrix_1d,
+      std::vector<float>& sim_matrix_1d,
       unsigned num_o,
       TCC::TransClustParams& _tcp
    );

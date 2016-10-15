@@ -4,3 +4,6 @@ transclust/tests/build/
 transclust/data/astral/
 transclust/data/actino/
 .Rproj.user
+*.o
+*.so
+*.dll

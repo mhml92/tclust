@@ -58,20 +58,20 @@ int main(int argc, char** argv){
 
 
 		// layout vars
-		TCLAP::ValueArg<double> f_att_Arg(
+		TCLAP::ValueArg<float> f_att_Arg(
 				"",
 				"f_att",
 				"Attraction force multiplier",
 				false,
 				100.0,
-				"double");
-		TCLAP::ValueArg<double> f_rep_Arg(
+				"float");
+		TCLAP::ValueArg<float> f_rep_Arg(
 				"",
 				"f_rep",
 				"Repulsion force multiplier",
 				false,
 				100.0,
-				"double");
+				"float");
 		TCLAP::ValueArg<unsigned> R_Arg(
 				"",
 				"R",
@@ -86,109 +86,109 @@ int main(int argc, char** argv){
 				false,
 				3,
 				"unsigend interger");
-		TCLAP::ValueArg<double> p_Arg(
+		TCLAP::ValueArg<float> p_Arg(
 				"",
 				"p",
 				"Layout initial radius",
 				false,
 				1,
-				"double");
+				"float");
 
-		TCLAP::ValueArg<double> start_t_Arg(
+		TCLAP::ValueArg<float> start_t_Arg(
 				"",
 				"start_t",
 				"Start temperature for force",
 				false,
 				100,
-				"double");
+				"float");
 
-		TCLAP::ValueArg<double> d_init_Arg(
+		TCLAP::ValueArg<float> d_init_Arg(
 				"",
 				"d_init",
 				"Initital distance for geometric linking",
 				false,
 				0.01,
-				"double");
+				"float");
 		
-		TCLAP::ValueArg<double> d_maximal_Arg(
+		TCLAP::ValueArg<float> d_maximal_Arg(
 				"",
 				"d_maximal",
 				"Maximal distance for geometric linking",
 				false,
 				5.0,
-				"double");
+				"float");
 
-		TCLAP::ValueArg<double> s_init_Arg(
+		TCLAP::ValueArg<float> s_init_Arg(
 				"",
 				"s_init",
 				"Initial stepsize for geometric linking",
 				false,
 				0.01,
-				"double");
+				"float");
 
-		TCLAP::ValueArg<double> f_s_Arg(
+		TCLAP::ValueArg<float> f_s_Arg(
 				"",
 				"f_s",
 				"Stepsize factor for geometric linking",
 				false,
 				0.01,
-				"double");
+				"float");
 
-		TCLAP::ValueArg<double> fallback_value_Arg(
+		TCLAP::ValueArg<float> fallback_value_Arg(
 				"",
 				"fallback_value",
 				"",
 				false,
 				0.00,
-				"double");
+				"float");
 
-		TCLAP::ValueArg<double> threshold_min_Arg(
+		TCLAP::ValueArg<float> threshold_min_Arg(
 				"",
 				"threshold_min",
 				"",
 				false,
 				0.0,
-				"double");
+				"float");
 
-		TCLAP::ValueArg<double> threshold_max_Arg(
+		TCLAP::ValueArg<float> threshold_max_Arg(
 				"",
 				"threshold_max",
 				"",
 				false,
 				100.0,
-				"double");
+				"float");
 
-		TCLAP::ValueArg<double> threshold_step_Arg(
+		TCLAP::ValueArg<float> threshold_step_Arg(
 				"",
 				"threshold_step",
 				"",
 				false,
 				1.0,
-				"double");
+				"float");
 
-		TCLAP::ValueArg<double> fpt_time_limit_Arg(
+		TCLAP::ValueArg<float> fpt_time_limit_Arg(
 				"",
 				"fpt_time_limit",
 				"",
 				false,
 				60.0,
-				"double");
+				"float");
 
-		TCLAP::ValueArg<double> fpt_max_cost_Arg(
+		TCLAP::ValueArg<float> fpt_max_cost_Arg(
 				"",
 				"fpt_max_cost",
 				"",
 				false,
 				5000.0,
-				"double");
+				"float");
 
-		TCLAP::ValueArg<double> fpt_step_size_Arg(
+		TCLAP::ValueArg<float> fpt_step_size_Arg(
 				"",
 				"fpt_step_size",
 				"",
 				false,
 				10.0,
-				"double");
+				"float");
 
 		TCLAP::ValueArg<unsigned> seed_Arg(
 				"",

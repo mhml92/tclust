@@ -24,13 +24,13 @@ namespace FORCE
 {
 
 	void layout(
-			const ConnectedComponent& cc,
-			std::vector<std::vector<double>>& pos,
-			double p,
-			double f_att,
-			double f_rep,
+			ConnectedComponent& cc,
+			std::vector<std::vector<float>>& pos,
+			float p,
+			float f_att,
+			float f_rep,
 			unsigned R,
-			double start_t,
+			float start_t,
 			unsigned dim,
 			unsigned seed
 )
@@ -41,8 +41,8 @@ namespace FORCE
 		if(dim == 2)
 		{
 			//uniform 2d layout
-			double radStep = (2*M_PI)/pos.size();
-			double radVal = 0;
+			float radStep = (2*M_PI)/pos.size();
+			float radVal = 0;
 
 			for(unsigned i = 0; i < pos.size(); i++)
 			{
@@ -54,11 +54,11 @@ namespace FORCE
 			// uniform hsphere layout
 			//unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 			std::mt19937 generator(seed);
-			std::uniform_real_distribution<double> distribution(-1.0,1.0);
+			std::uniform_real_distribution<float> distribution(-1.0,1.0);
 
 			for(unsigned i = 0; i < pos.size(); i++)
 			{
-				double r = 0;
+				float r = 0;
 				for(unsigned d = 0; d < dim; d++)
 				{
 					pos[i][d] = distribution(generator);
@@ -72,53 +72,60 @@ namespace FORCE
 				}
 			}
 		}
+		//DEBUG_force(pos,-1);
 		/*************************************************************************
 		 * MAIN LOOP
 		 ************************************************************************/
-		std::vector<std::vector<double>> delta;
-		delta.resize(pos.size(), std::vector<double>(dim,0.0));
+		std::vector<std::vector<float>> delta;
+		delta.resize(pos.size(), std::vector<float>(dim,0.0f));
 
-		f_att /= static_cast<double>(cc.size());
-		f_rep /= static_cast<double>(cc.size());
+		f_att /= static_cast<float>(cc.size());
+		f_rep /= static_cast<float>(cc.size());
 
 		for(unsigned r = 0; r < R; r++)
 		{
 			// zero delta vectors
-			for(auto& v:delta){std::fill(v.begin(),v.end(),0.0);}
+			for(auto& v:delta){std::fill(v.begin(),v.end(),0.0f);}
 
 
-			double temp = (start_t*static_cast<double>(cc.size()))*std::pow((1.0/(r+1.0)),2);
+			float temp = (start_t*static_cast<float>(cc.size()))*std::pow((1.0f/(r+1.0f)),2);
 			/**********************************************************************
 			 * CALCULATE DELTA VECTOR
 			 *********************************************************************/
+			//float negative_force = 0;
+			//float positive_force = 0;
 			#pragma omp parallel
 			{
 				// create local copy
-				std::vector< std::vector<double> > _delta = delta;
+				std::vector< std::vector<float> > _delta = delta;
 
 				#pragma omp for schedule(dynamic)
 				for(unsigned i = 0; i < pos.size();i++)
 				{
 					for(unsigned j = i+1; j < pos.size(); j++)
 					{
-						double _distance = TCC::dist(pos,i,j);
-						if(_distance > 0.0)
+						float _distance = TCC::dist(pos,i,j);
+						if(_distance > 0.0f)
 						{
-							double log_d = std::log(_distance+1);
+							float log_d = std::log(_distance+1);
 
-							double force = 0.0;
+							float force = 0.0f;
 
 							// normalized edge weight
-							double edge_weight = cc.at(i,j);
+							float edge_weight = cc.at(i,j);
 							if(edge_weight > 0)
 							{
 								force = (edge_weight * f_att * log_d)/_distance;
+								//#pragma omp atomic
+								//positive_force += force;
 							}else{
 								force = (edge_weight * f_rep)/log_d/_distance;
+								//#pragma omp atomic
+								//negative_force += force;
 							}
 							for(unsigned d = 0; d < dim; d++)
 							{
-								double displacement = (force * (pos[j][d]-pos[i][d]));
+								float displacement = (force * (pos[j][d]-pos[i][d]));
 								_delta[i][d] += displacement;
 								_delta[j][d] -= displacement;
 							}
@@ -135,13 +142,14 @@ namespace FORCE
 					}
 				}
 			}
+			//std::cout << cc.getId() << ","  << r << "," << positive_force << "," << std::abs(negative_force) << std::endl;
 			/*******************************************************************
 			 * APPLY COOLING FUNCTION AND UPDATE POSITIONS
 			 ******************************************************************/
 			//#pragma omp for schedule(static) 
 			for(unsigned i = 0; i < pos.size(); i++)
 			{
-				double len = 0.0;
+				float len = 0.0;
 				for(unsigned d = 0; d < dim;d++){
 					len += delta[i][d]*delta[i][d];
 				}
@@ -149,7 +157,7 @@ namespace FORCE
 
 				for(unsigned d = 0; d < dim;d++)
 				{
-					double pd = delta[i][d];
+					float pd = delta[i][d];
 					if(len > temp)
 					{
 						pd = (pd/len)*temp;
@@ -158,27 +166,28 @@ namespace FORCE
 					pos[i][d] = pos[i][d] + pd;
 				}
 			}
+			//DEBUG_force(pos,r);
 		}
 	}
 
 	void partition(
-			const ConnectedComponent& cc,
-			std::vector<std::vector<double>>& pos,
+			ConnectedComponent& cc,
+			std::vector<std::vector<float>>& pos,
 			ClusteringResult& cr,
-			double d_init,
-			double d_maximal,
-			double s_init,
-			double f_s)
+			float d_init,
+			float d_maximal,
+			float s_init,
+			float f_s)
 	{
-		double d = d_init;
-		double s = s_init;
-		std::vector<double> D;
+		float d = d_init;
+		float s = s_init;
+		std::vector<float> D;
 		while(d <= d_maximal){
 			D.push_back(d);
 			d += s;
 			s += s*f_s;
 		}
-		cr.cost = std::numeric_limits<double>::max();
+		cr.cost = std::numeric_limits<float>::max();
 
 		std::vector<std::vector<unsigned>> clustering;
 
@@ -186,7 +195,7 @@ namespace FORCE
 		std::iota(dummy.begin(),dummy.end(),0);
 		clustering.push_back(dummy);
 
-		for(std::vector<double>::reverse_iterator it = D.rbegin(); it != D.rend(); ++it) {
+		for(std::vector<float>::reverse_iterator it = D.rbegin(); it != D.rend(); ++it) {
 			clustering = geometricLinking(pos,*it,clustering);
 
 			DEBUG_GM(clustering,pos,*it);
@@ -200,7 +209,7 @@ namespace FORCE
 				clusterId++;
 			}
 
-			double cost = 0;
+			float cost = 0;
 			for(unsigned i = 0; i< membership.size(); i++)
 			{
 				for(unsigned j = i+1; j < membership.size(); j++)
@@ -228,8 +237,8 @@ namespace FORCE
 	 * DETERMINE MEMBERSHIP IN POS
 	 ******************************************************************************/
 	std::vector<std::vector<unsigned>> geometricLinking(
-			std::vector<std::vector<double>>& pos,
-			const double maxDist,
+			std::vector<std::vector<float>>& pos,
+			const float maxDist,
 			const std::vector<std::vector<unsigned>>& objects)
 	{
 		std::vector<std::vector<unsigned>> result;

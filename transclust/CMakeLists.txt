@@ -55,10 +55,10 @@ target_link_libraries(tclust
 	${Boost_LIBRARIES}
 )
 
-file(GLOB SOURCES "src/tc/*.cpp")
-add_library(transclust SHARED ${SOURCES})
-target_link_libraries(transclust 
-	${Boost_LIBRARIES}
-)
-install(TARGETS transclust DESTINATION lib)
-install(DIRECTORY include/transclust DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+#file(GLOB SOURCES "src/tc/*.cpp")
+#add_library(transclust SHARED ${SOURCES})
+#target_link_libraries(transclust 
+#	${Boost_LIBRARIES}
+#)
+#install(TARGETS transclust DESTINATION lib)
+#install(DIRECTORY include/transclust DESTINATION include FILES_MATCHING PATTERN "*.hpp")
