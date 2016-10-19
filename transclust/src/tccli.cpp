@@ -48,6 +48,14 @@ int main(int argc, char** argv){
 				"SIMPLE",
 				"'SIMPLE','LEGACY' (default: 'SIMPLE')");
 
+		TCLAP::ValueArg<std::string> normalization_Arg(
+				"",
+				"normalization",
+				"",
+				false,
+				"RELATIVE",
+				"'RELATIVE','ABSOLUTE' (default: 'RELATIVE')");
+
 		TCLAP::ValueArg<std::string> tmp_dir_Arg(
 				"",
 				"tmp_dir",
@@ -236,6 +244,7 @@ int main(int argc, char** argv){
 
 		cmd.add(fallback_value_Arg);
 		cmd.add(simFileType_Arg);
+		cmd.add(normalization_Arg);
 		cmd.add(simFilenameArg);
 		cmd.add(tmp_dir_Arg);
 		cmd.add(threshold_min_Arg);
@@ -269,6 +278,7 @@ int main(int argc, char** argv){
 			tcp.set_use_custom_fallback(use_custom_fallback_Arg.getValue())
 				.set_sim_fallback(fallback_value_Arg.getValue())
 				.set_file_type(simFileType_Arg.getValue())
+				.set_normalization(normalization_Arg.getValue())
 				.set_use_default_interval(use_default_interval_Arg.getValue())
 				.set_th_min(threshold_min_Arg.getValue())
 				.set_th_max(threshold_max_Arg.getValue())

@@ -25,7 +25,8 @@ class TriangularMatrix{
 					std::cout << bin_file_path << std::endl;
 					std::cout << "ERROR - file notloaded " << is_loaded << std::endl;
 				}
-				return *((float*)mm_file.data()+index(i,j));
+				float val =  *((float*)mm_file.data()+index(i,j));
+				return val;
 			}else{
 				return matrix.at(index(i,j));
 			}
@@ -60,17 +61,47 @@ class TriangularMatrix{
 		inline const TCC::TransClustParams& getTcp() const {return tcp;}
 
 	private:
-		void parseLegacySimDataFile(
-				std::map<std::string, unsigned> &object2index,
-				std::map<std::pair<std::string, std::string>, float> & sim_value,
-				std::map<std::pair<std::string, std::string>, bool> &hasPartner,
-				TCC::TransClustParams& tcp);
+		// enum for file type. used in parsing inputfile. since there can be 
+		// billions of edges we want to reduce computation as much as possible and
+		// string comparisons can be relativly costly
+		enum FileType {SIMPLE,LEGACY};
 
-		void parseSimpleSimDataFile(
-				std::map<std::string, unsigned> &object2index,
+		unsigned id;
+		bool is_external = false;
+		FileType ft;
+		unsigned num_o;
+		unsigned long msize;
+		std::vector<float> matrix;
+		float maxValue = 0;
+		float minValue = 0;
+		std::vector<std::string> index2ObjName;
+		std::vector<unsigned> index2ObjId;
+		TCC::TransClustParams tcp;
+
+
+		/* EXTERNAL MEMORY */
+		std::string bin_file_path;
+		boost::iostreams::mapped_file_source mm_file;
+		bool is_loaded = false;
+		
+		void writeToFile(
+				std::map<std::string, unsigned>& object2index,
+				std::map<std::pair<std::string, std::string>, float> & sim_value,
+				std::map<std::pair<std::string, std::string>, bool> &hasPartner
+				);
+
+		void writeToMemory(
+				std::map<std::string, unsigned>& object2index,
+				std::map<std::pair<std::string, std::string>, float> & sim_value,
+				std::map<std::pair<std::string, std::string>, bool> &hasPartner
+				);
+
+		float parseLegacyEdge(
+				std::map<std::string, unsigned>& object2index,
 				std::map<std::pair<std::string, std::string>, float> & sim_value,
 				std::map<std::pair<std::string, std::string>, bool> &hasPartner,
-				TCC::TransClustParams& tcp);
+				unsigned i,
+				unsigned j);
 
 		float parseSimpleEdge(
 				std::vector<std::pair<unsigned,unsigned>>& positive_inf,
@@ -78,8 +109,7 @@ class TriangularMatrix{
 				std::map<std::pair<std::string, std::string>, float> & sim_value,
 				std::map<std::pair<std::string, std::string>, bool> &hasPartner,
 				unsigned i,
-				unsigned j
-				);
+				unsigned j);
 
 		void readFile(
 				const std::string &filename,
@@ -88,11 +118,10 @@ class TriangularMatrix{
 				std::map<std::pair<std::string, std::string>, bool> &hasPartner
 				);
 
-		void load_external_file(){
-
-
-			
-		};
+		
+		/**
+		 * Contructs a filename and creates path if neccesary
+		 */
 		inline boost::filesystem::path getFilePath(){
 			boost::filesystem::path dir (tcp.tmp_dir);
 			if(!boost::filesystem::is_directory(dir)){
@@ -109,7 +138,7 @@ class TriangularMatrix{
 		};
 
 		// indexing the symetric matrix (column-major)
-		inline unsigned index(unsigned i,unsigned j) const {
+		inline unsigned long index(unsigned i,unsigned j) const {
 			/* row-wise index */
 			//if(j > i){
 			// std::swap(j,i);
@@ -121,29 +150,15 @@ class TriangularMatrix{
 			//return (((i*(i-1))/2)+j);
 
 			/* column-mojor index */
+
 			if(j < i){
 				std::swap(j,i);
 			}else if(i == j){
 				std::cout << "Error: attempt to index diagonal in TriangularMatrix" << std::endl;
 				return 0;
 			}
-
 			return (num_o*i - (i+1)*(i)/2 + j-(i+1));
 		};
-		unsigned id;
-		bool is_external = false;
-		unsigned num_o;
-		std::vector<float> matrix;
-		float maxValue = 0;
-		float minValue = 0;
-		std::vector<std::string> index2ObjName;
-		std::vector<unsigned> index2ObjId;
-		TCC::TransClustParams tcp;
-
-		/* EXTERNAL MEMORY */
-		std::string bin_file_path;
-		boost::iostreams::mapped_file_source mm_file;
-		bool is_loaded = false;
 };
 
 #endif

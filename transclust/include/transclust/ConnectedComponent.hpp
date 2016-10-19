@@ -39,7 +39,10 @@ class ConnectedComponent
 		inline float at(unsigned i, unsigned j, bool normalized = true)
 		{
 			float sim = m.get(i, j) - threshold;
-			if (normalized)
+			if(sim == std::numeric_limits<float>::lowest()){
+				// missing value
+				return getThreshold();
+			}else if (normalized)
 			{
 
 				if( sim > 0){
@@ -53,6 +56,7 @@ class ConnectedComponent
 				return TCC::round(sim);
 			}
 		}
+
 		inline const float getThreshold() const
 		{
 			return threshold;

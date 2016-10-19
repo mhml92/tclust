@@ -16,8 +16,12 @@ TriangularMatrix::TriangularMatrix(
 		TCC::TransClustParams& _tcp,
 		unsigned cc_id)
 {
+	// unique id (used when makeing filename for external data storage)
 	id = cc_id;
+
+	// TransClust parameters
 	tcp = _tcp;
+
 	// map <object name> -> <index in matrix>
 	std::map<std::string, unsigned> object2index;
 
@@ -33,27 +37,40 @@ TriangularMatrix::TriangularMatrix(
 	// is the content of the external file loaded in to memory
 	is_loaded = false;
 
-	// reads the input file and initializes the 'matrix' array
+	// reads the input file - fills object2index,sim_value,hasPartner
 	readFile(filename,object2index,sim_value,hasPartner);
 
+	// number of nodes (objects)
+	num_o = index2ObjName.size();
+
+	// size of the cost matrix (number of edges in the fulle connected graph)
+	msize = ((num_o * num_o) - num_o) / 2;
+
+	// set file type enum
 	if(tcp.file_type == "LEGACY"){
-
-		/* Init 1d matrix  */
-		parseLegacySimDataFile(
-				object2index,
-				sim_value,
-				hasPartner,
-				tcp);
+		ft = FileType::LEGACY;
 	}else if(tcp.file_type == "SIMPLE"){
+		ft = FileType::SIMPLE;
+	}
 
-		parseSimpleSimDataFile(
-				object2index,
-				sim_value,
-				hasPartner,
-				tcp);
+	// write cost matrix
+	if(tcp.external){
+		writeToFile(
+			object2index,
+			sim_value,
+			hasPartner);	
+	}else{
+		writeToMemory(
+			object2index,
+			sim_value,
+			hasPartner);	
 	}
 }
 
+/**
+ * Contrust an TriangularMatrix based on another TriangularMatrix and a 
+ * membership vector
+ */
 TriangularMatrix::TriangularMatrix(
 		TriangularMatrix &m,
 		const std::vector<unsigned> &objects,
@@ -65,16 +82,23 @@ TriangularMatrix::TriangularMatrix(
 	minValue = std::numeric_limits<float>::max();
 
 	num_o = objects.size();
-	unsigned long msize = ((num_o * num_o) - num_o) / 2;
-	if(tcp.external){
+	msize = ((num_o * num_o) - num_o) / 2;
+	if(tcp.external && msize > 0){
 
 		bin_file_path = getFilePath().string();
 
-		std::ofstream fs;
+		boost::iostreams::mapped_file_params mfp;
+		mfp.path = bin_file_path;
+		mfp.new_file_size = msize*sizeof(float);
 
-		fs.open(bin_file_path, std::fstream::out | std::fstream::binary);
+		boost::iostreams::mapped_file_sink mfs;
 
-		if(fs.is_open()){
+		mfs.open(mfp);
+			
+		if(mfs.is_open()){
+
+			float* mmf = (float*)mfs.data();
+
 			for (unsigned i = 0; i < num_o; i++)
 			{
 				// indexes
@@ -99,14 +123,14 @@ TriangularMatrix::TriangularMatrix(
 					//		index 1d matrix at i,j => (#rows * i - (i+1)*(i)/2 + j-(i+1))
 					//
 
-					fs.write((char*)&val, sizeof(float));
+					mmf[index(i,j)] = val;
 				}
 			}
+			mfs.close();
 		}else{
 			std::cout << "ERROR OPENING EXTERNAL FILE" << std::endl;
 			exit(1);
 		}
-		fs.close();
 	}else{
 
 		matrix.resize(msize);
@@ -127,128 +151,190 @@ TriangularMatrix::TriangularMatrix(
 	}
 }
 
-void TriangularMatrix::parseLegacySimDataFile(
-		std::map<std::string, unsigned> &object2index,
-		std::map<std::pair<std::string, std::string>, float> & sim_value,
-		std::map<std::pair<std::string, std::string>, bool> &hasPartner,
-		TCC::TransClustParams& _tcp)
+/**
+ * Contrust an TriangularMatrix based on a vector and the number of objects
+ */
+TriangularMatrix::TriangularMatrix(
+		std::vector<float>& sim_matrix_1d,
+		unsigned _num_o,
+		unsigned cc_id
+   )
 {
+	id = cc_id;
+   num_o = _num_o;
+	matrix = sim_matrix_1d;
+	msize = matrix.size();
 
-	tcp = _tcp;
-	// for each pair of object, tjeck if it has a partner and if so assign the
-	// minimum similarity value. If a pair only has similarity data in one
-	// direction then assign the defautl similarity value
-	num_o = index2ObjName.size();
-	unsigned long msize = ((num_o * num_o) - num_o) / 2;
+	maxValue = std::numeric_limits<float>::lowest();
+	minValue = std::numeric_limits<float>::max();
+
+	index2ObjName.resize(num_o);
+	index2ObjId.resize(num_o);
+	for(unsigned i = 0; i < index2ObjName.size();i++){
+		index2ObjName.at(i) = std::to_string(i);
+		index2ObjId.at(i) = i;
+	}
+	for(unsigned i = 0; i < matrix.size(); i++){
+			float val = matrix.at(i);
+			if (maxValue < val){maxValue = val;}
+			if (minValue > val){minValue = val;}
+	}
+}
+
+void TriangularMatrix::writeToMemory(
+		std::map<std::string, unsigned>& object2index,
+		std::map<std::pair<std::string, std::string>, float> & sim_value,
+		std::map<std::pair<std::string, std::string>, bool> &hasPartner
+		)
+{
+	float val;
+	std::vector<std::pair<unsigned,unsigned>> positive_inf;
 	matrix.resize(msize);
 	for (unsigned i = 0; i < num_o; i++)
 	{
 		for (unsigned j = i + 1; j < num_o; j++)
 		{
-			std::pair<std::string, std::string> key;
-			key = std::make_pair(index2ObjName[i], index2ObjName[j]);
-
-			// default value if pair is missing
-			float val = tcp.sim_fallback;
-			if(!tcp.use_custom_fallback)
-			{
-				val = minValue;
+			if(ft == FileType::SIMPLE){
+				val = parseSimpleEdge(
+						positive_inf,
+						object2index,
+						sim_value,
+						hasPartner,
+						i,
+						j);
+				
+			}else if(ft == FileType::LEGACY){
+				val = parseLegacyEdge(
+						object2index,
+						sim_value,
+						hasPartner,
+						i,
+						j);
+				
 			}
-
-			// if the pair is in simvalue and it has a partner
-			// choose the smallest sim value
-			// else
-			// use defualt value
-			if(sim_value.find(key) != sim_value.end())
-			{
-				if(hasPartner.find(key) != hasPartner.end())
-				{
-					std::pair<std::string, std::string> rkey;
-					rkey = std::make_pair(index2ObjName[j], index2ObjName[i]);
-					val = std::min(sim_value[key],sim_value[rkey]);
-				}
-			}
-			if(maxValue < val){maxValue = val;};
-			matrix.at(index(i, j)) = val;
+			matrix.at(index(i,j)) = val;
 		}
 	}
 
+	if(ft == FileType::SIMPLE){
+		for(std::pair<unsigned,unsigned> &p:positive_inf){
+			matrix.at(index(p.first,p.second)) = maxValue;
+		}
+	}
 }
 
-void TriangularMatrix::parseSimpleSimDataFile(
-		std::map<std::string, unsigned> &object2index,
+void TriangularMatrix::writeToFile(
+		std::map<std::string, unsigned>& object2index,
 		std::map<std::pair<std::string, std::string>, float> & sim_value,
-		std::map<std::pair<std::string, std::string>, bool> &hasPartner,
-		TCC::TransClustParams& tcp)
+		std::map<std::pair<std::string, std::string>, bool> &hasPartner
+		)
 {
-
-	// vector of indexes of similarity values which have Inf value. These indexes 
-	// will be set to maxValue after all other values have been assigned
+	float val;
 	std::vector<std::pair<unsigned,unsigned>> positive_inf;
+	// initialize (os agnostic) path to the temporary directory of the 
+	// external memory file
 
-	// Initialize the 1d matrix based on the number of objects
-	num_o = index2ObjName.size();
-	unsigned long msize = ((num_o * num_o) - num_o) / 2;
+	// set class variable with path to file
+	bin_file_path = getFilePath().string();
 
-	if(tcp.external){
-		/* EXTERNAL MEMORY VERSION */
-		/* EXTERNAL MEMORY VERSION */
-		/* EXTERNAL MEMORY VERSION */
+	// read the similarity values and write the values (column-wise lower 
+	// right half of matrix) to the binary 1d matrix.
+	//
+	//		a
+	//		bc    -> 1d column-wise lower right half
+	//		def   ->	
+	//		ghij  -> [a,b,d,g,k,c,e,h,l,f,i,m,j,n,o]    
+	//		klmno
+	//
+	//		index 1d matrix at i,j => (#rows * i - (i+1)*(i)/2 + j-(i+1))
+	//
 
-		// initialize (os agnostic) path to the temporary directory of the 
-		// external memory file
+	boost::iostreams::mapped_file_params mfp;
+	mfp.path = bin_file_path;
+	mfp.new_file_size = msize*sizeof(float);
 
-		// set class variable with path to file
-		bin_file_path = getFilePath().string();
+	boost::iostreams::mapped_file_sink mfs;
 
+	mfs.open(mfp);
 
-		// read the similarity values and write the values (column-wise lower 
-		// right half of matrix) to the binary 1d matrix.
-		//
-		//		a
-		//		bc    -> 1d column-wise lower right half
-		//		def   ->	
-		//		ghij  -> [a,b,d,g,k,c,e,h,l,f,i,m,j,n,o]    
-		//		klmno
-		//
-		//		index 1d matrix at i,j => (#rows * i - (i+1)*(i)/2 + j-(i+1))
-		//
-		std::ofstream fs;
-		fs.open(bin_file_path, std::fstream::out | std::fstream::binary);
+	if(mfs.is_open()){
 
-		if(fs.is_open()){
-			for (unsigned i = 0; i < num_o; i++)
-			{
-				for (unsigned j = i + 1; j < num_o; j++)
-				{
-					float val = parseSimpleEdge(positive_inf,object2index,sim_value,hasPartner,i,j);
-					fs.write((char*)&val, sizeof(float));
-				}
-			}
-		}else{
-			std::cout << "ERROR OPENING EXTERNAL FILE" << std::endl;
-			exit(1);
-		}
-		fs.close();
-
-	}else{
-		/* INTERNAL MEMORY VERSION */
-		/* INTERNAL MEMORY VERSION */
-		/* INTERNAL MEMORY VERSION */
-		matrix.resize(msize);
+		float* mmf = (float*)mfs.data();
 
 		for (unsigned i = 0; i < num_o; i++)
 		{
 			for (unsigned j = i + 1; j < num_o; j++)
 			{
-				float val = parseSimpleEdge(positive_inf,object2index,sim_value,hasPartner,i,j);
-				matrix.at(index(i, j)) = val;
+				if(ft == FileType::SIMPLE){
+					val = parseSimpleEdge(
+							positive_inf,
+							object2index,
+							sim_value,
+							hasPartner,
+							i,
+							j);
+
+				}else if(ft == FileType::LEGACY){
+					val = parseLegacyEdge(
+							object2index,
+							sim_value,
+							hasPartner,
+							i,
+							j);
+
+				}
+				mmf[index(i,j)] = val;
 			}
 		}
-		for(std::pair<unsigned,unsigned> &p:positive_inf){
-			matrix.at(index(p.first,p.second)) = maxValue;
+
+		if(ft == FileType::SIMPLE){
+			for(std::pair<unsigned,unsigned> &p:positive_inf){
+				mmf[index(p.first,p.second)] = maxValue;
+			}
+		}
+
+	}else{
+		std::cout << "ERROR OPENING EXTERNAL FILE" << std::endl;
+		exit(1);
+	}
+	mfs.close();
+}
+
+float TriangularMatrix::parseLegacyEdge(
+		std::map<std::string, unsigned>& object2index,
+		std::map<std::pair<std::string, std::string>, float> & sim_value,
+		std::map<std::pair<std::string, std::string>, bool> &hasPartner,
+		unsigned i,
+		unsigned j)
+{
+	// key for object pair in sim_value map
+	std::pair<std::string, std::string> key;
+	key = std::make_pair(index2ObjName[i], index2ObjName[j]);
+
+	// default value if pair is missing (minimum observed value)
+	float val = minValue;
+
+	// if some other value should be used
+	if(tcp.use_custom_fallback)
+	{
+		val = tcp.sim_fallback;
+	}
+
+	// if the pair is in sim_value and it has a partner
+	// 	choose the smallest sim value
+	if(sim_value.find(key) != sim_value.end())
+	{
+		if(hasPartner.find(key) != hasPartner.end())
+		{
+			std::pair<std::string, std::string> rkey;
+			rkey = std::make_pair(index2ObjName[j], index2ObjName[i]);
+			val = std::min(sim_value[key],sim_value[rkey]);
 		}
 	}
+
+	// update maxValue 
+	if(maxValue < val){maxValue = val;};
+	return val;
 }
 
 float TriangularMatrix::parseSimpleEdge(
@@ -262,11 +348,7 @@ float TriangularMatrix::parseSimpleEdge(
 	std::pair<std::string, std::string> key;
 	key = std::make_pair(index2ObjName[i], index2ObjName[j]);
 
-	float val = tcp.sim_fallback;
-	if(!tcp.use_custom_fallback)
-	{
-		val = minValue;
-	}
+	float val = 0;
 
 	if(sim_value.find(key) != sim_value.end())
 	{
@@ -286,6 +368,8 @@ float TriangularMatrix::parseSimpleEdge(
 		}else{
 			val = o1_o2;
 		}
+	}else{
+		val = tcp.sim_fallback;
 	}
 
 	if(val == std::numeric_limits<float>::max()){
@@ -304,15 +388,15 @@ void TriangularMatrix::readFile(
 	std::map<std::pair<std::string, std::string>, bool> &hasPartner
 	)
 {
+	// init max and min values
 	maxValue = std::numeric_limits<float>::lowest();
 	minValue = std::numeric_limits<float>::max();
-	/*********************************
-	 * Read the input similarity file
-	 ********************************/
+
+	// read file line by line
 	std::ifstream fs(filename);
 	for (std::string line; std::getline(fs, line); )
 	{
-		// split line from similarity file <o1,o2,sim val>
+		// split line: o1, o2, val
 		std::istringstream buf(line);
 		std::istream_iterator<std::string> beg(buf), end;
 		std::vector<std::string> tokens(beg, end);
@@ -322,11 +406,11 @@ void TriangularMatrix::readFile(
 		// object 2
 		std::string o2 = tokens.at(1);
 
-		// o1,o2 similarity
-		//float value = std::atof(tokens.at(2).c_str());
-		float value = std::stod(tokens.at(2));
+		// similarity
+		//float value = std::stod(tokens.at(2));
+		float value = std::stof(tokens.at(2));
 
-		// if inf/-inf
+		// if inf/-inf replace with numericlimits 
 		if(std::isinf(value))
 		{
 			if(value < 0 ){
@@ -353,7 +437,7 @@ void TriangularMatrix::readFile(
 			index2ObjId.push_back(_id);
 		}
 
-		// create key for similarity map (smallest id first)
+		// create key to check if the pair has a partner
 		std::pair<std::string, std::string> key;
 		if (object2index[o1] < object2index[o2])
 		{
@@ -364,8 +448,6 @@ void TriangularMatrix::readFile(
 			key = std::make_pair(o2, o1);
 		}
 
-		// if a similarity value for the two objects exists
-		// choose the smallest
 		if (sim_value.find(key) != sim_value.end())
 		{
 			hasPartner[key] = true;
@@ -377,35 +459,10 @@ void TriangularMatrix::readFile(
 		{
 			minValue = value;
 		}
+
 		sim_value[std::make_pair(o1,o2)] = value;
 	}
 	fs.close();
-
 }
 
-TriangularMatrix::TriangularMatrix(
-		std::vector<float>& sim_matrix_1d,
-		unsigned _num_o,
-		unsigned cc_id
-   )
-{
-	id = cc_id;
-   num_o = _num_o;
-	matrix = sim_matrix_1d;
-
-	maxValue = std::numeric_limits<float>::lowest();
-	minValue = std::numeric_limits<float>::max();
-
-	index2ObjName.resize(num_o);
-	index2ObjId.resize(num_o);
-	for(unsigned i = 0; i < index2ObjName.size();i++){
-		index2ObjName.at(i) = std::to_string(i);
-		index2ObjId.at(i) = i;
-	}
-	for(unsigned i = 0; i < matrix.size(); i++){
-			float val = matrix.at(i);
-			if (maxValue < val){maxValue = val;}
-			if (minValue > val){minValue = val;}
-	}
-}
 

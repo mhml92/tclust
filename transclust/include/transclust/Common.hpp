@@ -9,29 +9,29 @@ namespace TCC
 {
 	/* Config struct with fluint interface */
 	struct TransClustParams {
-	  	 std::string   file_type              =   "SIMPLE"; // LEGACY
-		 std::string 	normalization  		  =   "RELATIVE"; // ABSOLUTE
+	  	 std::string   file_type              =   "SIMPLE";         //   LEGACY
+	  	 std::string   normalization          =   "RELATIVE";       //   ABSOLUTE
 	  	 bool          use_custom_fallback    =   false;
-	  	 float        sim_fallback           =   0.0;
+	  	 float         sim_fallback           =   0.0;
 	  	 bool          use_default_interval   =   true;
-	  	 float        th_min                 =   0.0;
-	  	 float        th_max                 =   100;
-	  	 float        th_step                =   1.0;
-	  	 float        p                      =   1.0;
-	  	 float        f_att                  =   100.0;
-	  	 float        f_rep                  =   100.0;
+	  	 float         th_min                 =   0.0;
+	  	 float         th_max                 =   100;
+	  	 float         th_step                =   1.0;
+	  	 float         p                      =   1.0;
+	  	 float         f_att                  =   100.0;
+	  	 float         f_rep                  =   100.0;
 	  	 unsigned      R                      =   100;
 	  	 unsigned      dim                    =   3;
-	  	 float        start_t                =   100;
-	  	 float        d_init                 =   0.01;
-	  	 float        d_maximal              =   5.0;
-	  	 float        s_init                 =   0.01;
-	  	 float        f_s                    =   0.01;
-	  	 float        fpt_time_limit         =   5;
-	  	 float        fpt_max_cost           =   5000;
-	  	 float        fpt_step_size          =   10;
+	  	 float         start_t                =   100;
+	  	 float         d_init                 =   0.01;
+	  	 float         d_maximal              =   5.0;
+	  	 float         s_init                 =   0.01;
+	  	 float         f_s                    =   0.01;
+	  	 float         fpt_time_limit         =   5;
+	  	 float         fpt_max_cost           =   5000;
+	  	 float         fpt_step_size          =   10;
 	  	 bool          disable_force          =   false;
-	  	 bool          disable_fpt            =   false;
+	  	 bool          disable_fpt            =   true;
 	  	 unsigned      seed                   =   42;
 	  	 std::string   tmp_dir                =   "/tmp/tclust/";
 	  	 bool          external               =   false;

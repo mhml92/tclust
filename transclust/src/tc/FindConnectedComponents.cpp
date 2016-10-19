@@ -30,8 +30,6 @@ namespace FCC{
 			BFS_cc(membership,cc,threshold);
 		}
 
-		DEBUG_FCC(membership,cc,threshold);
-
 		for(auto &ccv:membership)
 		{
 			ccs.push(ConnectedComponent(cc,ccv,threshold,tcp));
@@ -47,7 +45,7 @@ namespace FCC{
 			ConnectedComponent &cc,
 			const float threshold)
 	{
-		std::vector<int> duf_result;
+		std::vector<long> duf_result;
 		for(int i = 0; i < cc.size(); i++)
 		{
 			for(int j = i+1; j < cc.size(); j++)
@@ -57,6 +55,13 @@ namespace FCC{
 				}
 			}
 		}
+		// makeing sure that all elements have been created in duf_result
+		DUF::find(duf_result,cc.size()-1);
+		/*for(unsigned i = 0; i < duf_result.size(); i++){
+			std::cout << duf_result.at(i) << ", ";
+		}
+		std::cout << std::endl;
+		*/
 		/* mapping root => vector in membership  */
 		std::map<unsigned,unsigned>cc_map;
 		for(unsigned i = 0; i < duf_result.size(); i++){

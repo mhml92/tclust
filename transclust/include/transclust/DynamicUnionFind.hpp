@@ -6,13 +6,13 @@ namespace DUF
 {
 
 	void funion(
-			std::vector<int>& membership,
-			int a,
-			int b
+			std::vector<long>& membership,
+			unsigned a,
+			unsigned b
 			);
 
-	int find(
-			std::vector<int>& membership,
-			int x);
+	long find(
+			std::vector<long>& membership,
+			unsigned x);
 }
 #endif

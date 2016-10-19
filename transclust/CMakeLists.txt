@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5.1)
 # project name
 project(TransClust) 
 #set(CMAKE_BUILD_TYPE Debug)
- 
+
 
 list(APPEND BOOST_REQUIRED_LIBRARIES iostreams)
 list(APPEND BOOST_REQUIRED_LIBRARIES system)
@@ -12,11 +12,11 @@ find_package(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_LIBRARIES})
 
 # get header files
 include_directories(
-   ${CMAKE_SOURCE_DIR}/include
-   ${CMAKE_SOURCE_DIR}/lib/tclap/include
-   ${CMAKE_SOURCE_DIR}/lib/plog/include
+	${CMAKE_SOURCE_DIR}/include
+	${CMAKE_SOURCE_DIR}/lib/tclap/include
+	${CMAKE_SOURCE_DIR}/lib/plog/include
 	${Boost_INCLUDE_DIR}
-)
+	)
 
 message(STATUS "${CMAKE_CXX_COMPILER_ID}") 
 message(STATUS "${CMAKE_BUILD_TYPE}") 
@@ -26,7 +26,7 @@ message(STATUS "${CMAKE_BUILD_TYPE}")
 #find_package(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_LIBRARIES})
 #find_package(Boost COMPONENTS iostreams REQUIRED)
 
- 
+
 # Set the output folder where your program will be created
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
@@ -54,7 +54,7 @@ add_executable(tclust src/tccli.cpp)
 target_link_libraries(tclust 
 	tc_core
 	${Boost_LIBRARIES}
-)
+	)
 
 #file(GLOB SOURCES "src/tc/*.cpp")
 #add_library(transclust SHARED ${SOURCES})

@@ -98,6 +98,7 @@ clustering TransClust::cluster()
 			cr.membership = std::vector<unsigned>(cc.size(),0);
 		}
 
+	
 		result.add(cc,cr);
 		float new_threshold = TCC::round(cc.getThreshold()+tcp.th_step);
 
@@ -110,39 +111,3 @@ clustering TransClust::cluster()
 	}
 	return result.get();
 }
-
-//void TransClust::init(TCC::TransClustParams& tcp){
-//   // set class vars from tcp
-//   // general vars
-//   use_custom_fallback = tcp.use_custom_fallback;
-//   sim_fallback = tcp.sim_fallback;
-//   use_custom_range = tcp.use_default_interval;
-//   threshold_min = tcp.th_min;
-//   threshold_max = tcp.th_max;
-//   threshold_step = tcp.th_step;
-//
-//   // Layout values
-//   p = tcp.p;
-//   f_att = tcp.f_att;
-//   f_rep = tcp.f_rep;
-//   R = tcp.R;
-//   start_t = tcp.start_t;
-//   dim = tcp.dim;
-//
-//   // partitioning values
-//   d_init = tcp.d_init;
-//   d_maximal = tcp.d_maximal;
-//   s_init = tcp.s_init;
-//   f_s = tcp.f_s;
-//
-//   // FPT values
-//   fpt_time_limit = tcp.fpt_time_limit;
-//   fpt_max_cost = tcp.fpt_max_cost;
-//   fpt_step_size = tcp.fpt_step_size;
-//
-//   disable_force = tcp.disable_force;
-//   disable_fpt = tcp.disable_fpt;
-//
-//   seed = tcp.seed;
-//
-//}

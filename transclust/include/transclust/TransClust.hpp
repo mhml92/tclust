@@ -11,26 +11,25 @@
 #include "transclust/ClusteringResult.hpp"
 #include "transclust/Result.hpp"
 
-
 class TransClust{
 
-public:
-   TransClust(
-      const std::string& filename,
-      TCC::TransClustParams& _tcp
-   );
+	public:
+		TransClust(
+				const std::string& filename,
+				TCC::TransClustParams& _tcp
+				);
 
-   TransClust(
-      std::vector<float>& sim_matrix_1d,
-      unsigned num_o,
-      TCC::TransClustParams& _tcp
-   );
+		TransClust(
+				std::vector<float>& sim_matrix_1d,
+				unsigned num_o,
+				TCC::TransClustParams& _tcp
+				);
 
-   clustering cluster();
-private:
-	TCC::TransClustParams tcp;
+		clustering cluster();
+	private:
+		TCC::TransClustParams tcp;
 
-   std::queue<ConnectedComponent> ccs;
-   std::vector<std::string> id2object;
+		std::queue<ConnectedComponent> ccs;
+		std::vector<std::string> id2object;
 };
 #endif
