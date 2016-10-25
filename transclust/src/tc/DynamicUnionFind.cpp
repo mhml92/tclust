@@ -61,11 +61,14 @@ namespace DUF
 		// Okay, the first time that this element is querried. Create all
 		// 		// elements up to this one
 		
-		if (x >= membership.size()) {
-			for (unsigned i = membership.size(); i <= x; i++) {
-				membership.push_back(std::numeric_limits<long>::lowest());
-			}
-			// As the element was freshly added, it cannot be already in a set.
+		//if (x >= membership.size()) {
+		//	for (unsigned i = membership.size(); i <= x; i++) {
+		//		membership.push_back(std::numeric_limits<long>::lowest());
+		//	}
+		//	// As the element was freshly added, it cannot be already in a set.
+		//	return x;
+		//}
+		if (membership.at(x) == std::numeric_limits<long>::lowest()) {
 			return x;
 		}
 

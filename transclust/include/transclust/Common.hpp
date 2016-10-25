@@ -68,6 +68,12 @@ namespace TCC
 		if(i > j){ std::swap(i,j);}
 		return (long) (( (std::uint64_t)j << 32) | (std::uint64_t)i);
 	}
+	inline std::pair<unsigned,unsigned> defuse(long l){
+		uint64_t l64 = (uint64_t)l;
+		uint32_t i = (uint32_t)(l64 >> 32);
+		uint32_t j = (uint32_t)(l64);
+		return std::make_pair(i,j);
+	}
 
 	inline float round(float f){
 		return std::rint(f*100000.0f)/100000.0f;

@@ -3,6 +3,10 @@
 #include <list>
 #include <limits>
 #include <plog/Log.h>
+#ifdef _OPENMP
+#	include <omp.h>
+#endif
+#include <unordered_map>
 #include "transclust/FindConnectedComponents.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/DynamicUnionFind.hpp"
@@ -24,12 +28,15 @@ namespace FCC{
 			const float threshold)
 	{
 		std::vector<std::vector<unsigned>>membership; 
-		BFS_cc(membership,cc,threshold);
+		//BFS_cc(membership,cc,threshold);
+		DUF_cc(membership,cc,threshold);
 		//if(tcp.external){
 		//	DUF_cc(membership,cc,threshold);
 		//}else{
 		//	BFS_cc(membership,cc,threshold);
 		//}
+		
+		DEBUG_FCC(membership,cc,threshold);
 
 		for(auto &ccv:membership)
 		{
@@ -46,10 +53,10 @@ namespace FCC{
 			ConnectedComponent &cc,
 			const float threshold)
 	{
-		std::vector<long> duf_result;
-		for(int i = 0; i < cc.size(); i++)
+		std::vector<long> duf_result(cc.size(),std::numeric_limits<long>::lowest());
+		for(unsigned i = 0; i < cc.size(); i++)
 		{
-			for(int j = i+1; j < cc.size(); j++)
+			for(unsigned j = i+1; j < cc.size(); j++)
 			{
 				if(cc.getCost(i,j,threshold) > 0){
 					DUF::funion(duf_result,i,j);
@@ -57,10 +64,10 @@ namespace FCC{
 			}
 		}
 		// makeing sure that all elements have been created in duf_result
-		DUF::find(duf_result,cc.size()-1);
+		//DUF::find(duf_result,cc.size()-1);
 
 		/* mapping root => vector in membership  */
-		std::map<unsigned,unsigned>cc_map;
+		std::unordered_map<unsigned,unsigned>cc_map;
 		for(unsigned i = 0; i < duf_result.size(); i++){
 			unsigned root = 0;
 			if(duf_result.at(i) < 0)
@@ -95,9 +102,7 @@ namespace FCC{
 		membership.push_back(std::vector<unsigned>());
 
 		std::queue<unsigned> Q;
-		unsigned componentId = 0;
-		Q.push(0);
-		membership.at(componentId).push_back(0);
+
 		while(!nodes.empty()){
 
 			unsigned i = Q.front();

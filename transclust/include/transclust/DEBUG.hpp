@@ -69,7 +69,7 @@ namespace DEBUG
 			while(!Q.empty()){
 				for(unsigned ei = 0; ei < membership.at(i).size(); ei++){
 					if( !assigned.at(ei) ){
-						if( cc.getMatrix().get( membership.at(i).at(Q.front()), membership.at(i).at(ei) )-threshold > 0){
+						if( cc.at( membership.at(i).at(Q.front()), membership.at(i).at(ei) ) > 0){
 							assigned.at(ei) = true;
 							Q.push(ei);
 						}
