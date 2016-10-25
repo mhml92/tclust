@@ -31,7 +31,7 @@ namespace TCC
 	  	 float         fpt_max_cost           =   5000;
 	  	 float         fpt_step_size          =   10;
 	  	 bool          disable_force          =   false;
-	  	 bool          disable_fpt            =   true;
+	  	 bool          disable_fpt            =   false;
 	  	 unsigned      seed                   =   42;
 	  	 std::string   tmp_dir                =   "/tmp/tclust/";
 	  	 bool          external               =   false;
@@ -63,8 +63,14 @@ namespace TCC
 		TransClustParams& set_external(bool val){external = val;return *this;}
 	};
 
-	inline float round(float d){
-		return std::rint(d*100000.0f)/100000.0f;
+	
+	inline long fuse(unsigned i,unsigned j){
+		if(i > j){ std::swap(i,j);}
+		return (long) (( (std::uint64_t)j << 32) | (std::uint64_t)i);
+	}
+
+	inline float round(float f){
+		return std::rint(f*100000.0f)/100000.0f;
 		
 	}
 

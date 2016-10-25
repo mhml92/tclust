@@ -11,9 +11,8 @@ ConnectedComponent::ConnectedComponent(
 	:
 		//m(filename,use_custom_fallback,sim_fallback,ft),
 		id(getNewId()),
-		m(filename,tcp,id),
 		threshold(0.0),
-		cost(-1)
+		m(filename,tcp,id)
 { 
 	init_normalization_context(tcp);
 }
@@ -21,14 +20,11 @@ ConnectedComponent::ConnectedComponent(
 ConnectedComponent::ConnectedComponent(
 		std::vector<float>& sim_matrix_1d,
 		unsigned num_o,
-		TCC::TransClustParams& tcp)//,
-		//bool use_custom_fallback,
-		//float sim_fallback)
+		TCC::TransClustParams& tcp)
 	:
 		id(getNewId()),
-		m(sim_matrix_1d,num_o,id),//,use_custom_fallback,sim_fallback),
 		threshold(0.0),
-		cost(-1)
+		m(sim_matrix_1d,num_o,id)
 {
 	init_normalization_context(tcp);
 }
@@ -40,9 +36,8 @@ ConnectedComponent::ConnectedComponent(
 		TCC::TransClustParams& tcp)
 	:
 		id(getNewId()),
-		m(cc.getMatrix(),objects,id),
 		threshold(th),
-		cost(-1.0)
+		m(cc.getMatrix(),objects,id,th,TCC::round(threshold-cc.getThreshold()))
 {
 	init_normalization_context(tcp);
 }

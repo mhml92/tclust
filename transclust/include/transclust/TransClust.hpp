@@ -29,6 +29,9 @@ class TransClust{
 	private:
 		TCC::TransClustParams tcp;
 
+		// LOG current threshold
+		float log_current_threshold = std::numeric_limits<float>::lowest();
+
 		std::queue<ConnectedComponent> ccs;
 		std::vector<std::string> id2object;
 };

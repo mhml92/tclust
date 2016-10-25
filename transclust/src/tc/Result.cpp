@@ -7,7 +7,6 @@
 Result::Result(std::vector<std::string> id2object)
 	:
 		id2object(id2object)
-
 { }
 
 void Result::add(ConnectedComponent& cc, ClusteringResult& cr)
@@ -23,11 +22,12 @@ void Result::add(ConnectedComponent& cc, ClusteringResult& cr)
 	// update clusters
 	std::vector<std::vector<unsigned>> clstrs;
 
-	std::unordered_map<unsigned,unsigned>clstr_index;
+	std::unordered_map<unsigned,unsigned> clstr_index;
 
 	for(unsigned i = 0; i < cr.membership.size(); i++)
 	{
 		unsigned clster_num = cr.membership.at(i);
+
 		// if cluster number is not present in map
 		if(clstr_index.find(clster_num) == clstr_index.end())
 		{

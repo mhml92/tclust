@@ -1,3 +1,4 @@
+#include <plog/Log.h>
 #include "transclust/TransClust.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/FindConnectedComponents.hpp"
@@ -53,6 +54,11 @@ clustering TransClust::cluster()
 	while(!ccs.empty()){
 		ConnectedComponent& cc = ccs.front();
 
+		if(cc.getThreshold() > log_current_threshold){
+			log_current_threshold = cc.getThreshold();
+			LOGI << "Clustering for threshold: " << log_current_threshold;
+		};
+
 		cc.load();
 
 		ClusteringResult cr;
@@ -62,8 +68,6 @@ clustering TransClust::cluster()
 
 		// if cc is at least a conflict tripple
 		if(cc.size() > 2){
-
-
 
 			/**********************************************************************
 			 * Cluster using FORCE
@@ -98,7 +102,6 @@ clustering TransClust::cluster()
 			cr.membership = std::vector<unsigned>(cc.size(),0);
 		}
 
-	
 		result.add(cc,cr);
 		float new_threshold = TCC::round(cc.getThreshold()+tcp.th_step);
 

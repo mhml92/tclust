@@ -1,6 +1,3 @@
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include <iterator>
 #include <limits>
 #include <cmath>
@@ -32,7 +29,12 @@ TriangularMatrix::TriangularMatrix(
 	std::map<std::pair<std::string, std::string>, bool> hasPartner;
 
 	// should the data reside in memory or on disk ("external" from memory)
-	is_external = tcp.external;
+	//is_external = tcp.external;
+	if(tcp.external){
+		sm = StorageMethod::EXTERNAL;
+	}else{
+		sm = StorageMethod::INTERNAL;
+	}
 
 	// is the content of the external file loaded in to memory
 	is_loaded = false;
@@ -43,7 +45,7 @@ TriangularMatrix::TriangularMatrix(
 	// number of nodes (objects)
 	num_o = index2ObjName.size();
 
-	// size of the cost matrix (number of edges in the fulle connected graph)
+	// size of the cost matrix (number of edges in the fully connected graph)
 	msize = ((num_o * num_o) - num_o) / 2;
 
 	// set file type enum
@@ -54,16 +56,22 @@ TriangularMatrix::TriangularMatrix(
 	}
 
 	// write cost matrix
-	if(tcp.external){
-		writeToFile(
-			object2index,
-			sim_value,
-			hasPartner);	
-	}else{
-		writeToMemory(
-			object2index,
-			sim_value,
-			hasPartner);	
+	switch(sm){
+		case StorageMethod::EXTERNAL:
+			writeToFile(
+					object2index,
+					sim_value,
+					hasPartner);	
+			break;
+		case StorageMethod::INTERNAL:
+			writeToMemory(
+					object2index,
+					sim_value,
+					hasPartner);	
+			break;
+		default:
+			std::cout << "ERROR no StorageMethod" << std::endl;
+			exit(0);
 	}
 }
 
@@ -74,80 +82,222 @@ TriangularMatrix::TriangularMatrix(
 TriangularMatrix::TriangularMatrix(
 		TriangularMatrix &m,
 		const std::vector<unsigned> &objects,
-		unsigned cc_id)
+		unsigned cc_id,
+		float threshold,
+		float delta_threshold)
 {
 	tcp = m.getTcp();
 	id = cc_id;
+
+	LOGD << id << ": "  << "Creating new TriangularMatrix with id: " << id;
+
+	// should the data reside in memory or on disk ("external" from memory)
+	if(tcp.external){
+		LOGD << id << ": "  << "Using StorageMethod::EXTERNAL";
+		sm = StorageMethod::EXTERNAL;
+	}else{
+		LOGD << id << ": "  << "Using StorageMethod::INTERNAL";
+		sm = StorageMethod::INTERNAL;
+	}
+
 	maxValue = std::numeric_limits<float>::lowest();
 	minValue = std::numeric_limits<float>::max();
 
 	num_o = objects.size();
+
+	LOGD << id << ": "  << "num_o: " << num_o;
+
 	msize = ((num_o * num_o) - num_o) / 2;
-	if(tcp.external && msize > 0){
 
-		bin_file_path = getFilePath().string();
+	LOGD << id << ": "  << "msize: " << msize;
 
-		boost::iostreams::mapped_file_params mfp;
-		mfp.path = bin_file_path;
-		mfp.new_file_size = msize*sizeof(float);
+	setCostStructure();
 
-		boost::iostreams::mapped_file_sink mfs;
+	switch(sm){
+		case StorageMethod::EXTERNAL:
+			///////////////////////////////////////////////////////////////////////
+			// EXTERNAL
+			///////////////////////////////////////////////////////////////////////
+			switch(cs){
+				case CostStructure::COST_MATRIX:
+				////////////////////////////////////////////////////////////////////
+				// EXTERNAL MATRIX
+				////////////////////////////////////////////////////////////////////
+					if(msize > 0){
+						data_file_path = getFilePath().string();
 
-		mfs.open(mfp);
-			
-		if(mfs.is_open()){
+						boost::iostreams::mapped_file_params mfp;
+						mfp.path = data_file_path;
+						mfp.new_file_size = msize*sizeof(float);
 
-			float* mmf = (float*)mfs.data();
+						boost::iostreams::mapped_file_sink mfs;
 
-			for (unsigned i = 0; i < num_o; i++)
-			{
-				// indexes
-				index2ObjName.push_back(m.getObjectName(objects.at(i)));
-				index2ObjId.push_back(m.getObjectId(objects.at(i)));
+						mfs.open(mfp);
 
-				for (unsigned j = i + 1; j < num_o; j++)
-				{
-					float val = m.get(objects.at(i), objects.at(j));
-					if (maxValue < val){maxValue = val;}
-					if (minValue > val){minValue = val;}
+						if(mfs.is_open()){
 
-					// read the similarity values and write the values (column-wise lower 
-					// right half of matrix) to the binary 1d matrix.
-					//
-					//		a
-					//		bc    -> 1d column-wise lower right half
-					//		def   ->	
-					//		ghij  -> [a,b,d,g,k,c,e,h,l,f,i,m,j,n,o]    
-					//		klmno
-					//
-					//		index 1d matrix at i,j => (#rows * i - (i+1)*(i)/2 + j-(i+1))
-					//
+							float* mmf = (float*)mfs.data();
 
-					mmf[index(i,j)] = val;
-				}
+							for (unsigned i = 0; i < num_o; i++)
+							{
+								// indexes
+								index2ObjName.push_back(m.getObjectName(objects.at(i)));
+								index2ObjId.push_back(m.getObjectId(objects.at(i)));
+
+								for (unsigned j = i + 1; j < num_o; j++)
+								{
+									float val = TCC::round(m.get(objects.at(i), objects.at(j))-delta_threshold);
+									if (maxValue < val){maxValue = val;}
+									if (minValue > val){minValue = val;}
+
+									// read the similarity values and write the values (column-wise lower 
+									// right half of matrix) to the binary 1d matrix.
+									//
+									//		a
+									//		bc    -> 1d column-wise lower right half
+									//		def   ->	
+									//		ghij  -> [a,b,d,g,k,c,e,h,l,f,i,m,j,n,o]    
+									//		klmno
+									//
+									//		index 1d matrix at i,j => (#rows * i - (i+1)*(i)/2 + j-(i+1))
+									//
+
+									mmf[index(i,j)] = val;
+								}
+							}
+							mfs.close();
+						}else{
+							std::cout << "ERROR OPENING EXTERNAL FILE" << std::endl;
+							exit(1);
+						}
+					}else{
+						index2ObjName.push_back(m.getObjectName(objects.at(0)));
+						index2ObjId.push_back(m.getObjectId(objects.at(0)));
+					}
+					break;
+				case CostStructure::COST_MAP:
+					/////////////////////////////////////////////////////////////////
+					// EXTERNAL MAP
+					/////////////////////////////////////////////////////////////////
+					if(msize > 0){
+						data_file_path = getFilePath().string();
+
+						std::ofstream ofs;
+						ofs.open(data_file_path);
+
+						if(ofs.is_open()){
+							for (unsigned i = 0; i < num_o; i++)
+							{
+								// indexes
+								index2ObjName.push_back(m.getObjectName(objects.at(i)));
+								index2ObjId.push_back(m.getObjectId(objects.at(i)));
+
+								for (unsigned j = i + 1; j < num_o; j++)
+								{
+									float val = m.get(objects.at(i), objects.at(j));
+
+									if(val == std::numeric_limits<float>::lowest()){
+										float val2 = -threshold;	
+										if (maxValue < val2){maxValue = val2;}
+										if (minValue > val2){minValue = val2;}
+									}else{
+										val = TCC::round(val - delta_threshold);
+										if (maxValue < val){maxValue = val;}
+										if (minValue > val){minValue = val;}
+										writePrecision(ofs,i,j,val);
+									}
+								}
+							}
+							ofs.close();
+						}else{
+							std::cout << "ERROR OPENING EXTERNAL FILE" << std::endl;
+							exit(1);
+						}
+					}else{
+						index2ObjName.push_back(m.getObjectName(objects.at(0)));
+						index2ObjId.push_back(m.getObjectId(objects.at(0)));
+					}
+					break;
+				default:
+					std::cout << "ERROR no CostRespresentation" << std::endl;
+					exit(0);
+
 			}
-			mfs.close();
-		}else{
-			std::cout << "ERROR OPENING EXTERNAL FILE" << std::endl;
-			exit(1);
-		}
-	}else{
+			break;
+		case StorageMethod::INTERNAL:
+			///////////////////////////////////////////////////////////////////////
+			// INTERNAL
+			///////////////////////////////////////////////////////////////////////
+			float val;
+			switch(cs){
+				case CostStructure::COST_MATRIX:
+					/////////////////////////////////////////////////////////////////
+					// INTERNAL MATRIX
+					/////////////////////////////////////////////////////////////////
+					matrix.resize(msize);
+					for (unsigned i = 0; i < num_o; i++)
+					{
+						// indexes
+						index2ObjName.push_back(m.getObjectName(objects.at(i)));
+						index2ObjId.push_back(m.getObjectId(objects.at(i)));
+						for (unsigned j = i + 1; j < num_o; j++)
+						{
+							val = m.get(objects.at(i), objects.at(j));
 
-		matrix.resize(msize);
-		for (unsigned i = 0; i < num_o; i++)
-		{
-			// indexes
-			index2ObjName.push_back(m.getObjectName(objects.at(i)));
-			index2ObjId.push_back(m.getObjectId(objects.at(i)));
-			for (unsigned j = i + 1; j < num_o; j++)
-			{
-				float val = m.get(objects.at(i), objects.at(j));
-				if (maxValue < val){maxValue = val;}
-				if (minValue > val){minValue = val;}
+							if(val == std::numeric_limits<float>::lowest())
+							{
+								val = tcp.sim_fallback-threshold;
+							}
+							else
+							{
+								val = TCC::round(val-delta_threshold);
+							}
 
-				matrix.at(index(i, j)) = val;
+							if (maxValue < val){maxValue = val;}
+							if (minValue > val){minValue = val;}
+
+							matrix.at(index(i, j)) = val;
+						}
+					}
+					break;
+				case CostStructure::COST_MAP:
+					/////////////////////////////////////////////////////////////////
+					// INTERNAL MAP
+					/////////////////////////////////////////////////////////////////
+					cost_map.reserve(msize/4);
+					for (unsigned i = 0; i < num_o; i++)
+					{
+						// indexes
+						index2ObjName.push_back(m.getObjectName(objects.at(i)));
+						index2ObjId.push_back(m.getObjectId(objects.at(i)));
+						for (unsigned j = i + 1; j < num_o; j++)
+						{
+							val = m.get(objects.at(i), objects.at(j));
+
+							if(val != std::numeric_limits<float>::lowest())
+							{
+								val =  TCC::round(val-delta_threshold);
+								if (maxValue < val){maxValue = val;}
+								if (minValue > val){minValue = val;}
+
+								cost_map.insert(std::make_pair(TCC::fuse(i,j),val));
+							}else{
+								float val2 = -threshold;	
+								if (maxValue < val2){maxValue = val2;}
+								if (minValue > val2){minValue = val2;}
+							}
+						}
+					}
+					
+					break;
+				default:
+					std::cout << "ERROR no CostRespresentation" << std::endl;
+					exit(0);
 			}
-		}
+			break;
+		default:
+			std::cout << "ERROR no StorageMethod" << std::endl;
+			exit(0);
 	}
 }
 
@@ -181,44 +331,134 @@ TriangularMatrix::TriangularMatrix(
 	}
 }
 
+
 void TriangularMatrix::writeToMemory(
 		std::map<std::string, unsigned>& object2index,
 		std::map<std::pair<std::string, std::string>, float> & sim_value,
 		std::map<std::pair<std::string, std::string>, bool> &hasPartner
 		)
 {
+	// variable holding the cost of the current cost
 	float val;
+
+	// if the input format is SIMPLE we need to keep track of which values have
+	// +inf values. After the entire matrix has been written these values must
+	// be chaged to maxValue
 	std::vector<std::pair<unsigned,unsigned>> positive_inf;
-	matrix.resize(msize);
-	for (unsigned i = 0; i < num_o; i++)
-	{
-		for (unsigned j = i + 1; j < num_o; j++)
-		{
-			if(ft == FileType::SIMPLE){
-				val = parseSimpleEdge(
-						positive_inf,
-						object2index,
-						sim_value,
-						hasPartner,
-						i,
-						j);
-				
-			}else if(ft == FileType::LEGACY){
-				val = parseLegacyEdge(
-						object2index,
-						sim_value,
-						hasPartner,
-						i,
-						j);
-				
+
+	setCostStructure();
+
+	// initialize whichever format we use to store the cost
+	switch(cs){
+		case CostStructure::COST_MATRIX:
+			///////////////////////////////////////////////////////////////////////
+			// MATRIX FORMAT
+			///////////////////////////////////////////////////////////////////////
+			matrix.resize(msize);
+			// for each pair of objects
+			for (unsigned i = 0; i < num_o; i++)
+			{
+				for (unsigned j = i + 1; j < num_o; j++)
+				{
+					// get the cost based on the file format
+
+					switch(ft){
+						case FileType::SIMPLE:
+							val = parseSimpleEdge(
+									positive_inf,
+									object2index,
+									sim_value,
+									hasPartner,
+									i,
+									j);
+							if(val == std::numeric_limits<float>::lowest())
+							{
+								val = tcp.sim_fallback;
+							}
+							break;
+						case FileType::LEGACY:
+							val = parseLegacyEdge(
+									object2index,
+									sim_value,
+									hasPartner,
+									i,
+									j);
+							if(val == std::numeric_limits<float>::lowest())
+							{
+								val = minValue;
+								// if some other value should be used
+								if(tcp.use_custom_fallback)
+								{
+									val = tcp.sim_fallback;
+								}
+							}
+							break;
+					}
+					// insert
+					matrix.at(index(i,j)) = val;
+				}
 			}
-			matrix.at(index(i,j)) = val;
-		}
+			break;
+		case CostStructure::COST_MAP:
+			///////////////////////////////////////////////////////////////////////
+			// MAP FORMAT
+			///////////////////////////////////////////////////////////////////////
+			cost_map.reserve(sim_value.size());
+			// for each pair of objects
+			for (unsigned i = 0; i < num_o; i++)
+			{
+				for (unsigned j = i + 1; j < num_o; j++)
+				{
+					// get the cost based on the file format
+					switch(ft){
+						case FileType::SIMPLE:
+							val = parseSimpleEdge(
+									positive_inf,
+									object2index,
+									sim_value,
+									hasPartner,
+									i,
+									j);
+							break;
+						case FileType::LEGACY:
+							val = parseLegacyEdge(
+									object2index,
+									sim_value,
+									hasPartner,
+									i,
+									j);
+							break;
+					}
+
+					// in the map format we dont need to store missing edges explicitly
+					if(val != std::numeric_limits<float>::lowest())
+					{
+						// note that we 'fuse' the two unsinged interger values, 
+						// representing the objects, in to a single unsigned long
+						cost_map.insert(std::make_pair(TCC::fuse(i,j),val));	
+					}
+				}
+			}
+			break;
+		default:
+			std::cout << "ERROR no CostStructure" << std::endl;
+			exit(0);
+
 	}
 
-	if(ft == FileType::SIMPLE){
-		for(std::pair<unsigned,unsigned> &p:positive_inf){
-			matrix.at(index(p.first,p.second)) = maxValue;
+	// if the file format is SIMPLE and there were inf values in the input
+	if(ft == FileType::SIMPLE)
+	{
+		for(std::pair<unsigned,unsigned> &p:positive_inf)
+		{
+			if(cs == CostStructure::COST_MATRIX)
+			{
+				matrix.at(index(p.first,p.second)) = maxValue;
+			}
+			else
+			{
+				cost_map[TCC::fuse(p.first,p.second)] = maxValue;	
+			}
 		}
 	}
 }
@@ -231,73 +471,159 @@ void TriangularMatrix::writeToFile(
 {
 	float val;
 	std::vector<std::pair<unsigned,unsigned>> positive_inf;
-	// initialize (os agnostic) path to the temporary directory of the 
-	// external memory file
 
 	// set class variable with path to file
-	bin_file_path = getFilePath().string();
+	data_file_path = getFilePath().string();
 
-	// read the similarity values and write the values (column-wise lower 
-	// right half of matrix) to the binary 1d matrix.
-	//
-	//		a
-	//		bc    -> 1d column-wise lower right half
-	//		def   ->	
-	//		ghij  -> [a,b,d,g,k,c,e,h,l,f,i,m,j,n,o]    
-	//		klmno
-	//
-	//		index 1d matrix at i,j => (#rows * i - (i+1)*(i)/2 + j-(i+1))
-	//
+	setCostStructure();
 
-	boost::iostreams::mapped_file_params mfp;
-	mfp.path = bin_file_path;
-	mfp.new_file_size = msize*sizeof(float);
-
-	boost::iostreams::mapped_file_sink mfs;
-
-	mfs.open(mfp);
-
-	if(mfs.is_open()){
-
-		float* mmf = (float*)mfs.data();
-
-		for (unsigned i = 0; i < num_o; i++)
-		{
-			for (unsigned j = i + 1; j < num_o; j++)
+	switch(cs){
+		case CostStructure::COST_MAP:
+			///////////////////////////////////////////////////////////////////////
+			// MAP FORMAT
+			///////////////////////////////////////////////////////////////////////
 			{
-				if(ft == FileType::SIMPLE){
-					val = parseSimpleEdge(
-							positive_inf,
-							object2index,
-							sim_value,
-							hasPartner,
-							i,
-							j);
+			std::ofstream ofs;
+			ofs.open (data_file_path);
 
-				}else if(ft == FileType::LEGACY){
-					val = parseLegacyEdge(
-							object2index,
-							sim_value,
-							hasPartner,
-							i,
-							j);
+			if(ofs.is_open()){
+				for (unsigned i = 0; i < num_o; i++)
+				{
+					for (unsigned j = i + 1; j < num_o; j++)
+					{
+						switch(ft){
+							case FileType::SIMPLE:
+								val = parseSimpleEdge(
+										positive_inf,
+										object2index,
+										sim_value,
+										hasPartner,
+										i,
+										j);
+								break;
+							case FileType::LEGACY:
+								val = parseLegacyEdge(
+										object2index,
+										sim_value,
+										hasPartner,
+										i,
+										j);
 
+								if(val == std::numeric_limits<float>::lowest())
+								{
+									val = minValue;
+
+									// if some other value should be used
+									if(tcp.use_custom_fallback)
+									{
+										val = tcp.sim_fallback;
+									}
+								}
+								break;
+						}
+						if(val != std::numeric_limits<float>::lowest())
+						{
+							writePrecision(ofs,i,j,val);
+						}
+					}
 				}
-				mmf[index(i,j)] = val;
-			}
-		}
 
-		if(ft == FileType::SIMPLE){
-			for(std::pair<unsigned,unsigned> &p:positive_inf){
-				mmf[index(p.first,p.second)] = maxValue;
+				if(ft == FileType::SIMPLE){
+					for(std::pair<unsigned,unsigned> &p:positive_inf){
+						writePrecision(ofs,p.first,p.second,maxValue);
+					}
+				}
+			
+			}else{
+				std::cout << "ERROR opening file for map" << std::endl;
+				exit(0);
 			}
-		}
 
-	}else{
-		std::cout << "ERROR OPENING EXTERNAL FILE" << std::endl;
-		exit(1);
+			ofs.close();
+			}
+			break;
+		case CostStructure::COST_MATRIX:
+			///////////////////////////////////////////////////////////////////////
+			// MATRIX FORMAT
+			///////////////////////////////////////////////////////////////////////
+			// read the similarity values and write the values (column-wise lower 
+			// right half of matrix) to the binary 1d matrix.
+			//
+			//		a
+			//		bc    -> 1d column-wise lower right half
+			//		def   ->	
+			//		ghij  -> [a,b,d,g,k,c,e,h,l,f,i,m,j,n,o]    
+			//		klmno
+			//
+			//		index 1d matrix at i,j => (#rows * i - (i+1)*(i)/2 + j-(i+1))
+			//
+
+			boost::iostreams::mapped_file_params mfp;
+			mfp.path = data_file_path;
+			mfp.new_file_size = msize*sizeof(float);
+
+			boost::iostreams::mapped_file_sink mfs;
+
+			mfs.open(mfp);
+
+			if(mfs.is_open())
+			{
+				float* mmf = (float*)mfs.data();
+
+				for (unsigned i = 0; i < num_o; i++)
+				{
+					for (unsigned j = i + 1; j < num_o; j++)
+					{
+						switch(ft){
+							case FileType::SIMPLE:
+								val = parseSimpleEdge(
+										positive_inf,
+										object2index,
+										sim_value,
+										hasPartner,
+										i,
+										j);
+								if(val == std::numeric_limits<float>::lowest())
+								{
+									val = tcp.sim_fallback;
+								}
+								break;
+							case FileType::LEGACY:
+								val = parseLegacyEdge(
+										object2index,
+										sim_value,
+										hasPartner,
+										i,
+										j);
+
+								if(val == std::numeric_limits<float>::lowest())
+								{
+									val = minValue;
+
+									// if some other value should be used
+									if(tcp.use_custom_fallback)
+									{
+										val = tcp.sim_fallback;
+									}
+								}
+								break;
+						}
+						mmf[index(i,j)] = val;
+					}
+				}
+
+				if(ft == FileType::SIMPLE){
+					for(std::pair<unsigned,unsigned> &p:positive_inf){
+						mmf[index(p.first,p.second)] = maxValue;
+					}
+				}
+			}else{
+				std::cout << "ERROR OPENING EXTERNAL FILE" << std::endl;
+				exit(1);
+			}
+			mfs.close();
+			break;
 	}
-	mfs.close();
 }
 
 float TriangularMatrix::parseLegacyEdge(
@@ -311,14 +637,7 @@ float TriangularMatrix::parseLegacyEdge(
 	std::pair<std::string, std::string> key;
 	key = std::make_pair(index2ObjName[i], index2ObjName[j]);
 
-	// default value if pair is missing (minimum observed value)
-	float val = minValue;
-
-	// if some other value should be used
-	if(tcp.use_custom_fallback)
-	{
-		val = tcp.sim_fallback;
-	}
+	float val = std::numeric_limits<float>::lowest();
 
 	// if the pair is in sim_value and it has a partner
 	// 	choose the smallest sim value
@@ -369,7 +688,7 @@ float TriangularMatrix::parseSimpleEdge(
 			val = o1_o2;
 		}
 	}else{
-		val = tcp.sim_fallback;
+		val = std::numeric_limits<float>::lowest();
 	}
 
 	if(val == std::numeric_limits<float>::max()){
@@ -388,6 +707,7 @@ void TriangularMatrix::readFile(
 	std::map<std::pair<std::string, std::string>, bool> &hasPartner
 	)
 {
+	LOGI << "Reading input...";
 	// init max and min values
 	maxValue = std::numeric_limits<float>::lowest();
 	minValue = std::numeric_limits<float>::max();
@@ -463,6 +783,7 @@ void TriangularMatrix::readFile(
 		sim_value[std::make_pair(o1,o2)] = value;
 	}
 	fs.close();
+	LOGI << "done";
 }
 
 

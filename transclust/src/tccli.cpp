@@ -11,13 +11,12 @@
 /*******************************************************************************
  * Set logging verbosity
  ******************************************************************************/
-const plog::Severity VERBOSITY = plog::none;
+//const plog::Severity VERBOSITY = plog::info;
 //const plog::Severity VERBOSITY = plog::fatal;
 //const plog::Severity VERBOSITY = plog::error;
 //const plog::Severity VERBOSITY = plog::warning;
-//const plog::Severity VERBOSITY = plog::info;
 //const plog::Severity VERBOSITY = plog::debug;
-//const plog::Severity VERBOSITY = plog::verbose;
+const plog::Severity VERBOSITY = plog::verbose;
 
 int main(int argc, char** argv){
 	/****************************************************************************

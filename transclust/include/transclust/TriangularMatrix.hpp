@@ -4,14 +4,22 @@
 #include <map>
 #include <vector>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <plog/Log.h>
+#include <boost/unordered_map.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include "transclust/Common.hpp"
 
 class TriangularMatrix{
 	public:
-		// Create connected component based on TriangularMatrix and threshold
-		TriangularMatrix(TriangularMatrix &m,const std::vector<unsigned> &objects,unsigned cc_id);
+		TriangularMatrix(
+				TriangularMatrix &m,
+				const std::vector<unsigned> &objects,
+				unsigned cc_id,
+				float threshold,
+				float delta_threshold);
 
 		// Read input similarity file and create similarity matrix
 		TriangularMatrix(const std::string &filename,TCC::TransClustParams& tcp,unsigned cc_id);
@@ -19,33 +27,107 @@ class TriangularMatrix{
 		// Read 1d similarity matrix
 		TriangularMatrix(std::vector<float>& sim_matrix_1d,unsigned _num_o,unsigned cc_id);
 
+		/**
+		 * Returns the cost of the edge between i and j
+		 * OR std::numeric_limits<float>::lowest() if the edge is not present
+		 */
 		inline float get(unsigned i,unsigned j) {
-			if(tcp.external){
-				if(!is_loaded || !mm_file.is_open()){
-					std::cout << bin_file_path << std::endl;
-					std::cout << "ERROR - file notloaded " << is_loaded << std::endl;
-				}
-				float val =  *((float*)mm_file.data()+index(i,j));
-				return val;
-			}else{
-				return matrix.at(index(i,j));
+			switch(cs){
+				case CostStructure::COST_MATRIX:
+					switch(sm){
+						case StorageMethod::EXTERNAL:
+							///////////////////////////////////////////////////////////
+							// MATRIX FORMAT
+							///////////////////////////////////////////////////////////
+							if(!is_loaded || !mm_file.is_open()){
+								std::cout << data_file_path << std::endl;
+								std::cout << "ERROR - file notloaded " << is_loaded << std::endl;
+							}
+
+							return *((float*)mm_file.data()+index(i,j));
+							break;
+						case StorageMethod::INTERNAL:
+							///////////////////////////////////////////////////////////
+							// MATRIX FORMAT
+							///////////////////////////////////////////////////////////
+							return matrix.at(index(i,j));
+							break;
+					}
+					break;
+				case CostStructure::COST_MAP:
+					switch(sm){
+						case StorageMethod::EXTERNAL:
+							if(!is_loaded){
+								std::cout << data_file_path << std::endl;
+								std::cout << "ERROR - file not loaded " << is_loaded << std::endl;
+							}
+						case StorageMethod::INTERNAL:
+							///////////////////////////////////////////////////////////
+							// MAP FORMAT
+							///////////////////////////////////////////////////////////
+							long key = TCC::fuse(i,j);
+							if(cost_map.find(key) != cost_map.end())
+							{
+								return cost_map[key];
+							}else{
+								return std::numeric_limits<float>::lowest();
+							}
+							break;
+					}
+					break;
 			}
+			std::cout << "ERROR " << __LINE__ << " " << __FILE__ << std::endl;
+			return 0;
 		};
 
 		inline void load(){
-			if(tcp.external){
+			LOGD << "Loading TriangularMatrix with id " << id;
+			if(sm == StorageMethod::EXTERNAL){
 				if(num_o > 1){
-					mm_file.open(bin_file_path);
+					switch(cs){
+						case CostStructure::COST_MAP:
+							{
+								std::ifstream fs(data_file_path);
+								for (std::string line; std::getline(fs, line); )
+								{
+									std::istringstream buf(line);
+									std::istream_iterator<std::string> beg(buf), end;
+									std::vector<std::string> tokens(beg, end);
+									
+									cost_map.insert( 
+											std::make_pair(
+												std::stol(tokens.at(0)),
+												std::stof(tokens.at(1))
+												) 
+											);
+								}
+								fs.close();
+							
+							}
+							break;
+						case CostStructure::COST_MATRIX:
+							mm_file.open(data_file_path);
+							break;
+					}
 				}
 				is_loaded = true;
 			}
 		};
 		inline void free(){
-			if(tcp.external){
+			if(sm == StorageMethod::EXTERNAL){
 				if(num_o > 1){
-					mm_file.close();
+					switch(cs){
+						case CostStructure::COST_MAP:
+							break;
+						case CostStructure::COST_MATRIX:
+							mm_file.close();
+							break;
+					}
 				}
-				boost::filesystem::remove(bin_file_path);
+				LOGD << "Freeing TriangularMatrix with id " << id;
+
+				// delete old data file
+				boost::filesystem::remove(data_file_path);
 				is_loaded = false;
 			}
 		};
@@ -66,12 +148,31 @@ class TriangularMatrix{
 		// string comparisons can be relativly costly
 		enum FileType {SIMPLE,LEGACY};
 
+		enum StorageMethod {INTERNAL,EXTERNAL};
+
+		enum CostStructure {COST_MATRIX,COST_MAP};
+
 		unsigned id;
-		bool is_external = false;
+
 		FileType ft;
+
+		StorageMethod sm;
+
+		CostStructure cs;
+
+		// number of obejcts
 		unsigned num_o;
+
+		// number of edges
 		unsigned long msize;
+
+		// matrix (1d vector) storing cost values
 		std::vector<float> matrix;
+
+		// map for storing cost values
+		boost::unordered_map<long,float> cost_map;
+
+
 		float maxValue = 0;
 		float minValue = 0;
 		std::vector<std::string> index2ObjName;
@@ -80,10 +181,10 @@ class TriangularMatrix{
 
 
 		/* EXTERNAL MEMORY */
-		std::string bin_file_path;
+		std::string data_file_path;
 		boost::iostreams::mapped_file_source mm_file;
 		bool is_loaded = false;
-		
+
 		void writeToFile(
 				std::map<std::string, unsigned>& object2index,
 				std::map<std::pair<std::string, std::string>, float> & sim_value,
@@ -118,7 +219,25 @@ class TriangularMatrix{
 				std::map<std::pair<std::string, std::string>, bool> &hasPartner
 				);
 
-		
+		inline void setCostStructure(){
+			if(msize > (unsigned long)matrix.max_size()){
+				cs = CostStructure::COST_MAP;
+			}else{
+				cs = CostStructure::COST_MATRIX;
+			}
+			//debug
+			//cs = CostStructure::COST_MAP;
+		};
+
+		inline void writePrecision(
+				std::ofstream& ofs,
+				unsigned i, 
+				unsigned j, 
+				float val)
+		{
+			ofs << TCC::fuse(i,j) <<"\t"<< std::fixed << std::setprecision(8) << val<< "\n";
+		};
+
 		/**
 		 * Contructs a filename and creates path if neccesary
 		 */
@@ -133,7 +252,7 @@ class TriangularMatrix{
 					"_objects_" + 
 					std::to_string(num_o) + 
 					".bcm"
-			);
+					);
 			return dir / _file;
 		};
 

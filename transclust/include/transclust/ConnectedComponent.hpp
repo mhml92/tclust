@@ -33,27 +33,28 @@ class ConnectedComponent
 		inline void load(){m.load();};
 
 		// get cost for some threshold
-		inline float getCost(unsigned i, unsigned j, float t){ return TCC::round(m.get(i, j) - t);}
+		inline float getCost(unsigned i, unsigned j, float t){ 
+			return TCC::round(at(i, j,false) - (t-getThreshold()));
+		}
 
 		// get the value of the edge in the cc 
 		inline float at(unsigned i, unsigned j, bool normalized = true)
 		{
-			float sim = m.get(i, j) - threshold;
-			if(sim == std::numeric_limits<float>::lowest()){
-				// missing value
-				return getThreshold();
-			}else if (normalized)
-			{
+			float cost = m.get(i, j);
 
-				if( sim > 0){
-					return TCC::round(sim / normalization_context_positive);
-				}else{
-					return TCC::round(sim / normalization_context_negative);
-				}
+			if(cost == std::numeric_limits<float>::lowest()){
+				cost = -getThreshold();
 			}
-			else
+
+			if (normalized)
 			{
-				return TCC::round(sim);
+				if( cost > 0){
+					return TCC::round(cost / normalization_context_positive);
+				}else{
+					return TCC::round(cost / normalization_context_negative);
+				}
+			}else{
+				return cost;
 			}
 		}
 
@@ -82,13 +83,13 @@ class ConnectedComponent
 		{
 			if(tcp.normalization == "RELATIVE"){
 
-				float max_val = TCC::round(std::abs(m.getMaxValue()-threshold));
+				float max_val = std::abs(m.getMaxValue());
 				if(max_val != 0){
 					normalization_context_positive = max_val;	
 				}else{
 					normalization_context_positive = 1;	
 				}
-				float min_val = TCC::round(std::abs(m.getMinValue()-threshold));
+				float min_val = std::abs(m.getMinValue()-threshold);
 				if(min_val != 0){
 					normalization_context_negative = min_val;	
 				}else{
@@ -97,8 +98,8 @@ class ConnectedComponent
 
 			}else if(tcp.normalization == "ABSOLUTE"){
 				float max_val = std::max(
-						TCC::round(std::abs(m.getMaxValue()-threshold)),
-						TCC::round(std::abs(m.getMinValue()-threshold))
+						std::abs(m.getMaxValue()),
+						std::abs(m.getMinValue())
 						);
 				normalization_context_positive = max_val;
 				normalization_context_negative = max_val;
@@ -106,11 +107,11 @@ class ConnectedComponent
 		
 		}
 		unsigned id;
-		TriangularMatrix m;
 		float threshold;
+		TriangularMatrix m;
 		float normalization_context_positive;
 		float normalization_context_negative;
-		float cost;
+		//float cost;
 
 		inline static unsigned getNewId()
 		{

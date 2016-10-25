@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <list>
 #include <limits>
+#include <plog/Log.h>
 #include "transclust/FindConnectedComponents.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/DynamicUnionFind.hpp"
@@ -23,12 +24,12 @@ namespace FCC{
 			const float threshold)
 	{
 		std::vector<std::vector<unsigned>>membership; 
-
-		if(tcp.external){
-			DUF_cc(membership,cc,threshold);
-		}else{
-			BFS_cc(membership,cc,threshold);
-		}
+		BFS_cc(membership,cc,threshold);
+		//if(tcp.external){
+		//	DUF_cc(membership,cc,threshold);
+		//}else{
+		//	BFS_cc(membership,cc,threshold);
+		//}
 
 		for(auto &ccv:membership)
 		{
@@ -57,11 +58,7 @@ namespace FCC{
 		}
 		// makeing sure that all elements have been created in duf_result
 		DUF::find(duf_result,cc.size()-1);
-		/*for(unsigned i = 0; i < duf_result.size(); i++){
-			std::cout << duf_result.at(i) << ", ";
-		}
-		std::cout << std::endl;
-		*/
+
 		/* mapping root => vector in membership  */
 		std::map<unsigned,unsigned>cc_map;
 		for(unsigned i = 0; i < duf_result.size(); i++){
