@@ -16,7 +16,8 @@
 //const plog::Severity VERBOSITY = plog::error;
 //const plog::Severity VERBOSITY = plog::warning;
 //const plog::Severity VERBOSITY = plog::debug;
-const plog::Severity VERBOSITY = plog::verbose;
+//const plog::Severity VERBOSITY = plog::verbose;
+const plog::Severity VERBOSITY = plog::none;
 
 int main(int argc, char** argv){
 	/****************************************************************************

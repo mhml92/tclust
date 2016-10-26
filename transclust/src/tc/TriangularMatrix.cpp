@@ -3,6 +3,7 @@
 #include <cmath>
 #include <utility>
 #include <stdlib.h>
+#include <boost/unordered_map.hpp>
 #include "transclust/TriangularMatrix.hpp"
 
 /**
@@ -20,13 +21,13 @@ TriangularMatrix::TriangularMatrix(
 	tcp = _tcp;
 
 	// map <object name> -> <index in matrix>
-	std::map<std::string, unsigned> object2index;
+	boost::unordered_map<std::string, unsigned> object2index;
 
 	// map for similarity value pair<<object1 name>-<object2 name>> -> <value>
-	std::map<std::pair<std::string, std::string>, float> sim_value;
+	boost::unordered_map<std::pair<std::string, std::string>, float> sim_value;
 
 	// map for findeing one-way sim values
-	std::map<std::pair<std::string, std::string>, bool> hasPartner;
+	boost::unordered_map<std::pair<std::string, std::string>, bool> hasPartner;
 
 	// should the data reside in memory or on disk ("external" from memory)
 	//is_external = tcp.external;
@@ -58,12 +59,14 @@ TriangularMatrix::TriangularMatrix(
 	// write cost matrix
 	switch(sm){
 		case StorageMethod::EXTERNAL:
+			LOGI << "writing to file";
 			writeToFile(
 					object2index,
 					sim_value,
 					hasPartner);	
 			break;
 		case StorageMethod::INTERNAL:
+			LOGI << "writing to memory";
 			writeToMemory(
 					object2index,
 					sim_value,
@@ -121,7 +124,7 @@ TriangularMatrix::TriangularMatrix(
 			switch(cs){
 				case CostStructure::COST_MATRIX:
 				////////////////////////////////////////////////////////////////////
-				// EXTERNAL MATRIX
+				// EXTERNAL MATRIX FROM TRIANGULAR MATRIX
 				////////////////////////////////////////////////////////////////////
 					if(msize > 0){
 						data_file_path = getFilePath().string();
@@ -177,7 +180,7 @@ TriangularMatrix::TriangularMatrix(
 					break;
 				case CostStructure::COST_MAP:
 					/////////////////////////////////////////////////////////////////
-					// EXTERNAL MAP
+					// EXTERNAL MAP FROM TRIANGULAR MATRIX
 					/////////////////////////////////////////////////////////////////
 					if(msize > 0){
 						data_file_path = getFilePath().string();
@@ -185,6 +188,7 @@ TriangularMatrix::TriangularMatrix(
 						std::ofstream ofs;
 						ofs.open(data_file_path);
 
+						// TODO changes to sparse map
 						if(ofs.is_open()){
 							for (unsigned i = 0; i < num_o; i++)
 							{
@@ -196,7 +200,8 @@ TriangularMatrix::TriangularMatrix(
 								{
 									float val = m.get(objects.at(i), objects.at(j));
 
-									if(val == std::numeric_limits<float>::lowest()){
+									if(val == std::numeric_limits<float>::lowest())
+									{
 										float val2 = -threshold;	
 										if (maxValue < val2){maxValue = val2;}
 										if (minValue > val2){minValue = val2;}
@@ -333,9 +338,9 @@ TriangularMatrix::TriangularMatrix(
 
 
 void TriangularMatrix::writeToMemory(
-		std::map<std::string, unsigned>& object2index,
-		std::map<std::pair<std::string, std::string>, float> & sim_value,
-		std::map<std::pair<std::string, std::string>, bool> &hasPartner
+		boost::unordered_map<std::string, unsigned>& object2index,
+		boost::unordered_map<std::pair<std::string, std::string>, float> & sim_value,
+		boost::unordered_map<std::pair<std::string, std::string>, bool> &hasPartner
 		)
 {
 	// variable holding the cost of the current cost
@@ -352,7 +357,7 @@ void TriangularMatrix::writeToMemory(
 	switch(cs){
 		case CostStructure::COST_MATRIX:
 			///////////////////////////////////////////////////////////////////////
-			// MATRIX FORMAT
+			// INTERNAL MATRIX
 			///////////////////////////////////////////////////////////////////////
 			matrix.resize(msize);
 			// for each pair of objects
@@ -401,7 +406,7 @@ void TriangularMatrix::writeToMemory(
 			break;
 		case CostStructure::COST_MAP:
 			///////////////////////////////////////////////////////////////////////
-			// MAP FORMAT
+			// INTERNAL MAP
 			///////////////////////////////////////////////////////////////////////
 			cost_map.reserve(sim_value.size());
 			// for each pair of objects
@@ -409,6 +414,7 @@ void TriangularMatrix::writeToMemory(
 			{
 				for (unsigned j = i + 1; j < num_o; j++)
 				{
+					
 					// get the cost based on the file format
 					switch(ft){
 						case FileType::SIMPLE:
@@ -464,9 +470,9 @@ void TriangularMatrix::writeToMemory(
 }
 
 void TriangularMatrix::writeToFile(
-		std::map<std::string, unsigned>& object2index,
-		std::map<std::pair<std::string, std::string>, float> & sim_value,
-		std::map<std::pair<std::string, std::string>, bool> &hasPartner
+		boost::unordered_map<std::string, unsigned>& object2index,
+		boost::unordered_map<std::pair<std::string, std::string>, float> & sim_value,
+		boost::unordered_map<std::pair<std::string, std::string>, bool> &hasPartner
 		)
 {
 	float val;
@@ -474,34 +480,57 @@ void TriangularMatrix::writeToFile(
 
 	// set class variable with path to file
 	data_file_path = getFilePath().string();
+	LOGI << "filename: " << data_file_path;
 
 	setCostStructure();
 
 	switch(cs){
 		case CostStructure::COST_MAP:
 			///////////////////////////////////////////////////////////////////////
-			// MAP FORMAT
+			// EXTERNAL MAP FROM FILE
 			///////////////////////////////////////////////////////////////////////
 			{
 			std::ofstream ofs;
 			ofs.open (data_file_path);
 
 			if(ofs.is_open()){
-				for (unsigned i = 0; i < num_o; i++)
-				{
-					for (unsigned j = i + 1; j < num_o; j++)
-					{
-						switch(ft){
-							case FileType::SIMPLE:
-								val = parseSimpleEdge(
-										positive_inf,
-										object2index,
-										sim_value,
-										hasPartner,
-										i,
-										j);
-								break;
-							case FileType::LEGACY:
+				switch(ft){
+					case FileType::SIMPLE:
+						float val;
+						for (auto it = sim_value.begin(); it != sim_value.end(); ++it )
+						{
+							std::string o1,o2;
+							o1 = it->first.first;
+							o2 = it->first.second;
+
+							unsigned i,j;
+							i = object2index[o1];
+							j = object2index[o2];
+							if(j < i){std::swap(i,j);}
+
+							val = parseSimpleEdge(
+									positive_inf,
+									object2index,
+									sim_value,
+									hasPartner,
+									i,
+									j);
+
+							if(val != std::numeric_limits<float>::lowest())
+							{
+								writePrecision(ofs,i,j,val);
+							}
+						}
+						//////////////////////////////////////////////////////////////
+						for(std::pair<unsigned,unsigned> &p:positive_inf){
+							writePrecision(ofs,p.first,p.second,maxValue);
+						}
+						break;
+					case FileType::LEGACY:
+						for (unsigned i = 0; i < num_o; i++)
+						{
+							for (unsigned j = i + 1; j < num_o; j++)
+							{
 								val = parseLegacyEdge(
 										object2index,
 										sim_value,
@@ -519,20 +548,58 @@ void TriangularMatrix::writeToFile(
 										val = tcp.sim_fallback;
 									}
 								}
-								break;
+								writePrecision(ofs,i,j,val);
+							}
 						}
-						if(val != std::numeric_limits<float>::lowest())
-						{
-							writePrecision(ofs,i,j,val);
-						}
-					}
+						break;
 				}
 
-				if(ft == FileType::SIMPLE){
-					for(std::pair<unsigned,unsigned> &p:positive_inf){
-						writePrecision(ofs,p.first,p.second,maxValue);
-					}
-				}
+				//for (unsigned i = 0; i < num_o; i++)
+				//{
+				//	for (unsigned j = i + 1; j < num_o; j++)
+				//	{
+				//		switch(ft){
+				//			case FileType::SIMPLE:
+				//				val = parseSimpleEdge(
+				//						positive_inf,
+				//						object2index,
+				//						sim_value,
+				//						hasPartner,
+				//						i,
+				//						j);
+				//				break;
+				//			case FileType::LEGACY:
+				//				val = parseLegacyEdge(
+				//						object2index,
+				//						sim_value,
+				//						hasPartner,
+				//						i,
+				//						j);
+
+				//				if(val == std::numeric_limits<float>::lowest())
+				//				{
+				//					val = minValue;
+
+				//					// if some other value should be used
+				//					if(tcp.use_custom_fallback)
+				//					{
+				//						val = tcp.sim_fallback;
+				//					}
+				//				}
+				//				break;
+				//		}
+				//		if(val != std::numeric_limits<float>::lowest())
+				//		{
+				//			writePrecision(ofs,i,j,val);
+				//		}
+				//	}
+				//}
+
+				//if(ft == FileType::SIMPLE){
+				//	for(std::pair<unsigned,unsigned> &p:positive_inf){
+				//		writePrecision(ofs,p.first,p.second,maxValue);
+				//	}
+				//}
 			
 			}else{
 				std::cout << "ERROR opening file for map" << std::endl;
@@ -544,7 +611,7 @@ void TriangularMatrix::writeToFile(
 			break;
 		case CostStructure::COST_MATRIX:
 			///////////////////////////////////////////////////////////////////////
-			// MATRIX FORMAT
+			// EXTERNAL MATRIX
 			///////////////////////////////////////////////////////////////////////
 			// read the similarity values and write the values (column-wise lower 
 			// right half of matrix) to the binary 1d matrix.
@@ -627,9 +694,9 @@ void TriangularMatrix::writeToFile(
 }
 
 float TriangularMatrix::parseLegacyEdge(
-		std::map<std::string, unsigned>& object2index,
-		std::map<std::pair<std::string, std::string>, float> & sim_value,
-		std::map<std::pair<std::string, std::string>, bool> &hasPartner,
+		boost::unordered_map<std::string, unsigned>& object2index,
+		boost::unordered_map<std::pair<std::string, std::string>, float> & sim_value,
+		boost::unordered_map<std::pair<std::string, std::string>, bool> &hasPartner,
 		unsigned i,
 		unsigned j)
 {
@@ -658,9 +725,9 @@ float TriangularMatrix::parseLegacyEdge(
 
 float TriangularMatrix::parseSimpleEdge(
 		std::vector<std::pair<unsigned,unsigned>>& positive_inf,
-		std::map<std::string, unsigned>& object2index,
-		std::map<std::pair<std::string, std::string>, float> & sim_value,
-		std::map<std::pair<std::string, std::string>, bool> &hasPartner,
+		boost::unordered_map<std::string, unsigned>& object2index,
+		boost::unordered_map<std::pair<std::string, std::string>, float> & sim_value,
+		boost::unordered_map<std::pair<std::string, std::string>, bool> &hasPartner,
 		unsigned i,
 		unsigned j)
 {
@@ -702,9 +769,9 @@ float TriangularMatrix::parseSimpleEdge(
 
 void TriangularMatrix::readFile(
 	const std::string &filename,
-	std::map<std::string, unsigned> &object2index,
-	std::map<std::pair<std::string, std::string>, float> & sim_value,
-	std::map<std::pair<std::string, std::string>, bool> &hasPartner
+	boost::unordered_map<std::string, unsigned> &object2index,
+	boost::unordered_map<std::pair<std::string, std::string>, float> & sim_value,
+	boost::unordered_map<std::pair<std::string, std::string>, bool> &hasPartner
 	)
 {
 	LOGI << "Reading input...";
@@ -784,6 +851,7 @@ void TriangularMatrix::readFile(
 	}
 	fs.close();
 	LOGI << "done";
+	LOGI << "minValue: " << minValue;
 }
 
 

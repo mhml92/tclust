@@ -7,6 +7,7 @@
 #	include <omp.h>
 #endif
 #include <unordered_map>
+#include <boost/lockfree/queue.hpp>
 #include "transclust/FindConnectedComponents.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/DynamicUnionFind.hpp"
@@ -28,8 +29,14 @@ namespace FCC{
 			const float threshold)
 	{
 		std::vector<std::vector<unsigned>>membership; 
+
+		LOGD << "Finding connected components for id: " << cc.getId();
+
 		//BFS_cc(membership,cc,threshold);
 		DUF_cc(membership,cc,threshold);
+
+		LOGD << "done. found " << membership.size() << " connected components";
+
 		//if(tcp.external){
 		//	DUF_cc(membership,cc,threshold);
 		//}else{
@@ -38,10 +45,12 @@ namespace FCC{
 		
 		DEBUG_FCC(membership,cc,threshold);
 
+		LOGD << "Creating datastructures for connected components";
 		for(auto &ccv:membership)
 		{
 			ccs.push(ConnectedComponent(cc,ccv,threshold,tcp));
 		}
+		LOGD << "done";
 	}
 
 	/****************************************************************************
@@ -54,13 +63,23 @@ namespace FCC{
 			const float threshold)
 	{
 		std::vector<long> duf_result(cc.size(),std::numeric_limits<long>::lowest());
-		for(unsigned i = 0; i < cc.size(); i++)
+		#pragma omp parallel
 		{
-			for(unsigned j = i+1; j < cc.size(); j++)
+			std::vector<std::pair<unsigned,unsigned>> edges;
+			#pragma omp for schedule(dynamic)
+			for(unsigned i = 0; i < cc.size(); i++)
 			{
-				if(cc.getCost(i,j,threshold) > 0){
-					DUF::funion(duf_result,i,j);
+				for(unsigned j = i+1; j < cc.size(); j++)
+				{
+					if(cc.getCost(i,j,threshold) > 0){
+						edges.push_back(std::make_pair(i,j));
+					}
 				}
+			}
+			#pragma omp critical
+			for(auto& e:edges)
+			{
+				DUF::funion(duf_result,e.first,e.second);
 			}
 		}
 		// makeing sure that all elements have been created in duf_result
@@ -102,7 +121,9 @@ namespace FCC{
 		membership.push_back(std::vector<unsigned>());
 
 		std::queue<unsigned> Q;
-
+		unsigned componentId = 0;
+		Q.push(0);
+		membership.at(componentId).push_back(0);
 		while(!nodes.empty()){
 
 			unsigned i = Q.front();

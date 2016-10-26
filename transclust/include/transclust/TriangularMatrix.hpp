@@ -81,8 +81,8 @@ class TriangularMatrix{
 		};
 
 		inline void load(){
-			LOGD << "Loading TriangularMatrix with id " << id;
 			if(sm == StorageMethod::EXTERNAL){
+				LOGD << "Loading TriangularMatrix with id " << id;
 				if(num_o > 1){
 					switch(cs){
 						case CostStructure::COST_MAP:
@@ -110,6 +110,7 @@ class TriangularMatrix{
 							break;
 					}
 				}
+				LOGD << "Loading done TriangularMatrix with id " << id;
 				is_loaded = true;
 			}
 		};
@@ -186,37 +187,37 @@ class TriangularMatrix{
 		bool is_loaded = false;
 
 		void writeToFile(
-				std::map<std::string, unsigned>& object2index,
-				std::map<std::pair<std::string, std::string>, float> & sim_value,
-				std::map<std::pair<std::string, std::string>, bool> &hasPartner
+				boost::unordered_map<std::string, unsigned>& object2index,
+				boost::unordered_map<std::pair<std::string, std::string>, float> & sim_value,
+				boost::unordered_map<std::pair<std::string, std::string>, bool> &hasPartner
 				);
 
 		void writeToMemory(
-				std::map<std::string, unsigned>& object2index,
-				std::map<std::pair<std::string, std::string>, float> & sim_value,
-				std::map<std::pair<std::string, std::string>, bool> &hasPartner
+				boost::unordered_map<std::string, unsigned>& object2index,
+				boost::unordered_map<std::pair<std::string, std::string>, float> & sim_value,
+				boost::unordered_map<std::pair<std::string, std::string>, bool> &hasPartner
 				);
 
 		float parseLegacyEdge(
-				std::map<std::string, unsigned>& object2index,
-				std::map<std::pair<std::string, std::string>, float> & sim_value,
-				std::map<std::pair<std::string, std::string>, bool> &hasPartner,
+				boost::unordered_map<std::string, unsigned>& object2index,
+				boost::unordered_map<std::pair<std::string, std::string>, float> & sim_value,
+				boost::unordered_map<std::pair<std::string, std::string>, bool> &hasPartner,
 				unsigned i,
 				unsigned j);
 
 		float parseSimpleEdge(
 				std::vector<std::pair<unsigned,unsigned>>& positive_inf,
-				std::map<std::string, unsigned> &object2index,
-				std::map<std::pair<std::string, std::string>, float> & sim_value,
-				std::map<std::pair<std::string, std::string>, bool> &hasPartner,
+				boost::unordered_map<std::string, unsigned>& object2index,
+				boost::unordered_map<std::pair<std::string, std::string>, float> & sim_value,
+				boost::unordered_map<std::pair<std::string, std::string>, bool> &hasPartner,
 				unsigned i,
 				unsigned j);
 
 		void readFile(
 				const std::string &filename,
-				std::map<std::string, unsigned> &object2index,
-				std::map<std::pair<std::string, std::string>, float> & sim_value,
-				std::map<std::pair<std::string, std::string>, bool> &hasPartner
+				boost::unordered_map<std::string, unsigned> &object2index,
+				boost::unordered_map<std::pair<std::string, std::string>, float> & sim_value,
+				boost::unordered_map<std::pair<std::string, std::string>, bool> &hasPartner
 				);
 
 		inline void setCostStructure(){
