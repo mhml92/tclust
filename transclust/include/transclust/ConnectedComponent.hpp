@@ -5,9 +5,11 @@
 #include <vector>
 #include <cmath>
 #include <math.h>
+#include <algorithm>
 #include <plog/Log.h>
 #include <stxxl/vector>
 #include <stxxl/map>
+#include <boost/algorithm/clamp.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
@@ -97,9 +99,9 @@ class ConnectedComponent
 
 			if(normalized){
 				if(cost > 0){
-					return TCC::round( std::clamp(cost / normalization_context_positive,-1,1));
+					return TCC::round( boost::algorithm::clamp(cost / normalization_context_positive,-1,1));
 				}else{
-					return TCC::round( std::clamp(cost / normalization_context_negative,-1,1));
+					return TCC::round( boost::algorithm::clamp(cost / normalization_context_negative,-1,1));
 				}
 			}else{
 				return cost;
