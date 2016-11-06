@@ -11,13 +11,13 @@
 /*******************************************************************************
  * Set logging verbosity
  ******************************************************************************/
-//const plog::Severity VERBOSITY = plog::info;
+const plog::Severity VERBOSITY = plog::none;
 //const plog::Severity VERBOSITY = plog::fatal;
 //const plog::Severity VERBOSITY = plog::error;
 //const plog::Severity VERBOSITY = plog::warning;
+//const plog::Severity VERBOSITY = plog::info;
 //const plog::Severity VERBOSITY = plog::debug;
 //const plog::Severity VERBOSITY = plog::verbose;
-const plog::Severity VERBOSITY = plog::none;
 
 int main(int argc, char** argv){
 	/****************************************************************************
@@ -30,240 +30,205 @@ int main(int argc, char** argv){
 	 * Parse input arguments
 	 ***************************************************************************/
 	try {
-		TCLAP::CmdLine cmd("cppTransClust", ' ', "1.0");
-
-		TCLAP::UnlabeledValueArg<std::string> simFilenameArg(
-				"simfile",                 // name
-				"Input similarity file",   // desc
-				true,                      // required
-				"not there",               // default val
-				"string"                   // type descripttion
-				);
-
-		TCLAP::ValueArg<std::string> simFileType_Arg(
-				"",
-				"simfile_type",
-				"",
-				false,
-				"SIMPLE",
-				"'SIMPLE','LEGACY' (default: 'SIMPLE')");
-
-		TCLAP::ValueArg<std::string> normalization_Arg(
-				"",
-				"normalization",
-				"",
-				false,
-				"RELATIVE",
-				"'RELATIVE','ABSOLUTE' (default: 'RELATIVE')");
-
-		TCLAP::ValueArg<std::string> tmp_dir_Arg(
-				"",
-				"tmp_dir",
-				"",
-				false,
-				"/tmp/tclust/",
-				"Temporary directory for external merge sort (default: '/tmp/tclust/')");
+		TCLAP::CmdLine cmd("Distributed TransClust", ' ', "1.0");
 
 
-		// layout vars
-		TCLAP::ValueArg<float> f_att_Arg(
-				"",
-				"f_att",
-				"Attraction force multiplier",
-				false,
-				100.0,
-				"float");
-		TCLAP::ValueArg<float> f_rep_Arg(
-				"",
-				"f_rep",
-				"Repulsion force multiplier",
-				false,
-				100.0,
-				"float");
-		TCLAP::ValueArg<unsigned> R_Arg(
-				"",
-				"R",
-				"Layout iterations",
-				false,
-				200,
-				"unsigned integer");
-		TCLAP::ValueArg<unsigned> dim_Arg(
-				"",
-				"dim",
-				"Layout dimensions",
-				false,
-				3,
-				"unsigend interger");
-		TCLAP::ValueArg<float> p_Arg(
-				"",
-				"p",
-				"Layout initial radius",
-				false,
-				1,
-				"float");
-
-		TCLAP::ValueArg<float> start_t_Arg(
-				"",
-				"start_t",
-				"Start temperature for force",
-				false,
-				100,
-				"float");
-
-		TCLAP::ValueArg<float> d_init_Arg(
-				"",
-				"d_init",
-				"Initital distance for geometric linking",
-				false,
-				0.01,
-				"float");
-		
-		TCLAP::ValueArg<float> d_maximal_Arg(
-				"",
-				"d_maximal",
-				"Maximal distance for geometric linking",
-				false,
-				5.0,
-				"float");
-
-		TCLAP::ValueArg<float> s_init_Arg(
-				"",
-				"s_init",
-				"Initial stepsize for geometric linking",
-				false,
-				0.01,
-				"float");
-
-		TCLAP::ValueArg<float> f_s_Arg(
-				"",
-				"f_s",
-				"Stepsize factor for geometric linking",
-				false,
-				0.01,
-				"float");
-
-		TCLAP::ValueArg<float> fallback_value_Arg(
-				"",
-				"fallback_value",
-				"",
-				false,
-				0.00,
-				"float");
-
-		TCLAP::ValueArg<float> threshold_min_Arg(
-				"",
-				"threshold_min",
-				"",
-				false,
-				0.0,
-				"float");
-
-		TCLAP::ValueArg<float> threshold_max_Arg(
-				"",
-				"threshold_max",
-				"",
-				false,
-				100.0,
-				"float");
-
-		TCLAP::ValueArg<float> threshold_step_Arg(
-				"",
-				"threshold_step",
-				"",
-				false,
-				1.0,
-				"float");
-
-		TCLAP::ValueArg<float> fpt_time_limit_Arg(
-				"",
-				"fpt_time_limit",
-				"",
-				false,
-				60.0,
-				"float");
-
-		TCLAP::ValueArg<float> fpt_max_cost_Arg(
-				"",
-				"fpt_max_cost",
-				"",
-				false,
-				5000.0,
-				"float");
-
-		TCLAP::ValueArg<float> fpt_step_size_Arg(
-				"",
-				"fpt_step_size",
-				"",
-				false,
-				10.0,
-				"float");
-
-		TCLAP::ValueArg<unsigned> seed_Arg(
+		TCLAP::ValueArg<unsigned> seed(
 				"",
 				"seed",
 				"",
 				false,
 				42,
-				"unsigned int");
+				"int (42)",
+				cmd);
 
-		TCLAP::SwitchArg use_default_interval_Arg(
+		TCLAP::ValueArg<unsigned> fpt_max_edge_conflicts(
 				"",
-				"use_default_interval",
-				"If false; set threshold vars",
-				cmd,
-				false);
+				"fpt_max_edge_conflicts",
+				"",
+				false,
+				5000,
+				"int (5000)",
+				cmd);
 
-		TCLAP::SwitchArg use_custom_fallback_Arg(
+		TCLAP::ValueArg<unsigned> fpt_max_cc_size(
 				"",
-				"use_custom_fallback",
+				"fpt_max_cc_size",
 				"",
-				cmd,
-				false);
+				false,
+				200,
+				"int (200)",
+				cmd);
 
-		TCLAP::SwitchArg disable_fpt_Arg(
+		TCLAP::ValueArg<float> fpt_step_size(
 				"",
-				"disable_fpt",
+				"fpt_step_size",
 				"",
-				cmd,
-				false);
+				false,
+				500.0,
+				"float (500.0)",
+				cmd);
 
-		TCLAP::SwitchArg disable_force_Arg(
+		TCLAP::ValueArg<float> fpt_time_limit(
+				"",
+				"FPTConfig.MAX_TIME",
+				"Specifies the maximal runtime for the FPT algorithm in seconds",
+				false,
+				1,
+				"float (1)",
+				cmd);
+
+		TCLAP::ValueArg<float> f_s(
+				"",
+				"f_s",
+				"Stepsize factor for geometric linking",
+				false,
+				0.01,
+				"float (0.01)",
+				cmd);
+
+
+		TCLAP::ValueArg<float> s_init(
+				"",
+				"s_init",
+				"Initial stepsize for geometric linking",
+				false,
+				0.01,
+				"float (0.01)",
+				cmd);
+
+		TCLAP::ValueArg<float> d_maximal(
+				"",
+				"d_maximal",
+				"Maximal distance for geometric linking",
+				false,
+				5.0,
+				"float (5.0)",
+				cmd);
+
+
+		TCLAP::ValueArg<float> d_init(
+				"",
+				"d_init",
+				"Initital distance for geometric linking",
+				false,
+				0.01,
+				"float (0.01)",
+				cmd);
+
+		TCLAP::ValueArg<float> FORCE_start_t(
+				"",
+				"FORCEConfig.TEMPERATURE",
+				"Defines the speed of how fast the movements are cooled down in order to achieve a stable result.",
+				false,
+				100.0,
+				"float (100.0)",
+				cmd);
+
+		TCLAP::ValueArg<float> FORCE_p(
+				"",
+				"p",
+				"Layout initial radius",
+				false,
+				1,
+				"float (1)",
+				cmd);
+
+		TCLAP::ValueArg<unsigned> FORCE_dim(
+				"",
+				"FORCEConfig.DIMENSION",
+				"Specifies the number of dimensions used for the layouter. 2 or 3 dimensions are normally fine values.",
+				false,
+				3,
+				"int (3)",
+				cmd);
+
+		TCLAP::ValueArg<unsigned> FORCE_R(
+				"",
+				"FORCEConfig.ITERATIONS",
+				"Number of iterations performed for the layouting process. For large instances it might be beneficial to reduce this number.",
+				false,
+				100,
+				"int (100)",
+				cmd);
+		
+		TCLAP::ValueArg<float> FORCE_rep(
+				"",
+				"FORCEConfig.REPULSION_FACTOR",
+				"Controls how strongly the repulsion of nodes determines the layouting.",
+				false,
+				100.0,
+				"float (100.0)",
+				cmd);
+		// layout vars
+		TCLAP::ValueArg<float> FORCE_att(
+				"",
+				"FORCEConfig.ATTRACTION_FACTOR",
+				"Temporary directory for external merge sort (default: '/tmp/tclust/')",
+				false,
+				100.0,
+				"float (100.0)",
+				cmd);
+
+		TCLAP::ValueArg<std::string> normalization(
+				"n",
+				"normalization",
+				"How normalization of cost values should be done. 'ABSOLUTE' normalizes by larges absolute value in a connected component, and 'RELATIVE' normalizes by larges positive value in a connected component.",
+				false,
+				"ABSOLUTE",
+				"string (ABSOLUTE)",
+				cmd);
+
+		TCLAP::SwitchArg disable_force(
 				"",
 				"disable_force",
 				"",
 				cmd,
 				false);
 
-		TCLAP::SwitchArg external_Arg(
+		TCLAP::SwitchArg disable_fpt(
 				"",
-				"external",
+				"disable_fpt",
 				"",
 				cmd,
 				false);
-		
 
-		cmd.add(fallback_value_Arg);
-		cmd.add(simFileType_Arg);
-		cmd.add(normalization_Arg);
-		cmd.add(simFilenameArg);
-		cmd.add(tmp_dir_Arg);
-		cmd.add(threshold_min_Arg);
-		cmd.add(threshold_max_Arg);
-		cmd.add(threshold_step_Arg);
-		cmd.add(f_att_Arg);
-		cmd.add(f_rep_Arg);
-		cmd.add(R_Arg);
-		cmd.add(dim_Arg);
-		cmd.add(p_Arg);
-		cmd.add(start_t_Arg);
-		cmd.add(d_init_Arg);
-		cmd.add(d_maximal_Arg);
-		cmd.add(s_init_Arg);
-		cmd.add(f_s_Arg);
-		cmd.add(fpt_time_limit_Arg);
-		cmd.add(fpt_step_size_Arg);
-		cmd.add(fpt_max_cost_Arg);
-		cmd.add(seed_Arg);
+		TCLAP::ValueArg<std::string> tmp_dir(
+				"",
+				"tmp_dir",
+				"Temporary directory for auxiliary files created during the run of the program",
+				false,
+				"/tmp/tclust/",
+				"string (/tmp/tclust/)",
+				cmd);
+
+		TCLAP::ValueArg<float> fallback_value(
+				"",
+				"defaultmissing",
+				"Sets the default similarity value to the given double value",
+				false,
+				0.0,
+				"float (0.0)",
+				cmd);
+
+		TCLAP::ValueArg<float> threshold(
+				"t",                
+				"threshold",    
+				"Threshold for the clustering or costmatrix creation.",
+				true,               
+				0,               
+				"float",
+				cmd
+				);
+
+		TCLAP::ValueArg<std::string> simfile(
+				"s",									// flag
+				"simfile",							// name
+				"Path and filename of the input Similarity file.",		// desc
+				true,									// req
+				"",									// value
+				"string",							// typeDesc
+				cmd);									// parser
 
 		cmd.parse( argc, argv );
 		/*************************************************************************
@@ -273,35 +238,35 @@ int main(int argc, char** argv){
 		TCC::TransClustParams tcp;
 
 		TransClust transclust(
-			// filename
-			simFilenameArg.getValue(),
-			tcp.set_use_custom_fallback(use_custom_fallback_Arg.getValue())
-				.set_sim_fallback(fallback_value_Arg.getValue())
-				.set_file_type(simFileType_Arg.getValue())
-				.set_normalization(normalization_Arg.getValue())
-				.set_use_default_interval(use_default_interval_Arg.getValue())
-				.set_th_min(threshold_min_Arg.getValue())
-				.set_th_max(threshold_max_Arg.getValue())
-				.set_th_step(threshold_step_Arg.getValue())
-				.set_p(p_Arg.getValue())
-				.set_f_att(f_att_Arg.getValue())
-				.set_f_rep(f_rep_Arg.getValue())
-				.set_R(R_Arg.getValue())
-				.set_dim(dim_Arg.getValue())
-				.set_start_t(start_t_Arg.getValue())
-				.set_d_init(d_init_Arg.getValue())
-				.set_d_maximal(d_maximal_Arg.getValue())
-				.set_s_init(s_init_Arg.getValue())
-				.set_f_s(f_s_Arg.getValue())
-				.set_fpt_time_limit(fpt_time_limit_Arg.getValue())
-				.set_fpt_max_cost(fpt_max_cost_Arg.getValue())
-				.set_fpt_step_size(fpt_step_size_Arg.getValue())
-				.set_disable_force(disable_force_Arg.getValue())
-				.set_disable_fpt(disable_fpt_Arg.getValue())
-				.set_seed(seed_Arg.getValue())
-				.set_tmp_dir(tmp_dir_Arg.getValue())
-				.set_external(external_Arg.getValue())
-		);
+				// filename
+				simfile.getValue(),
+				tcp.set_threshold(threshold.getValue())
+				.set_sim_fallback(fallback_value.getValue())
+				.set_normalization(normalization.getValue())
+
+				.set_p(FORCE_p.getValue())
+				.set_f_att(FORCE_att.getValue())
+				.set_f_rep(FORCE_rep.getValue())
+				.set_R(FORCE_R.getValue())
+				.set_dim(FORCE_dim.getValue())
+				.set_start_t(FORCE_start_t.getValue())
+
+				.set_d_init(d_init.getValue())
+				.set_d_maximal(d_maximal.getValue())
+				.set_s_init(s_init.getValue())
+				.set_f_s(f_s.getValue())
+
+				.set_fpt_time_limit(fpt_time_limit.getValue())
+				.set_fpt_step_size(fpt_step_size.getValue())
+		 		.set_fpt_max_edge_conflicts(fpt_max_edge_conflicts.getValue())
+				.set_fpt_max_cc_size(fpt_max_cc_size.getValue())
+				
+				.set_disable_fpt(disable_fpt.getValue())
+				.set_disable_force(disable_force.getValue())
+
+				.set_seed(seed.getValue())
+				.set_tmp_dir(tmp_dir.getValue())
+				);
 
 		/*************************************************************************
 		 * Cluster
@@ -327,7 +292,7 @@ int main(int argc, char** argv){
 			{
 				objects.push_back(i);
 			}
-			
+
 			std::string s = "";
 			while(!objects.empty())
 			{
@@ -344,7 +309,7 @@ int main(int argc, char** argv){
 						++it;
 					}
 				}
-				
+
 				s.pop_back();
 				s += ";";
 			}

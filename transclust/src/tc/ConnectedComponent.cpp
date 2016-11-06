@@ -1,60 +1,17 @@
 #include "transclust/ConnectedComponent.hpp"
 
-//ConnectedComponent::ConnectedComponent(
-//		const std::string &filename,
-//		bool use_custom_fallback,
-//		float sim_fallback,
-//		std::string ft)
 ConnectedComponent::ConnectedComponent(
-		const std::string &filename,
-		TCC::TransClustParams& tcp)
+		unsigned id,
+		long _num_positive_edges,
+		TCC::TransClustParams& _tcp)
 	:
-		//m(filename,use_custom_fallback,sim_fallback,ft),
-		id(getNewId()),
-		threshold(0.0),
-		m(filename,tcp,id)
-{ 
-	init_normalization_context(tcp);
-}
-
-ConnectedComponent::ConnectedComponent(
-		std::vector<float>& sim_matrix_1d,
-		unsigned num_o,
-		TCC::TransClustParams& tcp)
-	:
-		id(getNewId()),
-		threshold(0.0),
-		m(sim_matrix_1d,num_o,id)
+		cc_id(id),
+		tcp(_tcp),
+		num_positive_edges(_num_positive_edges)
 {
-	init_normalization_context(tcp);
-}
+		pcost_map = new external_cost_map_type((external_cost_map_type::node_block_type::raw_size)*3,(external_cost_map_type::leaf_block_type::raw_size)*3);
 
-ConnectedComponent::ConnectedComponent(
-		ConnectedComponent &cc,
-		const std::vector<unsigned> &objects,
-		float th,
-		TCC::TransClustParams& tcp)
-	:
-		id(getNewId()),
-		threshold(th),
-		m(cc.getMatrix(),objects,id,th,TCC::round(threshold-cc.getThreshold()))
-{
-	init_normalization_context(tcp);
-}
-
-void ConnectedComponent::dump()
-{
-	unsigned num_o = size();
-	std::cout << num_o << std::endl;
-	for(auto &name:m.getObjectNames()){
-		std::cout << name << std::endl;
-	}
-	for(unsigned i = 0; i < num_o;i++){
-		for(unsigned j = i+1;j < num_o;j++){
-			std::cout << at(i,j,false)<< "\t";
+		if(num_positive_edges == std::numeric_limits<long>::lowest()){
+			num_positive_edges = 0;
 		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
 }
-

@@ -14,6 +14,15 @@
 
 class TriangularMatrix{
 	public:
+
+
+		TriangularMatrix(TCC::TransClustParams& _tcp);
+		void init(
+				boost::unordered_map<unsigned,unsigned>& objectId2index,
+				std::deque<std::pair<std::pair<unsigned,unsigned>,float>>& cost_values
+				);
+
+		/*
 		TriangularMatrix(
 				TriangularMatrix &m,
 				const std::vector<unsigned> &objects,
@@ -27,10 +36,12 @@ class TriangularMatrix{
 		// Read 1d similarity matrix
 		TriangularMatrix(std::vector<float>& sim_matrix_1d,unsigned _num_o,unsigned cc_id);
 
+		*/
 		/**
 		 * Returns the cost of the edge between i and j
 		 * OR std::numeric_limits<float>::lowest() if the edge is not present
 		 */
+		/*
 		inline float get(unsigned i,unsigned j) {
 			switch(cs){
 				case CostStructure::COST_MATRIX:
@@ -142,13 +153,20 @@ class TriangularMatrix{
 		inline const unsigned getObjectId(unsigned i) const {return index2ObjId.at(i);};
 		inline const unsigned getMatrixSize() const {return matrix.size();};
 		inline const TCC::TransClustParams& getTcp() const {return tcp;}
-
+*/
 	private:
+		unsigned num_o;
+		TCC::TransClustParams tcp;
+
+		float maxValue = std::numeric_limits<float>::lowest();
+		float minValue = std::numeric_limits<float>::max();
+		// matrix (1d vector) storing cost values
+		std::vector<float> matrix;
+
 		// enum for file type. used in parsing inputfile. since there can be 
 		// billions of edges we want to reduce computation as much as possible and
 		// string comparisons can be relativly costly
-		enum FileType {SIMPLE,LEGACY};
-
+/*
 		enum StorageMethod {INTERNAL,EXTERNAL};
 
 		enum CostStructure {COST_MATRIX,COST_MAP};
@@ -179,9 +197,10 @@ class TriangularMatrix{
 		std::vector<std::string> index2ObjName;
 		std::vector<unsigned> index2ObjId;
 		TCC::TransClustParams tcp;
-
+*/
 
 		/* EXTERNAL MEMORY */
+	/*
 		std::string data_file_path;
 		boost::iostreams::mapped_file_source mm_file;
 		bool is_loaded = false;
@@ -238,10 +257,11 @@ class TriangularMatrix{
 		{
 			ofs << TCC::fuse(i,j) <<"\t"<< std::fixed << std::setprecision(8) << val<< "\n";
 		};
-
+*/
 		/**
 		 * Contructs a filename and creates path if neccesary
 		 */
+	/*
 		inline boost::filesystem::path getFilePath(){
 			boost::filesystem::path dir (tcp.tmp_dir);
 			if(!boost::filesystem::is_directory(dir)){
@@ -256,7 +276,7 @@ class TriangularMatrix{
 					);
 			return dir / _file;
 		};
-
+*/
 		// indexing the symetric matrix (column-major)
 		inline unsigned long index(unsigned i,unsigned j) const {
 			/* row-wise index */

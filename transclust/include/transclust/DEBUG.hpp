@@ -11,7 +11,7 @@ namespace DEBUG
 			std::vector<std::vector<float>>& pos, 
 			float distance)
 	{
-		//std::cout << "Debug geometricLinking" << std::endl;
+		std::cout << "Debug geometricLinking" << std::endl;
 
 		for(unsigned i = 0; i < clustering.size(); i++){
 			// test that each connected component IS connected
@@ -51,6 +51,7 @@ namespace DEBUG
 				}
 			}
 		}
+		std::cout << "Debug geometricLinking...done" << std::endl;
 	}
 
 	inline void findConnectedComponents(
@@ -58,7 +59,7 @@ namespace DEBUG
 			ConnectedComponent& cc, 
 			float threshold)
 	{
-		//std::cout << "Debug findConnectedComponents" << std::endl;
+		std::cout << "Debug findConnectedComponents" << std::endl;
 
 		for(unsigned i = 0; i < membership.size(); i++){
 			// test that each connected component IS connected
@@ -69,7 +70,7 @@ namespace DEBUG
 			while(!Q.empty()){
 				for(unsigned ei = 0; ei < membership.at(i).size(); ei++){
 					if( !assigned.at(ei) ){
-						if( cc.at( membership.at(i).at(Q.front()), membership.at(i).at(ei) ) > 0){
+						if( cc.getCost( membership.at(i).at(Q.front()), membership.at(i).at(ei) ) > 0){
 							assigned.at(ei) = true;
 							Q.push(ei);
 						}
@@ -90,7 +91,7 @@ namespace DEBUG
 				{
 					for(auto& j_ccv:membership.at(j))
 					{
-						if((cc.getMatrix().get(i_ccv,j_ccv) - threshold) > 0){
+						if(cc.getCost(i_ccv,j_ccv) > 0){
 							std::cout << "[ERROR]" << __FILE__ << " at line: " << __LINE__ << std::endl;
 						}
 					}
@@ -98,6 +99,7 @@ namespace DEBUG
 				}
 			}
 		}
+		std::cout << "Debug findConnectedComponents...done" << std::endl;
 	}
 
 	inline void round(float num){

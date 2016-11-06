@@ -45,6 +45,8 @@ WD + '/include/',
 WD + '/lib/tclap/include/',
 '-I',
 WD + '/lib/plog/include/',
+'-I',
+WD + '/stxxl/include',
 # include third party libraries
 #'-isystem',
 #'/usr/include/python2.7',

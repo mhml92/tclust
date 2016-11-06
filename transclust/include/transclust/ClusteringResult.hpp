@@ -1,6 +1,8 @@
 #ifndef CLUSTERINGRESULT_HPP
 #define CLUSTERINGRESULT_HPP
 #include <vector>
+#include <deque>
+#include <deque>
 #include <string>
 
 // Struct holding a partial clustering
@@ -10,7 +12,7 @@ struct ClusteringResult {
 };
 
 typedef struct clustering {
-	std::vector<std::string> id2object;
+	std::deque<std::string> id2object;
 	std::vector<float> threshold;
 	std::vector<float> cost;
 	std::vector< std::vector<unsigned> > clusters;

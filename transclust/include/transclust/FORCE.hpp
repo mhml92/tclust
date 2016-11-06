@@ -31,8 +31,8 @@ namespace FORCE{
 
 	std::vector<std::vector<unsigned>> geometricLinking(
 			std::vector<std::vector<float>>& pos,
-			const float maxDist,
-			const std::vector<std::vector<unsigned>>& objects);
+			float maxDist,
+			std::vector<std::vector<unsigned>>& objects);
 
 	void inline DEBUG_force(std::vector<std::vector<float>>& pos,int iter){
 

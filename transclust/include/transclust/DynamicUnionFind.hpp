@@ -2,17 +2,19 @@
 #define DYNAMIC_UNION_FIND_HPP
 #include <vector>
 
-namespace DUF
+class DynamicUnionFind
 {
+	public:
+		DynamicUnionFind();
+		inline std::vector<long>& getMembershipVector(){return membership;}
+		inline unsigned size() {return membership.size();}
+		inline long at(unsigned i){return membership.at(i);}
+		inline void reset(){membership.clear();}
 
-	void funion(
-			std::vector<long>& membership,
-			unsigned a,
-			unsigned b
-			);
+		void funion(unsigned a,unsigned b);
 
-	long find(
-			std::vector<long>& membership,
-			unsigned x);
-}
+		unsigned find(unsigned x);
+	private:
+		std::vector<long> membership;
+};
 #endif

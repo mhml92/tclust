@@ -92,8 +92,6 @@ namespace FORCE
 			/**********************************************************************
 			 * CALCULATE DELTA VECTOR
 			 *********************************************************************/
-			//float negative_force = 0;
-			//float positive_force = 0;
 			#pragma omp parallel
 			{
 				// create local copy
@@ -112,16 +110,16 @@ namespace FORCE
 							float force = 0.0f;
 
 							// normalized edge weight
-							float edge_weight = cc.at(i,j);
+							float edge_weight = 0;
+
+							//#pragma omp critical 
+							edge_weight = cc.getCost(i,j);
+							
 							if(edge_weight > 0)
 							{
 								force = (edge_weight * f_att * log_d)/_distance;
-								//#pragma omp atomic
-								//positive_force += force;
 							}else{
 								force = (edge_weight * f_rep)/log_d/_distance;
-								//#pragma omp atomic
-								//negative_force += force;
 							}
 							for(unsigned d = 0; d < dim; d++)
 							{
@@ -133,13 +131,17 @@ namespace FORCE
 					}
 				}
 
-				#pragma omp critical// for schedule(static)
+				#pragma omp critical
 				for(unsigned i = 0; i < delta.size(); i++)
 				{
-					for(unsigned j = 0; j < dim; j++)
-					{
-						delta.at(i).at(j) = delta.at(i).at(j) + _delta.at(i).at(j);
-					}
+					std::transform(delta.at(i).begin(),delta.at(i).end(),_delta.at(i).begin(),_delta.at(i).end(),std::plus<float>());
+					//for(unsigned j = 0; j < dim; j++)
+					//{
+					//	//std::transform(delta.begin(),delta.end(),_delta.begin(),_delta.end(),std::plus<float>());
+					//	//delta.at(i).at(j) = delta.at(i).at(j) + _delta.at(i).at(j);
+					//	#pragma omp atomic
+					//	delta.at(i).at(j) += _delta.at(i).at(j);
+					//}
 				}
 			}
 			//std::cout << cc.getId() << ","  << r << "," << positive_force << "," << std::abs(negative_force) << std::endl;
@@ -195,7 +197,10 @@ namespace FORCE
 		std::iota(dummy.begin(),dummy.end(),0);
 		clustering.push_back(dummy);
 
-		for(std::vector<float>::reverse_iterator it = D.rbegin(); it != D.rend(); ++it) {
+		long group = rand();
+		long count = 0;
+		for(std::vector<float>::reverse_iterator it = D.rbegin(); it != D.rend(); ++it) 
+		{
 			clustering = geometricLinking(pos,*it,clustering);
 
 			DEBUG_GM(clustering,pos,*it);
@@ -214,23 +219,29 @@ namespace FORCE
 			{
 				for(unsigned j = i+1; j < membership.size(); j++)
 				{
+					float _cost = cc.getCost(i,j,false);
 					if((membership.at(i) != membership.at(j))
-							&& cc.at(i,j,false) > 0.0)
+							&& _cost > 0.0)
 					{
-						cost += cc.at(i,j,false);
+						cost += _cost;
 					}else if((membership.at(i) == membership.at(j))
-							&& cc.at(i,j,false) < 0.0)
+							&& _cost < 0.0)
 					{
-						cost -= cc.at(i,j,false);
+						cost -= _cost;
 					}
 				}
 			}
+			// dist cost plot
+			//std::cout <<group << "\t" << count << "\t"<< *it<< "\t" <<  cost << std::endl;
+			count++;
 			if(cost < cr.cost)
 			{
 				cr.cost = cost;
 				cr.membership = membership;
+				if(cr.cost == 0){break;}
 			}
 		}
+
 	}
 
 	/*******************************************************************************
@@ -238,8 +249,8 @@ namespace FORCE
 	 ******************************************************************************/
 	std::vector<std::vector<unsigned>> geometricLinking(
 			std::vector<std::vector<float>>& pos,
-			const float maxDist,
-			const std::vector<std::vector<unsigned>>& objects)
+			float maxDist,
+			std::vector<std::vector<unsigned>>& objects)
 	{
 		std::vector<std::vector<unsigned>> result;
 

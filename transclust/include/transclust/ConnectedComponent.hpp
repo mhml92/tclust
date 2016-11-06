@@ -1,84 +1,319 @@
 #ifndef CONNECTEDCOMPONENT_HPP
 #define CONNECTEDCOMPONENT_HPP
 #include <string>
+#include <deque>
 #include <vector>
 #include <cmath>
 #include <math.h>
+#include <plog/Log.h>
+#include <stxxl/vector>
+#include <stxxl/map>
+#include <boost/unordered_map.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/iostreams/device/mapped_file.hpp>
 #include "transclust/Common.hpp"
-#include "transclust/TriangularMatrix.hpp"
 
-static unsigned _cc_id(0);
+#define DATA_NODE_BLOCK_SIZE 4096
+#define DATA_LEAF_BLOCK_SIZE 4096
+//#include "transclust/TriangularMatrix.hpp"
 
 class ConnectedComponent
 {
 	public:
-		//ConnectedComponent(const std::string &filename,bool use_custom_fallback,float sim_fallback,std::string ft);
-		ConnectedComponent(const std::string &filename,TCC::TransClustParams& tcp);
-		//ConnectedComponent(std::vector<float>& sim_matrix_1d,unsigned num_o,bool use_custom_fallback,float sim_fallback);
-		ConnectedComponent(std::vector<float>& sim_matrix_1d,unsigned num_o,TCC::TransClustParams& tcp);//,bool use_custom_fallback,float sim_fallback);
-		ConnectedComponent(ConnectedComponent& cc,const std::vector<unsigned>& objects, float th,TCC::TransClustParams& tcp);
-		/*
-			ConnectedComponent(const std::vector<std::vector<float>>& pos,float th);
-			*/
-		inline TriangularMatrix& getMatrix(){ return m; }
-		inline const unsigned size()const { return m.getNumObjects(); }
-		inline const float getMinSimilarity() const{ return m.getMinValue(); }
-		inline const float getMaxSimilarity() const{ return m.getMaxValue(); }
-		inline const std::vector<std::string>& getObjectNames() const
+		struct CompareLess
 		{
-			return m.getObjectNames();
-		}
-		inline const std::string getObjectName(unsigned i)const { return m.getObjectName(i);}
-		inline void free(){m.free();};
-		inline void load(){m.load();};
+			bool operator () (const uint64_t & a, const uint64_t & b) const
+			{ return a < b; }
 
-		// get cost for some threshold
-		inline float getCost(unsigned i, unsigned j, float t){ 
-			return TCC::round(at(i, j,false) - (t-getThreshold()));
-		}
+			static uint64_t max_value()
+			{ 
+				return std::numeric_limits<uint64_t>::max(); 
+			}
+		};
+		struct Cost {
+			uint64_t id;
+			float cost;
+			Cost(uint64_t _id, float _cost)
+				:id(_id), cost(_cost)
+			{ }
+			
+		};
+		//typedef stxxl::VECTOR_GENERATOR<float>::result external_cost_vector_type;
+		typedef stxxl::map< uint64_t, float, CompareLess, DATA_NODE_BLOCK_SIZE, DATA_LEAF_BLOCK_SIZE> external_cost_map_type;
+		ConnectedComponent(unsigned id,long _num_positive_edges ,TCC::TransClustParams& _tcp);
 
-		// get the value of the edge in the cc 
-		inline float at(unsigned i, unsigned j, bool normalized = true)
+		inline void addNode(unsigned id)
 		{
-			float cost = m.get(i, j);
+			index2objectId.push_back(id);
+			objectId2index.insert(std::make_pair(id,index2objectId.size()-1));
+		}
 
-			if(cost == std::numeric_limits<float>::lowest()){
-				cost = -getThreshold();
+		inline unsigned getId(){return cc_id;}
+		inline unsigned size(){return index2objectId.size();}
+		//inline long getNumEdges(){return num_positive_edges;}
+		inline bool isTransitive(){return transitive;}
+		inline float getThreshold(){return tcp.threshold;}
+		inline float getMaxCost(){return max_cost;}
+		inline long getNumConflictingEdges(){return num_conflicting_edges;}
+		inline unsigned getObjectId(unsigned i){return index2objectId.at(i);}
+		inline float getCost(unsigned i,unsigned j,bool normalized = true){
+
+			float cost =  *((float*)mm_file.data()+index(i,j));
+
+
+			///////////////////////////////////////////////////////////////////////
+			// BINARY SEARCH A SORTED FILE FOR AN ID-COST PAIR
+			///////////////////////////////////////////////////////////////////////
+			//uint64_t key = TCC::fuse(i,j);
+			////Cost* dp = ((Cost*)mm_file.data());
+			//float cost = std::numeric_limits<float>::lowest();
+			//long L = 0;
+			//long R = num_data_values-1;
+			//while(L < R){
+			//	long m = floor((L+R)/2);
+			//	Cost c = *((Cost*)mm_file.data()+m);
+			//	//LOGD << "id: " << c.id;
+			//	//LOGD << "cost: " << c.cost;
+			//	if(c.id < key){
+			//		L = m+1;
+			//	}else if(c.id > key){
+			//		R = m-1;
+			//	}else{
+			//		//LOGD << "found :D " << key;
+			//		cost = c.cost;
+			//		break;
+			//	}
+			//}
+
+			//if((*pcost_map).find(key) != (*pcost_map).end()){
+			//	cost = (*pcost_map)[key]; 
+			//}else{
+			//	cost = TCC::round(tcp.sim_fallback-tcp.threshold);
+			//}
+
+			if(cost == std::numeric_limits<float>::max()){
+				return 1;
 			}
 
-			if (normalized)
-			{
-				if( cost > 0){
-					return TCC::round(cost / normalization_context_positive);
+			if(normalized){
+				if(cost > 0){
+					return TCC::round( std::clamp(cost / normalization_context_positive,-1,1));
 				}else{
-					return TCC::round(cost / normalization_context_negative);
+					return TCC::round( std::clamp(cost / normalization_context_negative,-1,1));
 				}
 			}else{
 				return cost;
 			}
 		}
+		inline void addCost(uint64_t id, float cost)
+		{
+			if(maxValue < cost){maxValue = cost;};
+			if(minValue > cost){minValue = cost;};
 
-		inline const float getThreshold() const
-		{
-			return threshold;
-		};
+			max_cost += std::fabs(cost);
 
-		inline const unsigned getObjectId(unsigned i) const
-		{
-			return m.getObjectId(i);
-		};
-		inline const unsigned getId() const
-		{
-			return id;
-		};
-		inline const unsigned getMatrixSize() const
-		{
-			return m.getMatrixSize();
-		};
+			(*pcost_map).insert(std::pair<uint64_t,float>(id,cost));
+		}
 
-		void dump();
+		// the connected component have now been given all known information
+		// and based on this can a decision be made as how to store this
+		// information most efficiantly 
+		inline void commit(){
+
+			// get a filepath for the external file
+			data_file_path = getFilePath().string();
+
+			// The number of edges in the triangular matrix
+			long expected_num_edges = TCC::calc_num_sym_elem(index2objectId.size());
+
+			// number of edges negative weight edges (these edges contribute to the
+			// cost of the connected component)
+			num_conflicting_edges = expected_num_edges - num_positive_edges;
+
+			if(expected_num_edges == num_positive_edges){
+				// the connected component is already transitive!!! nothing more to 
+				// do! :D
+				transitive = true;
+			}else{
+				// the connected component is NOT transitive and must be configured 
+				// for computations with FORCE and FPT
+				
+				// the number of cost values available 
+				num_data_values = (*pcost_map).size();
+
+				// the maximim cost this connected component can have
+				max_cost += std::fabs((expected_num_edges-num_data_values)*(tcp.sim_fallback-tcp.threshold));
+
+				// if some values are missing we need to check if the fallback value
+				// (minus the threshold) is the larges or smallest cost value in the
+				// connected component
+				if(num_data_values < expected_num_edges){
+					float fallback = TCC::round(tcp.sim_fallback-tcp.threshold);
+					if(maxValue < fallback){maxValue = fallback;}
+					if(minValue > fallback){minValue = fallback;}
+				}
+
+				LOGD << "writing bin file w name: " << data_file_path;
+				LOGD << "num element in cost map " << (*pcost_map).size();
+				
+
+				// boost stuff for setting up the memory mapped file
+				boost::iostreams::mapped_file_params mfp;
+				mfp.path = data_file_path;
+
+				// As we are saving the cost values externally as floats we can
+				// calculate the size of the file we need to create
+				mfp.new_file_size = (((objectId2index.size()*objectId2index.size())-objectId2index.size())/2)*sizeof(float);
+				boost::iostreams::mapped_file_sink mfs;
+
+				mfs.open(mfp);
+
+				if(mfs.is_open()){
+
+					float* mmf = (float*)mfs.data();
+
+					// if not all cost values are available we need to prefill the 
+					// file with the default value and then overwrite these values
+					if(num_data_values < expected_num_edges){
+						for(unsigned i = 0; i < num_data_values; i++){
+							mmf[i] = tcp.sim_fallback;
+						}
+					}
+
+					// get each cost and put it in the external file at the correct 
+					// position
+					external_cost_map_type::iterator it;
+					for (it = (*pcost_map).begin(); it != (*pcost_map).end(); ++it)
+					{
+						// parse the data from the map
+						std::pair<unsigned,unsigned> ids = TCC::defuse(it->first);
+						float val = it->second;
+
+						// get the indexes of the nodes for which the cost belongs <- shakespear level commenting... sorry
+						unsigned i,j;
+						i = objectId2index[ids.first];
+						j = objectId2index[ids.second];
+
+						// insert the cost at the correct position
+						mmf[index(i,j)] = val;
+					}
+
+					//FILE* f = fopen(data_file_path.c_str(),"w");
+					//external_cost_map_type::iterator it;
+					//for (it = (*pcost_map).begin(); it != (*pcost_map).end(); ++it)
+					//{
+					//	Cost _cost(it->first,it->second);
+					//	fwrite(&_cost,sizeof(struct Cost),1,f);
+					//}
+					//fclose(f);
+
+					mfs.close();
+				}
+			}
+
+			// set the normmalization variables
+			if(tcp.normalization == "ABSOLUTE"){
+				// this is standard normalization
+				normalization_context_positive = std::max( std::fabs(minValue),std::fabs(maxValue) );
+				normalization_context_negative = std::max( std::fabs(minValue),std::fabs(maxValue) );
+			}else if(tcp.normalization == "RELATIVE"){
+				// this normalization favors positive values. Can in some situations 
+				// produce better results
+				normalization_context_positive = std::fabs(maxValue);
+				normalization_context_negative = std::fabs(maxValue);
+			}
+
+			LOGD << "writing bin file...done";
+
+			// clear old data
+			objectId2index.clear();
+			(*pcost_map).clear();
+			delete pcost_map;
+		}
+
+		void load(){
+			if(!is_loaded && !transitive){
+				mm_file.open(data_file_path);
+				is_loaded = true;
+			}
+		}
+
+		void free(){
+			if(is_loaded){
+				mm_file.close();
+				boost::filesystem::remove(data_file_path);
+			}
+			is_loaded = false;
+		}
+
+		//void dump();
 
 	private:
+		/**
+		 * Contructs a filename and creates path if neccesary
+		 */
+		inline boost::filesystem::path getFilePath(){
+			boost::filesystem::path dir (tcp.tmp_dir);
+			if(!boost::filesystem::is_directory(dir)){
+				boost::filesystem::create_directory(dir);
+			}
+			boost::filesystem::path _file (
+					"cm_id_" + 
+					std::to_string(cc_id) + 
+					"_objects_" + 
+					std::to_string(index2objectId.size()) + 
+					".bcm"
+					);
+			return dir / _file;
+		};
+
+		inline unsigned long index(unsigned i,unsigned j) {
+			/* row-wise index */
+			if(j > i){
+			 std::swap(j,i);
+			}else if(i == j){
+				std::cout << "Error: attempt to index diagonal in TriangularMatrix" << std::endl;
+				return 0;
+			}
+			
+			return (((i*(i-1))/2)+j);
+
+			/* column-mojor index */
+
+			//if(j < i){
+			//	std::swap(j,i);
+			//}else if(i == j){
+			//	std::cout << "Error: attempt to index diagonal in TriangularMatrix" << std::endl;
+			//	return 0;
+			//}
+			//return (size()*i - (i+1)*(i)/2 + j-(i+1));
+		};
+
+		enum StorageType {MATRIX,MAP};
+
+		unsigned cc_id;
+		TCC::TransClustParams tcp;
+		//external_cost_vector_type cost_matrix;
+		external_cost_map_type * pcost_map;
+		StorageType st = StorageType::MATRIX;
+		boost::unordered_map<unsigned,unsigned> objectId2index;
+		std::deque<unsigned> index2objectId;
+		bool transitive = false;
+		long num_positive_edges;
+		float maxValue = std::numeric_limits<float>::lowest();
+		float minValue = std::numeric_limits<float>::max();
+		float max_cost = 0;
+		long num_conflicting_edges = 0;
+
+		std::string data_file_path;
+		boost::iostreams::mapped_file_source mm_file;
+		bool is_loaded = false;
+		long num_data_values;
+		float normalization_context_positive;
+		float normalization_context_negative;
+		
+		//enum StorageMathod {INTERNAL_MAP,INTERNAL_MATRIX,EXTERNAL_MAP,EXTERNAL_MATRIX};
+		/*
 		inline void init_normalization_context(TCC::TransClustParams& tcp)
 		{
 			if(tcp.normalization == "RELATIVE"){
@@ -106,7 +341,6 @@ class ConnectedComponent
 			}
 		
 		}
-		unsigned id;
 		float threshold;
 		TriangularMatrix m;
 		float normalization_context_positive;
@@ -118,5 +352,6 @@ class ConnectedComponent
 			_cc_id++;
 			return _cc_id;
 		}
+		*/
 };
 #endif

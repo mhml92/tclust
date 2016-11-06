@@ -7,14 +7,14 @@
 
 class Result{
 	public:
-		Result(std::vector<std::string>id2object);
+		Result(std::deque<std::string>id2object);
 		void add(ConnectedComponent& cc,ClusteringResult& cr);
 		clustering get();
 		void dump();
 
 
 	private:
-		std::vector<std::string> id2object;
+		std::deque<std::string> id2object;
 		std::map<float,float> cost;
 		std::map<float,std::vector<std::vector<unsigned>>> clusters;
 };

@@ -2,11 +2,13 @@
 #define TRANSCLUST_HPP
 #include <string>
 #include <queue>
+#include <deque>
 #include <vector>
 #include <map>
 #include <cmath>
+#include <plog/Log.h>
 #include "transclust/Common.hpp"
-#include "transclust/TriangularMatrix.hpp"
+#include "transclust/InputParser.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/ClusteringResult.hpp"
 #include "transclust/Result.hpp"
@@ -19,20 +21,11 @@ class TransClust{
 				TCC::TransClustParams& _tcp
 				);
 
-		TransClust(
-				std::vector<float>& sim_matrix_1d,
-				unsigned num_o,
-				TCC::TransClustParams& _tcp
-				);
-
 		clustering cluster();
 	private:
 		TCC::TransClustParams tcp;
-
-		// LOG current threshold
-		float log_current_threshold = std::numeric_limits<float>::lowest();
-
-		std::queue<ConnectedComponent> ccs;
-		std::vector<std::string> id2object;
+		InputParser ip;
+		std::deque<ConnectedComponent> ccs;
+		std::deque<std::string> id2name; 
 };
 #endif

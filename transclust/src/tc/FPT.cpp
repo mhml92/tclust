@@ -64,7 +64,7 @@ void FPT::cluster(ClusteringResult &cr)
 				{
 					fptn.edgeCost.at(i).push_back(0);
 				}else{
-					fptn.edgeCost.at(i).push_back(cc.at(i,j,false));
+					fptn.edgeCost.at(i).push_back(cc.getCost(i,j,false));
 				}
 			}
 		}

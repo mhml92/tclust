@@ -4,7 +4,7 @@
 #include <iomanip>
 #include "transclust/Result.hpp"
 
-Result::Result(std::vector<std::string> id2object)
+Result::Result(std::deque<std::string> id2object)
 	:
 		id2object(id2object)
 { }
