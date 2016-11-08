@@ -11,7 +11,6 @@
 #include "transclust/InputParser.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/ClusteringResult.hpp"
-#include "transclust/Result.hpp"
 
 class TransClust{
 
@@ -21,11 +20,15 @@ class TransClust{
 				TCC::TransClustParams& _tcp
 				);
 
-		clustering cluster();
+		RES::Clustering cluster();
 	private:
 		TCC::TransClustParams tcp;
 		InputParser ip;
+		float total_cost = 0;
 		std::deque<ConnectedComponent> ccs;
 		std::deque<std::string> id2name; 
+		std::deque<std::deque<unsigned>> clusters;
+		RES::Clustering result;
+		
 };
 #endif

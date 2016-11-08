@@ -6,7 +6,7 @@
 #include "transclust/FORCE.hpp"
 #include "transclust/FPT.hpp"
 #include "transclust/ClusteringResult.hpp"
-#include "transclust/Result.hpp"
+//#include "transclust/Result.hpp"
 #include "transclust/Common.hpp"
 
 TransClust::TransClust(
@@ -17,23 +17,27 @@ TransClust::TransClust(
 		tcp(_tcp),
 		ip(filename,tcp),
 		ccs(),
-		id2name()
+		result()
 { }
 
-clustering TransClust::cluster()
+RES::Clustering TransClust::cluster()
 {
 
-	ip.getConnectedComponents(ccs,id2name);
-
-	Result result(id2name);
+	ip.getConnectedComponents(ccs,result);
+	result.threshold = tcp.threshold;
 
 	LOGI << "Starting clustering";
 
 	unsigned num_nodes_clustered = 0;
-	unsigned num_nodes = id2name.size(); 
+	unsigned num_nodes = result.id2name.size(); 
 	unsigned num_nodes_digits = 0;
-	unsigned n = id2name.size();
-	while(n > 0){ n /= 10; num_nodes_digits++; }
+	unsigned n = result.id2name.size();
+
+	while(n > 0)
+	{ 
+		n /= 10; 
+		num_nodes_digits++; 
+	}
 
 	//std::cout << "cc_size,num_conflicting_edges,force_time,force_cost,force_relative_cost,fpt_time,fpt_cost,fpt_relative_cost," << std::endl; 
 	while(!ccs.empty()){
@@ -41,8 +45,7 @@ clustering TransClust::cluster()
 		cc.load();
 		LOGI << "clustering cc of size: " << cc.size();
 
-		ClusteringResult cr;
-
+		RES::ClusteringResult cr;
 
 		// set initial cost to negativ, indicating 'no solution found (yet)'
 		cr.cost = -1;
@@ -58,8 +61,10 @@ clustering TransClust::cluster()
 			 * Cluster using FPT
 			 *********************************************************************/
 			if(!tcp.disable_fpt 
-					&& (cc.getNumConflictingEdges() <= tcp.fpt_max_edge_conflicts
-					|| cc.size() <= tcp.fpt_max_cc_size))
+					&& (
+						cc.getNumConflictingEdges() <= tcp.fpt_max_edge_conflicts
+						|| cc.size() <= tcp.fpt_max_cc_size)
+					)
 			{
 				LOGD << "Clustering using fpt";
 
@@ -111,17 +116,25 @@ clustering TransClust::cluster()
 			LOGD << "The cluster is already transitive!";
 			// cc consist of 1 or 2 nodes and is a cluster
 			cr.cost = 0;
-			cr.membership = std::vector<unsigned>(cc.size(),0);
+			cr.clusters = std::deque<std::deque<unsigned>>(1,cc.getIndex2ObjectId());
 		}
 		LOGD << "DONE the cost is: " << cr.cost;
-		
-		result.add(cc,cr);
-		//std::cout << std::endl;
+
+		// add clusters to solution
+		for(auto cluster:cr.clusters){
+			result.clusters.push_back(std::deque<unsigned>());
+			for(unsigned local_id = 0; local_id < cluster.size(); local_id++)
+			{
+				result.clusters.back().push_back(cc.getObjectId(local_id));
+			}
+		}
+		result.cost += cr.cost;
+
 		num_nodes_clustered += cc.size();
 		LOGI << std::setw(num_nodes_digits) << num_nodes_clustered << " out of " << std::setw(num_nodes_digits) << num_nodes <<" (" << std::floor(100*((float)num_nodes_clustered/num_nodes)) << " %)";
 		
 		cc.free();
 		ccs.pop_front();
 	}
-	return result.get();
+	return result;
 }

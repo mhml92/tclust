@@ -11,7 +11,6 @@
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/ClusteringResult.hpp"
 
-
 class FPT{
 
  	public:
@@ -29,7 +28,7 @@ class FPT{
 			float mockInf
 		);
 
-		void cluster(ClusteringResult &cr);
+		void cluster(RES::ClusteringResult &cr);
 
 	private:
 
@@ -39,7 +38,6 @@ class FPT{
 		float stepSize;
 		float maxK;
 		float inf;
-		int LEVEL = 0;
 
 		bool solution_found;
 		float solution_cost;
@@ -69,7 +67,7 @@ class FPT{
 			unsigned j, 
 			float costForMerging);
 		
-		void buildSolution(ClusteringResult &cr);
+		void buildSolution(RES::ClusteringResult &cr);
 		void clone_node(Node& fptn0,Node& fptn1);
 };
 #endif

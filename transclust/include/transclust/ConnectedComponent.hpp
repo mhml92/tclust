@@ -6,18 +6,13 @@
 #include <cmath>
 #include <math.h>
 #include <algorithm>
+#include <iostream>
 #include <plog/Log.h>
-#include <stxxl/vector>
-#include <stxxl/map>
 #include <boost/algorithm/clamp.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include "transclust/Common.hpp"
-
-#define DATA_NODE_BLOCK_SIZE 4096
-#define DATA_LEAF_BLOCK_SIZE 4096
-//#include "transclust/TriangularMatrix.hpp"
 
 class ConnectedComponent
 {
@@ -35,13 +30,12 @@ class ConnectedComponent
 		struct Cost {
 			uint64_t id;
 			float cost;
+			Cost(){}
 			Cost(uint64_t _id, float _cost)
 				:id(_id), cost(_cost)
 			{ }
 			
 		};
-		//typedef stxxl::VECTOR_GENERATOR<float>::result external_cost_vector_type;
-		typedef stxxl::map< uint64_t, float, CompareLess, DATA_NODE_BLOCK_SIZE, DATA_LEAF_BLOCK_SIZE> external_cost_map_type;
 		ConnectedComponent(unsigned id,long _num_positive_edges ,TCC::TransClustParams& _tcp);
 
 		inline void addNode(unsigned id)
@@ -56,6 +50,7 @@ class ConnectedComponent
 		inline bool isTransitive(){return transitive;}
 		inline float getThreshold(){return tcp.threshold;}
 		inline float getMaxCost(){return max_cost;}
+		inline std::deque<unsigned> getIndex2ObjectId(){return index2objectId;}
 		inline long getNumConflictingEdges(){return num_conflicting_edges;}
 		inline unsigned getObjectId(unsigned i){return index2objectId.at(i);}
 		inline float getCost(unsigned i,unsigned j,bool normalized = true){
@@ -112,9 +107,17 @@ class ConnectedComponent
 			if(maxValue < cost){maxValue = cost;};
 			if(minValue > cost){minValue = cost;};
 
-			max_cost += std::fabs(cost);
+			FILE* tmpFile = fopen(tmp_file_path.c_str(),"a");
+			if(tmpFile != NULL)
+			{
+				Cost _cost(id,cost); 
+				fwrite(&_cost,sizeof(struct Cost),1,tmpFile);
+				fclose(tmpFile);
+			}else{
+				std::cout << "ERROR FILE COULD NOT BE OPENED " << tmp_file_path << std::endl;
+				exit(1);
+			}
 
-			(*pcost_map).insert(std::pair<uint64_t,float>(id,cost));
 		}
 
 		// the connected component have now been given all known information
@@ -139,13 +142,7 @@ class ConnectedComponent
 			}else{
 				// the connected component is NOT transitive and must be configured 
 				// for computations with FORCE and FPT
-				
-				// the number of cost values available 
-				num_data_values = (*pcost_map).size();
-
-				// the maximim cost this connected component can have
-				max_cost += std::fabs((expected_num_edges-num_data_values)*(tcp.sim_fallback-tcp.threshold));
-
+				//
 				// if some values are missing we need to check if the fallback value
 				// (minus the threshold) is the larges or smallest cost value in the
 				// connected component
@@ -156,7 +153,6 @@ class ConnectedComponent
 				}
 
 				LOGD << "writing bin file w name: " << data_file_path;
-				LOGD << "num element in cost map " << (*pcost_map).size();
 				
 
 				// boost stuff for setting up the memory mapped file
@@ -182,23 +178,49 @@ class ConnectedComponent
 						}
 					}
 
+					FILE* tmpFile = fopen(tmp_file_path.c_str(),"rb"); 
+					if(tmpFile != NULL)
+					{
+						struct Cost _cost;
+						while ( fread(&_cost,sizeof(struct Cost), 1, tmpFile) == 1 )
+						{
+							std::pair<unsigned,unsigned> ids = TCC::defuse(_cost.id);
+							float val = _cost.cost;
+
+							// get the indexes of the nodes for which the cost belongs <- shakespear level commenting... sorry
+							unsigned i,j;
+							i = objectId2index[ids.first];
+							j = objectId2index[ids.second];
+
+							// insert the cost at the correct position
+							mmf[index(i,j)] = val;
+						}
+						fclose(tmpFile);
+					}else{
+						std::cout << "ERROR FILE COULD NOT BE OPENED " << tmp_file_path << std::endl;
+						exit(1);
+					}
+
+
+					/////////////////////////////////////////////////////////////////
+
 					// get each cost and put it in the external file at the correct 
 					// position
-					external_cost_map_type::iterator it;
-					for (it = (*pcost_map).begin(); it != (*pcost_map).end(); ++it)
-					{
-						// parse the data from the map
-						std::pair<unsigned,unsigned> ids = TCC::defuse(it->first);
-						float val = it->second;
+					//external_cost_map_type::iterator it;
+					//for (it = (*pcost_map).begin(); it != (*pcost_map).end(); ++it)
+					//{
+					//	// parse the data from the map
+					//	std::pair<unsigned,unsigned> ids = TCC::defuse(it->first);
+					//	float val = it->second;
 
-						// get the indexes of the nodes for which the cost belongs <- shakespear level commenting... sorry
-						unsigned i,j;
-						i = objectId2index[ids.first];
-						j = objectId2index[ids.second];
+					//	// get the indexes of the nodes for which the cost belongs <- shakespear level commenting... sorry
+					//	unsigned i,j;
+					//	i = objectId2index[ids.first];
+					//	j = objectId2index[ids.second];
 
-						// insert the cost at the correct position
-						mmf[index(i,j)] = val;
-					}
+					//	// insert the cost at the correct position
+					//	mmf[index(i,j)] = val;
+					//}
 
 					//FILE* f = fopen(data_file_path.c_str(),"w");
 					//external_cost_map_type::iterator it;
@@ -229,8 +251,7 @@ class ConnectedComponent
 
 			// clear old data
 			objectId2index.clear();
-			(*pcost_map).clear();
-			delete pcost_map;
+			boost::filesystem::remove(tmp_file_path);
 		}
 
 		void load(){
@@ -268,6 +289,18 @@ class ConnectedComponent
 					);
 			return dir / _file;
 		};
+		inline boost::filesystem::path getTmpFilePath(){
+			boost::filesystem::path dir (tcp.tmp_dir);
+			if(!boost::filesystem::is_directory(dir)){
+				boost::filesystem::create_directory(dir);
+			}
+			boost::filesystem::path _file (
+					"cm_id_" + 
+					std::to_string(cc_id) + 
+					".bcm"
+					);
+			return dir / _file;
+		};
 
 		inline unsigned long index(unsigned i,unsigned j) {
 			/* row-wise index */
@@ -296,7 +329,6 @@ class ConnectedComponent
 		unsigned cc_id;
 		TCC::TransClustParams tcp;
 		//external_cost_vector_type cost_matrix;
-		external_cost_map_type * pcost_map;
 		StorageType st = StorageType::MATRIX;
 		boost::unordered_map<unsigned,unsigned> objectId2index;
 		std::deque<unsigned> index2objectId;
@@ -306,11 +338,12 @@ class ConnectedComponent
 		float minValue = std::numeric_limits<float>::max();
 		float max_cost = 0;
 		long num_conflicting_edges = 0;
+		long num_data_values = 0;
 
 		std::string data_file_path;
+		std::string tmp_file_path;
 		boost::iostreams::mapped_file_source mm_file;
 		bool is_loaded = false;
-		long num_data_values;
 		float normalization_context_positive;
 		float normalization_context_negative;
 		

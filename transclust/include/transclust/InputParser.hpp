@@ -9,6 +9,7 @@
 #include "transclust/Common.hpp"
 #include "transclust/SimilarityData.hpp"
 #include "transclust/DynamicUnionFind.hpp"
+#include "transclust/ClusteringResult.hpp"
 
 class InputParser
 {
@@ -20,11 +21,10 @@ class InputParser
 
 		void getConnectedComponents(
 				std::deque<ConnectedComponent>& ccs,
-				std::deque<std::string>& id2name
+				RES::Clustering& result
 				);
 
 	private:
-		// template parameter <ValueType, CompareType, BlockSize(optional), AllocStr(optional)>
 		struct similarity
 		{
 			uint64_t id;
@@ -60,13 +60,13 @@ class InputParser
 		void buildObjectIdMaps(
 				std::string o,
 				boost::unordered_map<std::string, unsigned>& name2id,
-				std::deque<std::string>& id2name
+				RES::Clustering& result
 				)
 		{
 			if (name2id.find(o) == name2id.end())
 			{
-				id2name.push_back(o);
-				unsigned _id = id2name.size()-1;
+				result.id2name.push_back(o);
+				unsigned _id = result.id2name.size()-1;
 				name2id[o] = _id;
 			}
 		}
@@ -76,21 +76,9 @@ class InputParser
 		float maxValue = std::numeric_limits<float>::lowest();
 		float minValue = std::numeric_limits<float>::max();
 		DynamicUnionFind duf;
-		//SimilarityData sd;
 
 		boost::unordered_map<unsigned,unsigned> rootId2cc;
 		// LOG BOOLS
 		bool has_inf_in_input = false;
-
-		//void init_CC_external(std::queue<ConnectedComponent>& ccs);
-		//void init_CC_internal(std::queue<ConnectedComponent>& ccs);
-
-		/*
-			void merge_sort(
-			std::vector<std::pair<long,float> >& chunk,
-			unsigned start,
-			unsigned end
-			);
-			*/
 };
 #endif

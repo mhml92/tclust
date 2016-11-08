@@ -33,22 +33,22 @@ int main(int argc, char** argv){
 		TCLAP::CmdLine cmd("Distributed TransClust", ' ', "1.0");
 
 
-		TCLAP::ValueArg<unsigned> seed(
+		TCLAP::SwitchArg debug_cost_only(
 				"",
-				"seed",
+				"DEBUG_COST_ONLY",
 				"",
-				false,
-				42,
-				"int (42)",
-				cmd);
+				cmd,
+				false);
 
-		TCLAP::ValueArg<unsigned> fpt_max_edge_conflicts(
+		TCLAP::ValueArg<unsigned> seed("","seed","",false,42,"int (42)",cmd);
+
+		TCLAP::ValueArg<unsigned> fpt_max_edge_conflicts( 
 				"",
-				"fpt_max_edge_conflicts",
-				"",
-				false,
-				5000,
-				"int (5000)",
+				"fpt_max_edge_conflicts", 
+				"", 
+				false, 
+				5000, 
+				"int (5000)", 
 				cmd);
 
 		TCLAP::ValueArg<unsigned> fpt_max_cc_size(
@@ -222,12 +222,12 @@ int main(int argc, char** argv){
 				);
 
 		TCLAP::ValueArg<std::string> simfile(
-				"s",									// flag
-				"simfile",							// name
-				"Path and filename of the input Similarity file.",		// desc
-				true,									// req
-				"",									// value
-				"string",							// typeDesc
+				"s",
+				"simfile",
+				"Path and filename of the input Similarity file.",
+				true,
+				"",
+				"string",
 				cmd);									// parser
 
 		cmd.parse( argc, argv );
@@ -266,55 +266,36 @@ int main(int argc, char** argv){
 
 				.set_seed(seed.getValue())
 				.set_tmp_dir(tmp_dir.getValue())
+
+				.set_debug_cost_only(debug_cost_only.getValue())
 				);
 
 		/*************************************************************************
 		 * Cluster
 		 ************************************************************************/
-		clustering clusters = transclust.cluster();
+		RES::Clustering clusters = transclust.cluster();
 
 		/*************************************************************************
 		 * Print result (java transclust style)
 		 ************************************************************************/
-		for(unsigned i = 0; i < clusters.threshold.size(); i++){
-			std::cout << 
-				clusters.threshold.at(i) << 
-				"\t" << 
-				clusters.cost.at(i) << 
-				"\t";
-
-			// membership vector
-			std::vector<unsigned>& m_vec = clusters.clusters.at(i);
-
-			std::list<unsigned> objects;
-			// fill list of indexes
-			for (unsigned i = 0; i < m_vec.size();i++)
-			{
-				objects.push_back(i);
-			}
-
-			std::string s = "";
-			while(!objects.empty())
-			{
-				unsigned c_num = m_vec.at(*objects.begin());
-				for (auto it = objects.begin(); it != objects.end();)
-				{
-					if(m_vec.at(*it) == c_num)
-					{
-						s += clusters.id2object.at(*it); 
-						s += ",";
-						it = objects.erase(it);
-
-					}else{
-						++it;
-					}
-				}
-
-				s.pop_back();
-				s += ";";
-			}
-			std::cout << s << std::endl;
+		if(debug_cost_only.getValue()){
+			std::cout << "cost: " << clusters.cost << std::endl;
+			return 0;
 		}
+		std::cout << clusters.threshold << "\t" << clusters.cost << "\t";
+
+		for(auto cluster:clusters.clusters)
+		{
+			std::string s = "";
+			for(unsigned i = 0; i < cluster.size(); i++)
+			{
+				s += clusters.id2name.at(cluster.at(i)) + ","; 
+			}
+			s.pop_back();
+			s += ";";
+			std::cout << s;		
+		}
+		std::cout << std::endl;
 
 	}catch (TCLAP::ArgException &e){
 		std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;

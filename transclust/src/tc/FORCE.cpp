@@ -175,7 +175,7 @@ namespace FORCE
 	void partition(
 			ConnectedComponent& cc,
 			std::vector<std::vector<float>>& pos,
-			ClusteringResult& cr,
+			RES::ClusteringResult& cr,
 			float d_init,
 			float d_maximal,
 			float s_init,
@@ -191,68 +191,42 @@ namespace FORCE
 		}
 		cr.cost = std::numeric_limits<float>::max();
 
-		std::vector<std::vector<unsigned>> clustering;
+		std::deque<std::deque<unsigned>> clustering;
 
-		std::vector<unsigned> dummy(cc.size());
+		std::deque<unsigned> dummy(cc.size());
 		std::iota(dummy.begin(),dummy.end(),0);
 		clustering.push_back(dummy);
 
-		long group = rand();
-		long count = 0;
+		//long group = rand();
+		//long count = 0;
+		//long NEW_SCORE = 0;
+		//long OLD_SCORE = 0;
 		for(std::vector<float>::reverse_iterator it = D.rbegin(); it != D.rend(); ++it) 
 		{
 			clustering = geometricLinking(pos,*it,clustering);
 
 			DEBUG_GM(clustering,pos,*it);
 
-			std::vector<unsigned> membership(cc.size(),std::numeric_limits<unsigned>::max());
-			unsigned clusterId = 0;
-			for(auto& cluster:clustering){
-				for(unsigned i = 0; i < cluster.size(); i++){
-					membership.at(cluster.at(i)) = clusterId;
-				}
-				clusterId++;
-			}
+			float cost = RES::calculateCost(cc,clustering);
 
-			float cost = 0;
-			for(unsigned i = 0; i< membership.size(); i++)
-			{
-				for(unsigned j = i+1; j < membership.size(); j++)
-				{
-					float _cost = cc.getCost(i,j,false);
-					if((membership.at(i) != membership.at(j))
-							&& _cost > 0.0)
-					{
-						cost += _cost;
-					}else if((membership.at(i) == membership.at(j))
-							&& _cost < 0.0)
-					{
-						cost -= _cost;
-					}
-				}
-			}
-			// dist cost plot
-			//std::cout <<group << "\t" << count << "\t"<< *it<< "\t" <<  cost << std::endl;
-			count++;
 			if(cost < cr.cost)
 			{
 				cr.cost = cost;
-				cr.membership = membership;
+				cr.clusters = clustering;
 				if(cr.cost == 0){break;}
 			}
 		}
-
 	}
 
 	/*******************************************************************************
 	 * DETERMINE MEMBERSHIP IN POS
 	 ******************************************************************************/
-	std::vector<std::vector<unsigned>> geometricLinking(
+	std::deque<std::deque<unsigned>> geometricLinking(
 			std::vector<std::vector<float>>& pos,
 			float maxDist,
-			std::vector<std::vector<unsigned>>& objects)
+			std::deque<std::deque<unsigned>>& objects)
 	{
-		std::vector<std::vector<unsigned>> result;
+		std::deque<std::deque<unsigned>> result;
 
 		for(auto& obj:objects)
 		{
@@ -263,7 +237,7 @@ namespace FORCE
 				nodes.push_back(i);
 			}
 
-			result.push_back(std::vector<unsigned>());
+			result.push_back(std::deque<unsigned>());
 			std::queue<unsigned> Q;
 			Q.push(0);
 			unsigned componentId = result.size()-1;
@@ -295,7 +269,7 @@ namespace FORCE
 				{
 					if(!nodes.empty())
 					{
-						result.push_back(std::vector<unsigned>());
+						result.push_back(std::deque<unsigned>());
 						componentId++;
 						Q.push(nodes.front());
 						result.at(componentId).push_back(obj.at(nodes.front()));

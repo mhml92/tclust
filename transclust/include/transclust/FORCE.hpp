@@ -23,16 +23,16 @@ namespace FORCE{
 	void partition(
 			ConnectedComponent& cc,
 			std::vector<std::vector<float>>& pos,
-			ClusteringResult& cs,
+			RES::ClusteringResult& cs,
 			float d_init,
 			float d_maximal,
 			float s_init,
 			float f_s);
 
-	std::vector<std::vector<unsigned>> geometricLinking(
+	std::deque<std::deque<unsigned>> geometricLinking(
 			std::vector<std::vector<float>>& pos,
 			float maxDist,
-			std::vector<std::vector<unsigned>>& objects);
+			std::deque<std::deque<unsigned>>& objects);
 
 	void inline DEBUG_force(std::vector<std::vector<float>>& pos,int iter){
 

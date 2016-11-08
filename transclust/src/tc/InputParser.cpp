@@ -34,7 +34,7 @@ InputParser::InputParser(
 
 void InputParser::getConnectedComponents(
 		std::deque<ConnectedComponent>& ccs,
-		std::deque<std::string>& id2name
+		RES::Clustering& result
 		)
 {
 	boost::unordered_map<std::string, unsigned> name2id;
@@ -80,8 +80,8 @@ void InputParser::getConnectedComponents(
 			}
 		}
 
-		buildObjectIdMaps(o1,name2id,id2name);
-		buildObjectIdMaps(o2,name2id,id2name);
+		buildObjectIdMaps(o1,name2id,result);
+		buildObjectIdMaps(o2,name2id,result);
 
 		// create key
 		uint64_t key;
@@ -140,7 +140,7 @@ void InputParser::getConnectedComponents(
 		++similarity_sorter;
 	}
 	// make sure all elements are represented
-	duf.find(id2name.size()-1);
+	duf.find(result.id2name.size()-1);
 	/////////////////////////////////////////////////////////////////////////////
 	LOGI << "Building DUF...done";
 	/////////////////////////////////////////////////////////////////////////////
@@ -237,16 +237,15 @@ void InputParser::getConnectedComponents(
 	/////////////////////////////////////////////////////////////////////////////
 	LOGI << "Adding costs to connected components...done";
 
-	LOGW_IF(num_added_edges != TCC::calc_num_sym_elem(id2name.size())) 
+	LOGW_IF(num_added_edges != TCC::calc_num_sym_elem(result.id2name.size())) 
 		<< "Similarity file is incomplete. Only " 
 		<< num_added_edges 
 		<< " out of " 
-		<< TCC::calc_num_sym_elem(id2name.size()) 
+		<< TCC::calc_num_sym_elem(result.id2name.size()) 
 		<< " possible edges for " 
-		<< id2name.size() 
+		<< result.id2name.size() 
 		<< " nodes were found";
 	/////////////////////////////////////////////////////////////////////////////
-
 
 	/////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////

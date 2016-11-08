@@ -26,11 +26,12 @@ FPT::FPT(
 { }
 
 
-void FPT::cluster(ClusteringResult &cr)
+void FPT::cluster(RES::ClusteringResult &cr)
 {
 	cr.cost = -1;
 	start = std::chrono::system_clock::now();
-	while(!solution_found){
+	while(!solution_found)
+	{
 		/**********************************************************************
 		 * Track time
 		 *********************************************************************/
@@ -96,7 +97,7 @@ reduceLoopStart:
 	{
 		for(unsigned v = u+1; v < fptn.size; v++)
 		{
-			if(fptn.edgeCost.at(u).at(u) <= 0){ continue; }
+			if(fptn.edgeCost.at(u).at(v) <= 0){ continue; }
 
 			float cost_uv = fptn.edgeCost[u][v];
 			float sumIcf = std::max(0.0f,cost_uv) + costSetForbidden(fptn,u,v);
@@ -302,65 +303,74 @@ void FPT::clone_node(Node& fptn0,Node& fptn1){
 	fptn1.edgeCost = fptn0.edgeCost;
 }
 
-void FPT::buildSolution(ClusteringResult &cr)
+void FPT::buildSolution(RES::ClusteringResult &cr)
 {
-	std::vector<unsigned> membership(
-			solution_edgeCost.size(),
-			std::numeric_limits<unsigned>::max());
 
-	std::vector<std::vector<unsigned>> result;
-	result.push_back(std::vector<unsigned>());
+	cr.cost = solution_cost;
+
+	/////////////////////////////////////////////////////////////////////////////
+	// find connected components in the reduced fptn
+	/////////////////////////////////////////////////////////////////////////////
+	std::list<unsigned> nodes;
+	// fill list of nodes
+	for (unsigned i=1; i< solution_edgeCost.size();i++)
+	{
+		nodes.push_back(i);
+	}
+
+	std::vector<std::vector<unsigned>> reduced_clusters(1,std::vector<unsigned>());
+
 	std::queue<unsigned> Q;
-
 	unsigned componentId = 0;
 	Q.push(0);
-	membership.at(0) = componentId;
-	result.at(componentId).push_back(0);
-	while(true){
+	reduced_clusters.at(componentId).push_back(0);
+	while(!nodes.empty()){
 
 		unsigned i = Q.front();
-		Q.pop();
-
-		for(unsigned j = 0; j < solution_edgeCost.size();j++)
+		for (auto it = nodes.begin(); it != nodes.end();)
 		{
-			if(membership.at(j) == std::numeric_limits<unsigned>::max())
+			unsigned j = *it;
+			if(j != i)
 			{
-				if(solution_edgeCost.at(i).at(j) > 0)
+				if (solution_edgeCost.at(i).at(j) > 0.0)
 				{
 					Q.push(j);
-					membership.at(j) = componentId;
-					result.at(componentId).push_back(j);
+					reduced_clusters.at(componentId).push_back(j);
+					it = nodes.erase(it);
+				}else{
+					++it;
 				}
+			}else{
+				++it;
 			}
 		}
+
+		Q.pop();
 
 		if(Q.empty())
 		{
-			componentId++;
-			// could be done smarter by by saving 'last known nonmember'
-			for(unsigned s = 0; s < membership.size();s++)
+			if(!nodes.empty())
 			{
-				if(membership.at(s) == std::numeric_limits<unsigned>::max())
-				{
-					Q.push(s);
-					membership.at(s) = componentId;
-					result.push_back(std::vector<unsigned>());
-					result.at(componentId).push_back(s);
-					break;
-				}
-			}
-			if(Q.empty()){
-				break;
+				componentId++;
+				reduced_clusters.push_back(std::vector<unsigned>());
+				Q.push(nodes.front());
+				reduced_clusters.at(componentId).push_back(nodes.front());
+				nodes.pop_front();
 			}
 		}
 	}
-	cr.membership.resize(cc.size());
-	for(unsigned i = 0; i < solution_edgeCost.size(); i++)
+	/////////////////////////////////////////////////////////////////////////////
+	// Add result to the cr
+	/////////////////////////////////////////////////////////////////////////////
+	for(auto& cluster:reduced_clusters)
 	{
-		for(unsigned j = 0; j < solution_nodeParents.at(i).size(); j++)
+		cr.clusters.push_back(std::deque<unsigned>());
+		for(unsigned i = 0; i < cluster.size(); i++)
 		{
-			cr.membership.at(solution_nodeParents.at(i).at(j)) = membership.at(i);
+			for(unsigned j = 0; j < solution_nodeParents.at(cluster.at(i)).size();j++)
+			{
+				cr.clusters.back().push_back(solution_nodeParents.at(cluster.at(i)).at(j));
+			}
 		}
 	}
-	cr.cost = solution_cost;
 }

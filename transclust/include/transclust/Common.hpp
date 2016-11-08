@@ -3,6 +3,7 @@
 #include <string>
 #include <cmath>
 #include <vector>
+#include <deque>
 
 // TransClust Commons
 namespace TCC
@@ -39,6 +40,11 @@ namespace TCC
 		std::string tmp_dir = "/tmp/tclust/";
 		unsigned seed = 42;
 		unsigned max_ram = 1024;
+
+		// debug
+		bool debug_cost_only = false;
+
+
 		TransClustParams& set_threshold(float val){threshold = val;return *this;}
 
 		TransClustParams& set_p(float val){p = val;return *this;}
@@ -64,6 +70,8 @@ namespace TCC
 		TransClustParams& set_normalization(std::string val){normalization = val;return *this;}
 		TransClustParams& set_tmp_dir(std::string val){tmp_dir = val;return *this;}
 		TransClustParams& set_seed(bool val){seed = val;return *this;}
+
+		TransClustParams& set_debug_cost_only(bool val){debug_cost_only = val;return *this;}
 	};
 
 	
