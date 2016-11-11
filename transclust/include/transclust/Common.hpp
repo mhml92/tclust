@@ -4,6 +4,7 @@
 #include <cmath>
 #include <vector>
 #include <deque>
+#include <iostream>
 
 // TransClust Commons
 namespace TCC
@@ -75,25 +76,30 @@ namespace TCC
 	};
 
 	
-	inline uint64_t fuse(unsigned i,unsigned j){
+	inline uint64_t fuse(unsigned i,unsigned j)
+	{
 		if(i > j){ std::swap(i,j);}
 		return (( (std::uint64_t)j << 32) | (std::uint64_t)i);
 	}
-	inline std::pair<unsigned,unsigned> defuse(long l){
+	
+	inline std::pair<unsigned,unsigned> defuse(long l)
+	{
 		uint64_t l64 = (uint64_t)l;
 		uint32_t i = (uint32_t)(l64 >> 32);
 		uint32_t j = (uint32_t)(l64);
 		return std::make_pair(i,j);
 	}
 
-	inline float round(float f){
+	inline float round(float f)
+	{
 		return std::rint(f*100000.0f)/100000.0f;
 	}
 
 	inline float dist(std::vector<std::vector<float>>& pos,unsigned i, unsigned j)
 	{
 		float res = 0;
-		for(unsigned d = 0; d < pos[0].size(); d++){
+		for(unsigned d = 0; d < pos[0].size(); d++)
+		{
 			float side = pos[i][d] - pos[j][d];
 			res += side*side;
 		}

@@ -17,16 +17,6 @@
 class ConnectedComponent
 {
 	public:
-		struct CompareLess
-		{
-			bool operator () (const uint64_t & a, const uint64_t & b) const
-			{ return a < b; }
-
-			static uint64_t max_value()
-			{ 
-				return std::numeric_limits<uint64_t>::max(); 
-			}
-		};
 		struct Cost {
 			uint64_t id;
 			float cost;
@@ -44,15 +34,14 @@ class ConnectedComponent
 			objectId2index.insert(std::make_pair(id,index2objectId.size()-1));
 		}
 
-		inline unsigned getId(){return cc_id;}
-		inline unsigned size(){return index2objectId.size();}
+		inline unsigned getId(){ return cc_id; }
+		inline unsigned size(){ return index2objectId.size(); }
 		//inline long getNumEdges(){return num_positive_edges;}
-		inline bool isTransitive(){return transitive;}
-		inline float getThreshold(){return tcp.threshold;}
-		inline float getMaxCost(){return max_cost;}
-		inline std::deque<unsigned> getIndex2ObjectId(){return index2objectId;}
-		inline long getNumConflictingEdges(){return num_conflicting_edges;}
-		inline unsigned getObjectId(unsigned i){return index2objectId.at(i);}
+		inline bool isTransitive(){ return transitive; }
+		inline float getMaxCost(){ return max_cost; }
+		inline std::deque<unsigned> getIndex2ObjectId(){ return index2objectId; }
+		inline long getNumConflictingEdges(){ return num_conflicting_edges; }
+		inline unsigned getObjectId(unsigned i){ return index2objectId.at(i); }
 		inline float getCost(unsigned i,unsigned j,bool normalized = true){
 
 			float cost =  *((float*)mm_file.data()+index(i,j));
@@ -88,15 +77,21 @@ class ConnectedComponent
 			//	cost = TCC::round(tcp.sim_fallback-tcp.threshold);
 			//}
 
-			if(cost == std::numeric_limits<float>::max()){
-				return 1;
+			if(std::isinf(cost)){
+				cost = maxValue;
 			}
 
-			if(normalized){
-				if(cost > 0){
-					return TCC::round( boost::algorithm::clamp(cost / normalization_context_positive,-1,1));
+			if(normalized)
+			{
+				if(cost > 0)
+				{
+					return TCC::round( 
+							boost::algorithm::clamp(
+								cost / normalization_context_positive,-1,1));
 				}else{
-					return TCC::round( boost::algorithm::clamp(cost / normalization_context_negative,-1,1));
+					return TCC::round( 
+							boost::algorithm::clamp(
+								cost / normalization_context_negative,-1,1));
 				}
 			}else{
 				return cost;
@@ -104,8 +99,13 @@ class ConnectedComponent
 		}
 		inline void addCost(uint64_t id, float cost)
 		{
-			if(maxValue < cost){maxValue = cost;};
-			if(minValue > cost){minValue = cost;};
+			if(!std::isinf(cost)){
+				if(maxValue < cost){maxValue = cost;};
+				if(minValue > cost){minValue = cost;};
+			}
+
+			max_cost += std::fabs(cost);
+			num_data_values++;
 
 			FILE* tmpFile = fopen(tmp_file_path.c_str(),"a");
 			if(tmpFile != NULL)
@@ -114,15 +114,17 @@ class ConnectedComponent
 				fwrite(&_cost,sizeof(struct Cost),1,tmpFile);
 				fclose(tmpFile);
 			}else{
-				std::cout << "ERROR FILE COULD NOT BE OPENED " << tmp_file_path << std::endl;
+				std::cout 
+					<< "ERROR FILE COULD NOT BE OPENED " 
+					<< tmp_file_path << std::endl;
 				exit(1);
 			}
 
 		}
 
-		// the connected component have now been given all known information
-		// and based on this can a decision be made as how to store this
-		// information most efficiantly 
+		// the connected component has now been given all known information
+		// and now a decision can be made as to how this
+		// information can be stored most efficiantly 
 		inline void commit(){
 
 			// get a filepath for the external file
@@ -152,6 +154,9 @@ class ConnectedComponent
 					if(minValue > fallback){minValue = fallback;}
 				}
 
+				// add the cost of all the explicitly missing edges
+				max_cost += (expected_num_edges-num_data_values)*std::fabs(TCC::round(tcp.sim_fallback-tcp.threshold));
+
 				LOGD << "writing bin file w name: " << data_file_path;
 				
 
@@ -161,7 +166,7 @@ class ConnectedComponent
 
 				// As we are saving the cost values externally as floats we can
 				// calculate the size of the file we need to create
-				mfp.new_file_size = (((objectId2index.size()*objectId2index.size())-objectId2index.size())/2)*sizeof(float);
+				mfp.new_file_size = expected_num_edges*sizeof(float);
 				boost::iostreams::mapped_file_sink mfs;
 
 				mfs.open(mfp);
@@ -197,87 +202,65 @@ class ConnectedComponent
 						}
 						fclose(tmpFile);
 					}else{
-						std::cout << "ERROR FILE COULD NOT BE OPENED " << tmp_file_path << std::endl;
+						std::cout 
+							<< "ERROR FILE COULD NOT BE OPENED " 
+							<< tmp_file_path << std::endl;
 						exit(1);
 					}
-
-
-					/////////////////////////////////////////////////////////////////
-
-					// get each cost and put it in the external file at the correct 
-					// position
-					//external_cost_map_type::iterator it;
-					//for (it = (*pcost_map).begin(); it != (*pcost_map).end(); ++it)
-					//{
-					//	// parse the data from the map
-					//	std::pair<unsigned,unsigned> ids = TCC::defuse(it->first);
-					//	float val = it->second;
-
-					//	// get the indexes of the nodes for which the cost belongs <- shakespear level commenting... sorry
-					//	unsigned i,j;
-					//	i = objectId2index[ids.first];
-					//	j = objectId2index[ids.second];
-
-					//	// insert the cost at the correct position
-					//	mmf[index(i,j)] = val;
-					//}
-
-					//FILE* f = fopen(data_file_path.c_str(),"w");
-					//external_cost_map_type::iterator it;
-					//for (it = (*pcost_map).begin(); it != (*pcost_map).end(); ++it)
-					//{
-					//	Cost _cost(it->first,it->second);
-					//	fwrite(&_cost,sizeof(struct Cost),1,f);
-					//}
-					//fclose(f);
-
 					mfs.close();
 				}
-			}
 
-			// set the normmalization variables
-			if(tcp.normalization == "ABSOLUTE"){
-				// this is standard normalization
-				normalization_context_positive = std::max( std::fabs(minValue),std::fabs(maxValue) );
-				normalization_context_negative = std::max( std::fabs(minValue),std::fabs(maxValue) );
-			}else if(tcp.normalization == "RELATIVE"){
-				// this normalization favors positive values. Can in some situations 
-				// produce better results
-				normalization_context_positive = std::fabs(maxValue);
-				normalization_context_negative = std::fabs(maxValue);
+				// set the normmalization variables
+				if(tcp.normalization == "ABSOLUTE"){
+					// this is standard normalization
+					
+					normalization_context_positive = std::max( std::fabs(minValue),std::fabs(maxValue) );
+					normalization_context_negative = normalization_context_positive;
+				}else if(tcp.normalization == "RELATIVE"){
+					// this normalization favors positive values. Can in some situations 
+					// produce better results
+					normalization_context_positive = std::fabs(maxValue);
+					normalization_context_negative = std::fabs(maxValue);
+				}
 			}
 
 			LOGD << "writing bin file...done";
 
-			// clear old data
+			// delete unneseccasry date
 			objectId2index.clear();
 			boost::filesystem::remove(tmp_file_path);
 		}
 
-		void load(){
-			if(!is_loaded && !transitive){
+		inline void load()
+		{
+			if(!is_loaded && !transitive)
+			{
 				mm_file.open(data_file_path);
 				is_loaded = true;
 			}
 		}
 
-		void free(){
-			if(is_loaded){
+		inline void free(bool permanent = false)
+		{
+			if(is_loaded)
+			{
 				mm_file.close();
-				boost::filesystem::remove(data_file_path);
+				if(permanent){
+					boost::filesystem::remove(data_file_path);
+				}
 			}
 			is_loaded = false;
 		}
-
-		//void dump();
 
 	private:
 		/**
 		 * Contructs a filename and creates path if neccesary
 		 */
-		inline boost::filesystem::path getFilePath(){
+		inline boost::filesystem::path getFilePath()
+		{
 			boost::filesystem::path dir (tcp.tmp_dir);
-			if(!boost::filesystem::is_directory(dir)){
+			if(!boost::filesystem::is_directory(dir))
+			{
 				boost::filesystem::create_directory(dir);
 			}
 			boost::filesystem::path _file (
@@ -289,11 +272,15 @@ class ConnectedComponent
 					);
 			return dir / _file;
 		};
-		inline boost::filesystem::path getTmpFilePath(){
+
+		inline boost::filesystem::path getTmpFilePath()
+		{
 			boost::filesystem::path dir (tcp.tmp_dir);
-			if(!boost::filesystem::is_directory(dir)){
+			if(!boost::filesystem::is_directory(dir))
+			{
 				boost::filesystem::create_directory(dir);
 			}
+
 			boost::filesystem::path _file (
 					"cm_id_" + 
 					std::to_string(cc_id) + 
@@ -302,7 +289,8 @@ class ConnectedComponent
 			return dir / _file;
 		};
 
-		inline unsigned long index(unsigned i,unsigned j) {
+		inline unsigned long index(unsigned i,unsigned j) 
+		{
 			/* row-wise index */
 			if(j > i){
 			 std::swap(j,i);
@@ -324,12 +312,8 @@ class ConnectedComponent
 			//return (size()*i - (i+1)*(i)/2 + j-(i+1));
 		};
 
-		enum StorageType {MATRIX,MAP};
-
 		unsigned cc_id;
 		TCC::TransClustParams tcp;
-		//external_cost_vector_type cost_matrix;
-		StorageType st = StorageType::MATRIX;
 		boost::unordered_map<unsigned,unsigned> objectId2index;
 		std::deque<unsigned> index2objectId;
 		bool transitive = false;
@@ -346,47 +330,5 @@ class ConnectedComponent
 		bool is_loaded = false;
 		float normalization_context_positive;
 		float normalization_context_negative;
-		
-		//enum StorageMathod {INTERNAL_MAP,INTERNAL_MATRIX,EXTERNAL_MAP,EXTERNAL_MATRIX};
-		/*
-		inline void init_normalization_context(TCC::TransClustParams& tcp)
-		{
-			if(tcp.normalization == "RELATIVE"){
-
-				float max_val = std::abs(m.getMaxValue());
-				if(max_val != 0){
-					normalization_context_positive = max_val;	
-				}else{
-					normalization_context_positive = 1;	
-				}
-				float min_val = std::abs(m.getMinValue()-threshold);
-				if(min_val != 0){
-					normalization_context_negative = min_val;	
-				}else{
-					normalization_context_negative = 1;	
-				}
-
-			}else if(tcp.normalization == "ABSOLUTE"){
-				float max_val = std::max(
-						std::abs(m.getMaxValue()),
-						std::abs(m.getMinValue())
-						);
-				normalization_context_positive = max_val;
-				normalization_context_negative = max_val;
-			}
-		
-		}
-		float threshold;
-		TriangularMatrix m;
-		float normalization_context_positive;
-		float normalization_context_negative;
-		//float cost;
-
-		inline static unsigned getNewId()
-		{
-			_cc_id++;
-			return _cc_id;
-		}
-		*/
 };
 #endif

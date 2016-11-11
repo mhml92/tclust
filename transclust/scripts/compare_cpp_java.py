@@ -1,0 +1,28 @@
+{
+	{
+		"sim_file":"/home/mikkel/Dropbox/Datalogi/Speciale/repo/transclust/data/coryne/coryne-sims.sim", 
+		"thresholds":[]
+	},
+	{
+		"sim_file":"/home/mikkel/Dropbox/Datalogi/Speciale/repo/transclust/data/karateclub/Zachary_karate_club_similarities.sim", 
+		"thresholds":[]
+	},
+	{
+		"sim_file":"/home/mikkel/Dropbox/Datalogi/Speciale/repo/transclust/data/brown/sfld_brown_et_al_amidohydrolases_protein_similarities_for_beh.sim", 
+		"thresholds":[]
+	},
+	{
+		"sim_file":"/home/mikkel/Dropbox/Datalogi/Speciale/repo/transclust/data/brown/brown-sims.sim", 
+		"thresholds":[]
+	},
+	{
+		"sim_file":"/home/mikkel/Dropbox/Datalogi/Speciale/repo/transclust/data/astral/ASTRAL-large-sized-mammoth-sims-geq-2.sim", 
+		"thresholds":[]
+	},
+	{
+		"sim_file":"/home/mikkel/Dropbox/Datalogi/Speciale/repo/transclust/data/gavin/gavin2006_socioaffinities_rescaled_reduced_complete.sim", 
+		"thresholds":[]
+	}
+}
+[
+

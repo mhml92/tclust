@@ -40,7 +40,7 @@ class FPT{
 		float inf;
 
 		bool solution_found;
-		float solution_cost;
+		double solution_cost;
 		std::vector<std::vector<unsigned>> solution_nodeParents;
 		std::vector<std::vector<float>> solution_edgeCost;
 
@@ -51,12 +51,12 @@ class FPT{
 			return diff.count();
 		}
 		void reduce(Node& fptn);
-		float costSetForbidden(
+		double costSetForbidden(
 				Node& fptn, 
 				unsigned node_i,
 				unsigned node_j);
 
-		float costSetPermanent(
+		double costSetPermanent(
 				Node& fptn, 
 				unsigned node_i,
 				unsigned node_j);
@@ -65,7 +65,7 @@ class FPT{
 			Node& fptn, 
 			unsigned i,
 			unsigned j, 
-			float costForMerging);
+			double costForMerging);
 		
 		void buildSolution(RES::ClusteringResult &cr);
 		void clone_node(Node& fptn0,Node& fptn1);

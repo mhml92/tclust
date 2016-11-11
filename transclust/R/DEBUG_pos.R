@@ -1,14 +1,34 @@
 library(ggplot2)
-#data <- read.table(file("stdin"), header=FALSE, sep="\t")
-data <- read.table(file("~/out.txt"), header=FALSE, sep="\t")
-names(data) <- c('cc_id','threshold','r','x','y')
+library(stringr)
+setwd("~/Dropbox/Datalogi/Speciale/repo/transclust/R/")
+#data <- read.table(file("stdin"), header=FALSE, sep=",")
+data <- read.table(file("../build/release/gavin_pos.txt"), header=FALSE, sep=",")
+names(data) <- c('r','x','y')
+iter <- unique(data$r)
 options(scipen=999)
-iter <- unique(data$cc_id)
-for(i in iter){
-   subdata <- data[which(data$cc_id == i),]
-   plot <- ggplot(subdata,aes(x = x, y = y, alpha = r/100)) + 
-      geom_point() +
-      coord_fixed() + 
-		ggtitle(paste("cc id:",i,"threshold:",subdata$threshold,sep=" "))
-   plot(plot)
+for(i in iter){ 
+  #if(i == 0){
+    plot <- ggplot(data = data[which(data$r == i),],aes(x = x, y = y)) + 
+      geom_point(alpha = 0.5) +
+      coord_fixed() +
+      theme(legend.position="none")
+  png(
+    filename = paste("pos_out/",str_pad(i,4,pad="0"),".png",sep = ""),
+    width = 1024,
+    height = 1024
+    )
+  plot(plot)
+  dev.off()
 }
+#edge_weight <- -0.30004
+#f_rep       <- 100
+#log_d       <- 2.96937
+#num_nodes   <- 135
+##force:        -0.0748482
+#
+#(edge_weight*f_rep)/(log_d*num_nodes)
+#plot(
+#  (edge_weight*f_rep)/(log_d*num_nodes)
+#)
+#
+#

@@ -22,6 +22,30 @@ class TransClust{
 
 		RES::Clustering cluster();
 	private:
+
+		inline void addResult(
+				ConnectedComponent& cc,
+				RES::ClusteringResult& cr)
+		{
+			if(cc.isTransitive())
+			{
+				cr.cost = 0;
+				result.clusters.push_back(cc.getIndex2ObjectId());
+			}else{
+
+				for(auto cluster:cr.clusters)
+				{
+					result.clusters.push_back(std::deque<unsigned>());
+					for(unsigned local_id:cluster)
+					{
+						result.clusters.back().push_back(cc.getObjectId(local_id));
+					}
+				}
+			}
+			
+			result.cost += cr.cost;
+		}
+
 		TCC::TransClustParams tcp;
 		InputParser ip;
 		float total_cost = 0;

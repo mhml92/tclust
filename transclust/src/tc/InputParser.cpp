@@ -9,7 +9,6 @@
 #include <plog/Log.h>
 #include "transclust/Common.hpp"
 #include <boost/unordered_map.hpp>
-//#include "transclust/SimilarityData.hpp"
 #include "transclust/InputParser.hpp"
 
 
@@ -60,9 +59,7 @@ void InputParser::getConnectedComponents(
 		std::string o2 = tokens.at(1);
 
 		// we dont care about selfsimilarities
-		if(o1 == o2){
-			continue;
-		}
+		if(o1 == o2){ continue;}
 
 		// similarity
 		//float value = std::stod(tokens.at(2));
@@ -200,6 +197,9 @@ void InputParser::getConnectedComponents(
 	{
 		// if we see an object pair which we have not seen before
 		if((*similarity_sorter).id != current_id){
+
+			num_added_edges++;
+
 			// update current_id 
 			current_id = (*similarity_sorter).id;
 
@@ -226,14 +226,13 @@ void InputParser::getConnectedComponents(
 
 				// add the cost to the connected component
 				ccs.at(cc_index).addCost((*similarity_sorter).id,cost);	
-				num_added_edges++;
 			}
 		}
 		++similarity_sorter;
 	}
 	// we now have all the information that we need and the original input can
 	// be discarded
-	similarity_sorter.clear();
+	similarity_sorter.finish_clear();
 	/////////////////////////////////////////////////////////////////////////////
 	LOGI << "Adding costs to connected components...done";
 

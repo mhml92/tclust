@@ -1,12 +1,13 @@
 #include <chrono>
+#ifdef _OPENMP
+#	include <omp.h>
+#endif
 #include "transclust/TransClust.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/InputParser.hpp"
-//#include "transclust/FindConnectedComponents.hpp"
 #include "transclust/FORCE.hpp"
 #include "transclust/FPT.hpp"
 #include "transclust/ClusteringResult.hpp"
-//#include "transclust/Result.hpp"
 #include "transclust/Common.hpp"
 
 TransClust::TransClust(
@@ -23,118 +24,143 @@ TransClust::TransClust(
 RES::Clustering TransClust::cluster()
 {
 
+	// read input file and initialize connected components
 	ip.getConnectedComponents(ccs,result);
 	result.threshold = tcp.threshold;
 
-	LOGI << "Starting clustering";
 
-	unsigned num_nodes_clustered = 0;
-	unsigned num_nodes = result.id2name.size(); 
-	unsigned num_nodes_digits = 0;
-	unsigned n = result.id2name.size();
+	// array holding indexes for connected components which could not succesfully
+	// be clustered using the FPT algorithm
+	std::deque<unsigned> force_cc;
 
-	while(n > 0)
-	{ 
-		n /= 10; 
-		num_nodes_digits++; 
+	/////////////////////////////////////////////////////////////////////////////
+	// Try to cluster all connected components using the FPT algorithm
+	// If a connected component could not be clusterd it will clusterd with 
+	// FORCE
+	/////////////////////////////////////////////////////////////////////////////
+	if(!tcp.disable_fpt)
+	{
+		LOGI << "Clustering using FPT algorithm";
+		#pragma omp parallel
+		{
+			#pragma omp for schedule(dynamic)
+			for(unsigned i = 0; i < ccs.size(); i++){
+
+				// get a reference to the connected component at i 
+				ConnectedComponent& cc = ccs.at(i);
+
+				// load the memorymapped file holding the cost-matrix 
+				cc.load();
+
+				// initialize a struct holding the clustering result
+				RES::ClusteringResult cr;
+
+				// set initial cost to negativ, indicating 'no solution found'
+				cr.cost = -1;
+
+				// If the connected compoent was already found to be transitive 
+				// then we can skip any analysis and just add it to the result
+				if(!cc.isTransitive())
+				{
+					// if the connected component is small enough or contains only 
+					// few negative cost edges we try clustering using the FPT
+					if(cc.getNumConflictingEdges() <= tcp.fpt_max_edge_conflicts 
+							|| cc.size() <= tcp.fpt_max_cc_size)
+					{
+						FPT fpt(cc,tcp.fpt_time_limit,tcp.fpt_step_size,cc.getMaxCost());
+						fpt.cluster(cr);
+					}		
+
+
+					if(!tcp.disable_force && cr.cost < 0){
+
+						#pragma omp critical
+						{
+							force_cc.push_back(i);
+						}
+
+						cc.free();
+						continue;
+					}
+				}
+
+				// add clusters to solution
+				#pragma omp critical
+				{
+					addResult(cc,cr);
+				}
+
+				cc.free(true);
+			}
+		}
+		LOGI 
+			<< "Clustered " 
+			<< ccs.size()-force_cc.size() 
+			<< " connected components to optimality";
+
+	}else{
+		force_cc.resize(ccs.size());
+		std::iota(force_cc.begin(),force_cc.end(),0);
 	}
 
-	//std::cout << "cc_size,num_conflicting_edges,force_time,force_cost,force_relative_cost,fpt_time,fpt_cost,fpt_relative_cost," << std::endl; 
-	while(!ccs.empty()){
-		ConnectedComponent& cc = ccs.front();
-		cc.load();
-		LOGI << "clustering cc of size: " << cc.size();
+	/////////////////////////////////////////////////////////////////////////////
+	// Cluster using FORCE
+	/////////////////////////////////////////////////////////////////////////////
+	if(!force_cc.empty() && !tcp.disable_force)
+	{
+		LOGI 
+			<< "Clustered " 
+			<< force_cc.size() 
+			<< " connected components using FORCE";
 
-		RES::ClusteringResult cr;
-
-		// set initial cost to negativ, indicating 'no solution found (yet)'
-		cr.cost = -1;
-
-		// if cc is at least a conflict tripple
-		if(!cc.isTransitive()){
-			LOGD << "The cluster is not transitive!";
-
-			//std::cout << cc.size() << ",";
-			//std::cout << cc.getNumConflictingEdges() << ",";
-
-			/**********************************************************************
-			 * Cluster using FPT
-			 *********************************************************************/
-			if(!tcp.disable_fpt 
-					&& (
-						cc.getNumConflictingEdges() <= tcp.fpt_max_edge_conflicts
-						|| cc.size() <= tcp.fpt_max_cc_size)
-					)
+		#pragma omp parallel
+		{
+			#pragma omp for schedule(dynamic)
+			for(unsigned i = 0; i < force_cc.size();i++)
 			{
-				LOGD << "Clustering using fpt";
+				ConnectedComponent& cc = ccs.at(force_cc.at(i)); 
 
-				float tmp_force_cost = cr.cost;
-				//auto fpt_t1 = std::chrono::high_resolution_clock::now();
-				FPT fpt(cc,tcp.fpt_time_limit,tcp.fpt_step_size,cc.getMaxCost());
-				fpt.cluster(cr);
-				//auto fpt_t2 = std::chrono::high_resolution_clock::now();
-				//std::cout 
-				//	<< std::chrono::duration_cast<std::chrono::nanoseconds>(fpt_t2-fpt_t1).count() 
-				//	<< "," 
-				//	<< cr.cost 
-				//	<< "," 
-				//	<< cr.cost/cc.getMaxCost()<<","; 
+				RES::ClusteringResult cr;
+				if(!cc.isTransitive())
+				{
+					cc.load();
+					LOGD << "clustering with FORCE";
+					// init position array
+					std::vector<std::vector<float>> pos;
+					pos.resize(cc.size(), std::vector<float>(tcp.dim,0));
 
-				if(cr.cost < 0){
-					cr.cost = tmp_force_cost;
-				}
-			}		
+					// layout
+					FORCE::layout(
+							cc, 
+							pos, 
+							tcp.p, 
+							tcp.f_att, 
+							tcp.f_rep, 
+							tcp.R, 
+							tcp.start_t, 
+							tcp.dim);
 
+					// partition
+					FORCE::partition(
+							cc, 
+							pos, 
+							cr, 
+							tcp.d_init, 
+							tcp.d_maximal, 
+							tcp.s_init, 
+							tcp.f_s);
 
-			/**********************************************************************
-			 * Cluster using FORCE
-			 *********************************************************************/
-			if(!tcp.disable_force && cr.cost < 0){
-				LOGD << "clustering with FORCE";
-				// init position array
-				std::vector<std::vector<float>> pos;
-				pos.resize(cc.size(), std::vector<float>(tcp.dim,0));
-
-				// layout
-				//auto force_t1 = std::chrono::high_resolution_clock::now();
-				FORCE::layout(cc, pos, tcp.p, tcp.f_att, tcp.f_rep, tcp.R, tcp.start_t, tcp.dim);
-				//auto layout_t2 = std::chrono::high_resolution_clock::now();
+				}				
 				
-				// partition
-				//auto partition_t1 = std::chrono::high_resolution_clock::now();
-				FORCE::partition(cc, pos, cr, tcp.d_init, tcp.d_maximal, tcp.s_init, tcp.f_s);
-				//auto force_t2 = std::chrono::high_resolution_clock::now();
-				//std::cout 
-				//	<< std::chrono::duration_cast<std::chrono::nanoseconds>(force_t2-force_t1).count() 
-				//	<< "," 
-				//	<< cr.cost 
-				//	<< ","
-				//	<< cr.cost/cc.getMaxCost() << ",";
-			}
+				#pragma omp critical
+				{
+					addResult(cc,cr);
+				}
 
-		}else{
-			LOGD << "The cluster is already transitive!";
-			// cc consist of 1 or 2 nodes and is a cluster
-			cr.cost = 0;
-			cr.clusters = std::deque<std::deque<unsigned>>(1,cc.getIndex2ObjectId());
-		}
-		LOGD << "DONE the cost is: " << cr.cost;
 
-		// add clusters to solution
-		for(auto cluster:cr.clusters){
-			result.clusters.push_back(std::deque<unsigned>());
-			for(unsigned local_id = 0; local_id < cluster.size(); local_id++)
-			{
-				result.clusters.back().push_back(cc.getObjectId(local_id));
+				cc.free(true);
 			}
 		}
-		result.cost += cr.cost;
-
-		num_nodes_clustered += cc.size();
-		LOGI << std::setw(num_nodes_digits) << num_nodes_clustered << " out of " << std::setw(num_nodes_digits) << num_nodes <<" (" << std::floor(100*((float)num_nodes_clustered/num_nodes)) << " %)";
-		
-		cc.free();
-		ccs.pop_front();
 	}
 	return result;
 }

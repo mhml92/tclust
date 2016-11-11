@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
+#include <chrono>
+#include <sstream>
+#include <iomanip>
 #include <tclap/CmdLine.h>
 #include <plog/Log.h>
 #include <plog/Appenders/ColorConsoleAppender.h>
@@ -11,11 +14,11 @@
 /*******************************************************************************
  * Set logging verbosity
  ******************************************************************************/
-const plog::Severity VERBOSITY = plog::none;
+//const plog::Severity VERBOSITY = plog::none;
 //const plog::Severity VERBOSITY = plog::fatal;
 //const plog::Severity VERBOSITY = plog::error;
 //const plog::Severity VERBOSITY = plog::warning;
-//const plog::Severity VERBOSITY = plog::info;
+const plog::Severity VERBOSITY = plog::info;
 //const plog::Severity VERBOSITY = plog::debug;
 //const plog::Severity VERBOSITY = plog::verbose;
 
@@ -33,12 +36,6 @@ int main(int argc, char** argv){
 		TCLAP::CmdLine cmd("Distributed TransClust", ' ', "1.0");
 
 
-		TCLAP::SwitchArg debug_cost_only(
-				"",
-				"DEBUG_COST_ONLY",
-				"",
-				cmd,
-				false);
 
 		TCLAP::ValueArg<unsigned> seed("","seed","",false,42,"int (42)",cmd);
 
@@ -221,6 +218,15 @@ int main(int argc, char** argv){
 				cmd
 				);
 
+		TCLAP::ValueArg<std::string> outfile(
+				"o",
+				"output",
+				"Path and filename of the ouput file. If not specified will the result be saved to transclust_result.txt",
+				false,
+				"transclust_result.txt",
+				"string",
+				cmd);									// parser
+
 		TCLAP::ValueArg<std::string> simfile(
 				"s",
 				"simfile",
@@ -267,35 +273,74 @@ int main(int argc, char** argv){
 				.set_seed(seed.getValue())
 				.set_tmp_dir(tmp_dir.getValue())
 
-				.set_debug_cost_only(debug_cost_only.getValue())
 				);
 
 		/*************************************************************************
 		 * Cluster
 		 ************************************************************************/
+		auto t1 = std::chrono::steady_clock::now();
 		RES::Clustering clusters = transclust.cluster();
+		auto t2 = std::chrono::steady_clock::now();
+		double _time = (double)std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count()/1000000;
+
+		//////////////////////////////////////////////////////////////////////////
+		// format timeduration string (...oh gawd)
+		//////////////////////////////////////////////////////////////////////////
+		unsigned hours = _time/3600;
+
+		_time = _time-(hours*3600.0);
+
+		unsigned minutes = _time/60;
+
+		_time = _time - (minutes*60.0);
+		unsigned seconds = _time;
+
+		unsigned rest = ((_time - seconds)*100);
+
+		std::stringstream ss;
+		if(hours > 0 || minutes > 0){
+			ss << std::setw(2) << std::setfill('0') << hours << ":";
+			ss << std::setw(2) << std::setfill('0') << minutes << ":"; 
+			ss << std::setw(2) << std::setfill('0') << seconds << ".";
+			ss << ((unsigned)(rest*1000))/1000.0;
+		}else{
+			ss <<	((unsigned)(_time*1000))/1000.0 << "s";
+		}
+		std::string stime = ss.str();
+		//////////////////////////////////////////////////////////////////////////
+
+		// print stats
+		std::string num_clusters = std::to_string(clusters.clusters.size());
+		std::stringstream tc;
+		tc << std::setprecision(2)<< std::fixed << clusters.cost;
+		std::string total_cost = tc.str();
+
+		unsigned width = 1+std::max({stime.length(),num_clusters.length(),total_cost.length()});
+
+		LOGI << "Clusters" << std::setw(width) << num_clusters;
+		LOGI << "Cost    " << std::setw(width) << total_cost;
+		LOGI << "Time    " << std::setw(width) << stime;
 
 		/*************************************************************************
 		 * Print result (java transclust style)
 		 ************************************************************************/
-		if(debug_cost_only.getValue()){
-			std::cout << "cost: " << clusters.cost << std::endl;
-			return 0;
-		}
-		std::cout << clusters.threshold << "\t" << clusters.cost << "\t";
+		FILE* ofile = fopen(outfile.getValue().c_str(),"w");
+		std::string s = "";
+		s += std::to_string(clusters.threshold) + "\t" + std::to_string(clusters.cost) + "\t";
+		fputs(s.c_str(),ofile);
 
 		for(auto cluster:clusters.clusters)
 		{
-			std::string s = "";
-			for(unsigned i = 0; i < cluster.size(); i++)
+			s = "";
+			for(unsigned id:cluster)
 			{
-				s += clusters.id2name.at(cluster.at(i)) + ","; 
+				s += clusters.id2name.at(id) + ","; 
 			}
 			s.pop_back();
 			s += ";";
-			std::cout << s;		
+			fputs(s.c_str(),ofile);
 		}
-		std::cout << std::endl;
+		fclose(ofile);
 
 	}catch (TCLAP::ArgException &e){
 		std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;

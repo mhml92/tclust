@@ -36,12 +36,14 @@ namespace FORCE{
 
 	void inline DEBUG_force(std::vector<std::vector<float>>& pos,int iter){
 
-		for(unsigned i = 0; i < pos.size();i++){
-			std::cout << iter+1 << ",";
-			for(unsigned j = 0; j < pos[0].size();j++){
-				std::cout  << pos.at(i).at(j) << ",";	
+		if(pos.size() > 1500){
+			for(unsigned i = 0; i < pos.size();i++){
+				std::cout << iter+1 << ",";
+				for(unsigned j = 0; j < pos[0].size();j++){
+					std::cout  << pos.at(i).at(j) << ",";	
+				}
+				std::cout << std::endl;
 			}
-			std::cout << std::endl;
 		}
 	}
 }

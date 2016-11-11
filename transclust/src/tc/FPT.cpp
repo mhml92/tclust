@@ -3,11 +3,12 @@
 #include <iomanip>
 #include <queue>
 #include <iomanip>
-
-#ifdef _OPENMP
-#	include <omp.h>
+#ifndef NDEBUG
+#	include "transclust/DEBUG.hpp"
+#	define DEBUG_COST(cc,clustering,cost) DEBUG::test_cost(cc,clustering,cost);
+#else
+#	define DEBUG_COST(cc,clustering,cost) {} 
 #endif
-
 #include "transclust/FPT.hpp"
 
 FPT::FPT(
@@ -37,6 +38,8 @@ void FPT::cluster(RES::ClusteringResult &cr)
 		 *********************************************************************/
 		if(getDeltaTime() > time_limit){ return; }
 
+		LOGD << "FPT with max cost: " << maxK;
+
 		/**********************************************************************
 		 * Init root node
 		 *********************************************************************/
@@ -58,14 +61,12 @@ void FPT::cluster(RES::ClusteringResult &cr)
 		 */
 		for(unsigned i = 0; i < fptn.size;i++)
 		{
-			fptn.edgeCost.push_back(std::vector<float>());
+			fptn.edgeCost.push_back(std::vector<float>(fptn.size,0));
 			for(unsigned j = 0; j < fptn.size;j++)
 			{
-				if(i == j)
+				if(i != j)
 				{
-					fptn.edgeCost.at(i).push_back(0);
-				}else{
-					fptn.edgeCost.at(i).push_back(cc.getCost(i,j,false));
+					fptn.edgeCost.at(i).at(j) = cc.getCost(i,j,false);
 				}
 			}
 		}
@@ -74,6 +75,7 @@ void FPT::cluster(RES::ClusteringResult &cr)
 		 * Reduce node
 		 ************************************************************************/
 		reduce(fptn);
+
 		/*************************************************************************
 		 * Start recursion
 		 ************************************************************************/
@@ -83,6 +85,7 @@ void FPT::cluster(RES::ClusteringResult &cr)
 		 * Increase K
 		 ************************************************************************/
 		maxK += stepSize;
+
 	}
 	buildSolution(cr);
 }
@@ -99,22 +102,21 @@ reduceLoopStart:
 		{
 			if(fptn.edgeCost.at(u).at(v) <= 0){ continue; }
 
-			float cost_uv = fptn.edgeCost[u][v];
-			float sumIcf = std::max(0.0f,cost_uv) + costSetForbidden(fptn,u,v);
-			float sumIcp = std::max(0.0f,-cost_uv) + costSetPermanent(fptn,u,v);
+			double cost_uv = fptn.edgeCost[u][v];
+			double sumIcf = costSetForbidden(fptn,u,v);
+			double sumIcp = costSetPermanent(fptn,u,v);
 
 			if(sumIcf + fptn.cost > maxK && sumIcp + fptn.cost > maxK)
 			{
 				fptn.cost = inf;
 				return;
-				goto reduceLoopStart;
 			}else if( sumIcf + fptn.cost > maxK)
 			{
 				mergeNodes(fptn,u,v,sumIcp);
 				goto reduceLoopStart;
 			}else if(sumIcp + fptn.cost > maxK)
 			{
-				fptn.cost += std::max(0.0f,cost_uv);
+				fptn.cost += cost_uv;
 				fptn.edgeCost[u][v] = -inf;
 				fptn.edgeCost[v][u] = -inf;
 				goto reduceLoopStart;
@@ -123,19 +125,18 @@ reduceLoopStart:
 		}
 	}
 }
-float FPT::costSetForbidden(
+double FPT::costSetForbidden(
 		Node& fptn,
 		unsigned u,
 		unsigned v)
 {
-	float costs = 0;
+	double costs = fptn.edgeCost.at(u).at(v);
 
 	for (unsigned w = 0; w < fptn.size; w++)
 	{
 		if( u == w || v == w){ continue; }
 
-		if (fptn.edgeCost.at(u).at(w) > 0
-				&& fptn.edgeCost.at(v).at(w) > 0)
+		if (fptn.edgeCost.at(u).at(w) > 0 && fptn.edgeCost.at(v).at(w) > 0)
 		{
 			costs += std::min(
 					fptn.edgeCost.at(u).at(w),
@@ -145,22 +146,19 @@ float FPT::costSetForbidden(
 	return costs;
 }
 
-float FPT::costSetPermanent(
+double FPT::costSetPermanent(
 		Node& fptn,
 		unsigned u,
 		unsigned v)
 {
-	float cost = 0;
+	double cost = 0;
 
 	for (unsigned  w = 0; w < fptn.size; w++)
 	{
-		if (w == u || w == v)
-		{
-			continue;
-		}
+		if (w == u || w == v){ continue; }
+
 		// sum cost of symmetric set difference
-		if( (fptn.edgeCost.at(u).at(w) > 0)
-				!= (fptn.edgeCost.at(v).at(w) > 0) )
+		if( (fptn.edgeCost.at(u).at(w) > 0) != (fptn.edgeCost.at(v).at(w) > 0) )
 		{
 			cost += std::min(
 				std::abs(fptn.edgeCost.at(u).at(w)),
@@ -181,8 +179,9 @@ void FPT::find_solution(Node& fptn0)
 	 * Find conflict triple
 	 ************************************************************************/
 	unsigned edge[2];
-	float highestoccurence = 0;
-	float occurence = 0;
+	double highestoccurence = 0;
+	double occurence = 0;
+	bool foundEdge = false;
 
 	for (unsigned u = 0; u < fptn0.size; u++)
 	{
@@ -191,18 +190,18 @@ void FPT::find_solution(Node& fptn0)
 
 			if (fptn0.edgeCost[u][v] > 0) {
 
-				//occurence = std::abs(
-				//		costSetPermanent(fptn0, u, v)
-				//		- costSetForbidden(fptn0,u, v)
-				//		);
-				occurence = std::max(
-						costSetPermanent(fptn0, u, v),
-						costSetForbidden(fptn0, u, v)
+				occurence = std::fabs(
+						costSetPermanent(fptn0, u, v) - costSetForbidden(fptn0,u, v)
 						);
+				//occurence = std::max(
+				//		costSetPermanent(fptn0, u, v),
+				//		costSetForbidden(fptn0, u, v)
+				//		);
 
 				if (occurence > highestoccurence)
 				{
 					highestoccurence = occurence;
+					foundEdge = true;
 					edge[0] = u;
 					edge[1] = v;
 				}
@@ -210,7 +209,7 @@ void FPT::find_solution(Node& fptn0)
 		}
 	}
 
-	if(highestoccurence == 0){
+	if(!foundEdge){
 		solution_found = true;
 		solution_cost = fptn0.cost;
 		solution_edgeCost = fptn0.edgeCost;
@@ -221,42 +220,43 @@ void FPT::find_solution(Node& fptn0)
 
 	unsigned u = edge[0];
 	unsigned v = edge[1];
-	float cost_uv = fptn0.edgeCost[u][v];
+	double cost_uv = fptn0.edgeCost[u][v];
 
 	/*************************************************************************
 	 * Branch merge
 	 ************************************************************************/
-	float csp = std::max(0.0f,-cost_uv) + costSetPermanent(fptn0,u,v);
+	double csp = costSetPermanent(fptn0,u,v);
 	if (csp + fptn0.cost <= maxK)
 	{
 		Node fptn1;
 		clone_node(fptn0,fptn1);
 
 		mergeNodes(fptn1,u,v, csp);
+
 		find_solution(fptn1);
 	}
 
 	/*************************************************************************
 	 * Branch forbidden
 	 ************************************************************************/
-	float csf = std::max(0.0f,cost_uv) + costSetForbidden(fptn0,u,v);
+	double csf = costSetForbidden(fptn0,u,v);
 	if (csf + fptn0.cost <= maxK)
 	{
-		float origCost = fptn0.edgeCost[u][v];
+		double origCost = fptn0.edgeCost[u][v];
 
-		fptn0.cost += std::max(0.0f,cost_uv);
+		fptn0.cost += cost_uv;
 		fptn0.edgeCost[u][v] = -inf;
 		fptn0.edgeCost[v][u] = -inf;
 
 		find_solution(fptn0);
 
-		fptn0.cost -= std::max(0.0f,cost_uv);
+		fptn0.cost -= cost_uv;
 		fptn0.edgeCost[u][v] = origCost;
 		fptn0.edgeCost[v][u] = origCost;
 	}
 
 }
-void FPT::mergeNodes(Node& fptn, unsigned node_i,unsigned node_j, float costForMerging)
+void FPT::mergeNodes(Node& fptn, unsigned node_i,unsigned node_j, double costForMerging)
 {
 	unsigned l = std::min(node_i,node_j);
 	unsigned h = std::max(node_i,node_j);
@@ -268,9 +268,9 @@ void FPT::mergeNodes(Node& fptn, unsigned node_i,unsigned node_j, float costForM
 	{
 		if( i == l ){
 			fptn.edgeCost.at(l).at(i) = 0.0f;
+		}else if(h == i){
+			fptn.edgeCost.at(h).at(i) = 0.0f;
 		}else{
-
-
 			fptn.edgeCost.at(l).at(i) += fptn.edgeCost.at(h).at(i);
 			fptn.edgeCost.at(i).at(l) += fptn.edgeCost.at(i).at(h);
 		}
@@ -373,4 +373,5 @@ void FPT::buildSolution(RES::ClusteringResult &cr)
 			}
 		}
 	}
+	DEBUG_COST(cc,cr.clusters,cr.cost);
 }

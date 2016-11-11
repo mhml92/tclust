@@ -10,7 +10,7 @@ namespace RES
 {
 	// Struct holding a partial clustering
 	struct ClusteringResult {
-		float cost;
+		double cost;
 		std::deque<std::deque<unsigned>> clusters;
 	};
 
@@ -21,11 +21,45 @@ namespace RES
 		std::deque<std::deque<unsigned>> clusters;
 	};
 
-	inline float calculateCost(
+	inline double calculateCost_membership(
 			ConnectedComponent& cc, 
 			std::deque<std::deque<unsigned>>& clustering)
 	{
-		float cost = 0;
+		std::vector<unsigned> membership(cc.size(),std::numeric_limits<unsigned>::max());
+		unsigned clusterId = 0;
+		for(auto& cluster:clustering){
+			for(unsigned i = 0; i < cluster.size(); i++){
+				membership.at(cluster.at(i)) = clusterId;
+			}
+			clusterId++;
+		}
+
+		double cost = 0;
+		for(unsigned i = 0; i< membership.size(); i++)
+		{
+			for(unsigned j = i+1; j < membership.size(); j++)
+			{
+				float _cost = cc.getCost(i,j,false);
+				if((membership.at(i) != membership.at(j))
+						&& _cost > 0.0)
+				{
+
+					cost += _cost;
+				}else if((membership.at(i) == membership.at(j))
+						&& _cost < 0.0)
+				{
+					cost -= _cost;
+				}
+			}
+		}
+		return cost;
+	}
+
+	inline double calculateCost(
+			ConnectedComponent& cc, 
+			std::deque<std::deque<unsigned>>& clustering)
+	{
+		double cost = 0;
 
 		// calculate internal cost of each connected component
 		for(auto& cluster:clustering)
@@ -67,40 +101,6 @@ namespace RES
 			}
 		}
 		return cost;
-		//auto _t2 = std::chrono::high_resolution_clock::now();
-		//std::cout << std::endl;
-		//std::cout << "new cost: " << std::chrono::duration_cast<std::chrono::nanoseconds>(_t2-_t1).count()  << " " <<TEST_cost <<  std::endl;
-		//NEW_SCORE += std::chrono::duration_cast<std::chrono::nanoseconds>(_t2-_t1).count();
-
-		//auto t1 = std::chrono::high_resolution_clock::now();
-
-		//	std::vector<unsigned> membership(cc.size(),std::numeric_limits<unsigned>::max());
-		//	unsigned clusterId = 0;
-		//	for(auto& cluster:clustering){
-		//		for(unsigned i = 0; i < cluster.size(); i++){
-		//			membership.at(cluster.at(i)) = clusterId;
-		//		}
-		//		clusterId++;
-		//	}
-
-		//	float cost = 0;
-		//	for(unsigned i = 0; i< membership.size(); i++)
-		//	{
-		//		for(unsigned j = i+1; j < membership.size(); j++)
-		//		{
-		//			float _cost = cc.getCost(i,j,false);
-		//			if((membership.at(i) != membership.at(j))
-		//					&& _cost > 0.0)
-		//			{
-
-		//				cost += _cost;
-		//			}else if((membership.at(i) == membership.at(j))
-		//					&& _cost < 0.0)
-		//			{
-		//				cost -= _cost;
-		//			}
-		//		}
-		//	}
 
 	}
 

@@ -2,17 +2,32 @@
 #define DEBUG_HPP
 #include <vector>
 #include <queue>
+#include "transclust/Common.hpp"
+#include "transclust/ClusteringResult.hpp"
 #include "transclust/ConnectedComponent.hpp"
 
 namespace DEBUG
 {
+	inline void test_cost(
+			ConnectedComponent& cc, 
+			std::deque<std::deque<unsigned>>& clustering, 
+			double cost)
+	{
+		double alt_cost = RES::calculateCost_membership(cc,clustering);
+
+		if(alt_cost != cost){
+			std::cout << "[ERROR] COST NOT RIGHT\n" 
+				<< "cost:     " << std::setprecision(15) << cost << "\n"
+				<< "alt_cost: " << std::setprecision(15) << alt_cost << "\n" << __FILE__ << " at line: " << __LINE__ << std::endl;
+		}
+	}
+
+
 	inline void geometricLinking(
-			std::vector<std::vector<unsigned>>& clustering, 
+			std::deque<std::deque<unsigned>>& clustering, 
 			std::vector<std::vector<float>>& pos, 
 			float distance)
 	{
-		std::cout << "Debug geometricLinking" << std::endl;
-
 		for(unsigned i = 0; i < clustering.size(); i++){
 			// test that each connected component IS connected
 			std::vector<bool> assigned(clustering.at(i).size(),false);
@@ -51,7 +66,6 @@ namespace DEBUG
 				}
 			}
 		}
-		std::cout << "Debug geometricLinking...done" << std::endl;
 	}
 
 	inline void findConnectedComponents(

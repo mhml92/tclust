@@ -7,7 +7,6 @@
 #include <boost/unordered_map.hpp>
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/Common.hpp"
-#include "transclust/SimilarityData.hpp"
 #include "transclust/DynamicUnionFind.hpp"
 #include "transclust/ClusteringResult.hpp"
 
