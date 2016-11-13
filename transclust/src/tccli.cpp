@@ -321,9 +321,9 @@ int main(int argc, char** argv){
 		LOGI << "Cost    " << std::setw(width) << total_cost;
 		LOGI << "Time    " << std::setw(width) << stime;
 
-		/*************************************************************************
-		 * Print result (java transclust style)
-		 ************************************************************************/
+		//////////////////////////////////////////////////////////////////////////
+		//* Print result (java transclust style)
+		//////////////////////////////////////////////////////////////////////////
 		FILE* ofile = fopen(outfile.getValue().c_str(),"w");
 		std::string s = "";
 		s += std::to_string(clusters.threshold) + "\t" + std::to_string(clusters.cost) + "\t";

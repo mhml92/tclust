@@ -44,6 +44,10 @@ class ConnectedComponent
 		inline unsigned getObjectId(unsigned i){ return index2objectId.at(i); }
 		inline float getCost(unsigned i,unsigned j,bool normalized = true){
 
+			if(!is_loaded){
+				std::cout << "[ERROR] cost file not loaded" << std::endl;
+				exit(1);
+			}
 			float cost =  *((float*)mm_file.data()+index(i,j));
 
 
@@ -102,9 +106,9 @@ class ConnectedComponent
 			if(!std::isinf(cost)){
 				if(maxValue < cost){maxValue = cost;};
 				if(minValue > cost){minValue = cost;};
-			}
+				max_cost += std::fabs(cost);
+			}			
 
-			max_cost += std::fabs(cost);
 			num_data_values++;
 
 			FILE* tmpFile = fopen(tmp_file_path.c_str(),"a");

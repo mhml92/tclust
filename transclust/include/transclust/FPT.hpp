@@ -24,8 +24,7 @@ class FPT{
 		FPT(
 			ConnectedComponent& cc,
 			float time_limit,
-			float stepSize,
-			float mockInf
+			float stepSize
 		);
 
 		void cluster(RES::ClusteringResult &cr);

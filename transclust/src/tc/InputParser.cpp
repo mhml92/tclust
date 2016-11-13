@@ -9,6 +9,7 @@
 #include <plog/Log.h>
 #include "transclust/Common.hpp"
 #include <boost/unordered_map.hpp>
+#include <boost/filesystem.hpp>
 #include "transclust/InputParser.hpp"
 
 
@@ -28,7 +29,13 @@ InputParser::InputParser(
 		filename(_filename),
 		tcp(_tcp),
 		duf()
-{ }
+{
+	if(!boost::filesystem::exists(filename)){
+		std::cout << "Could not find file " << filename << std::endl;
+		exit(1);
+	}
+}
+
 
 
 void InputParser::getConnectedComponents(
@@ -36,6 +43,8 @@ void InputParser::getConnectedComponents(
 		RES::Clustering& result
 		)
 {
+
+
 	boost::unordered_map<std::string, unsigned> name2id;
 
 	// create sorter object (CompareType(), MainMemoryLimit)
@@ -62,7 +71,6 @@ void InputParser::getConnectedComponents(
 		if(o1 == o2){ continue;}
 
 		// similarity
-		//float value = std::stod(tokens.at(2));
 		float value = std::stof(tokens.at(2));
 
 		// if inf/-inf replace with numericlimits 
@@ -112,6 +120,10 @@ void InputParser::getConnectedComponents(
 	/////////////////////////////////////////////////////////////////////////////
 	LOGI << "Building DUF";
 	/////////////////////////////////////////////////////////////////////////////
+	
+	float max_value = std::numeric_limits<float>::lowest();
+	float min_value = std::numeric_limits<float>::max();
+
 	// ensure that we only use the first occurence of each pair 
 	uint64_t current_id = 0;
 	while (!similarity_sorter.empty())
@@ -127,6 +139,13 @@ void InputParser::getConnectedComponents(
 
 			// get the similarity value
 			float value = (*similarity_sorter).sim;
+
+			if(value != std::numeric_limits<float>::lowest() ||
+					value != std::numeric_limits<float>::max())
+			{
+				if(max_value < value){ max_value = value;}
+				if(min_value > value){ min_value = value;}
+			}
 
 			// if the similarity value is larger then the threshold we know these 
 			// two objects belong to the same connected component
@@ -208,6 +227,17 @@ void InputParser::getConnectedComponents(
 
 			// get the similarity value
 			float value = (*similarity_sorter).sim;
+
+			if(value == std::numeric_limits<float>::lowest() ||
+					value == std::numeric_limits<float>::max())
+			{
+				if(value > 0){
+					value = max_value;
+				}
+				else{
+					value = min_value;
+				}
+			}
 
 			// find the roots of each element
 			unsigned root_id_1 = duf.find(ids.first);

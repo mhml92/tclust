@@ -44,7 +44,8 @@ RES::Clustering TransClust::cluster()
 		#pragma omp parallel
 		{
 			#pragma omp for schedule(dynamic)
-			for(unsigned i = 0; i < ccs.size(); i++){
+			for(unsigned i = 0; i < ccs.size(); i++)
+			{
 
 				// get a reference to the connected component at i 
 				ConnectedComponent& cc = ccs.at(i);
@@ -67,19 +68,19 @@ RES::Clustering TransClust::cluster()
 					if(cc.getNumConflictingEdges() <= tcp.fpt_max_edge_conflicts 
 							|| cc.size() <= tcp.fpt_max_cc_size)
 					{
-						FPT fpt(cc,tcp.fpt_time_limit,tcp.fpt_step_size,cc.getMaxCost());
+						FPT fpt(cc,tcp.fpt_time_limit,tcp.fpt_step_size);
 						fpt.cluster(cr);
 					}		
 
-
-					if(!tcp.disable_force && cr.cost < 0){
-
+					if(cr.cost < 0)
+					{
 						#pragma omp critical
 						{
 							force_cc.push_back(i);
 						}
 
 						cc.free();
+
 						continue;
 					}
 				}
@@ -106,10 +107,10 @@ RES::Clustering TransClust::cluster()
 	/////////////////////////////////////////////////////////////////////////////
 	// Cluster using FORCE
 	/////////////////////////////////////////////////////////////////////////////
-	if(!force_cc.empty() && !tcp.disable_force)
+	if(!force_cc.empty())
 	{
 		LOGI 
-			<< "Clustered " 
+			<< "Clustering " 
 			<< force_cc.size() 
 			<< " connected components using FORCE";
 

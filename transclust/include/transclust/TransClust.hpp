@@ -11,6 +11,12 @@
 #include "transclust/InputParser.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/ClusteringResult.hpp"
+#ifndef NDEBUG
+#	include "transclust/DEBUG.hpp"
+#	define DEBUG_COST(cc,clustering,cost) DEBUG::test_cost(cc,clustering,cost);
+#else
+#	define DEBUG_COST(cc,clustering,cost) {} 
+#endif
 
 class TransClust{
 
@@ -42,7 +48,9 @@ class TransClust{
 					}
 				}
 			}
-			
+			if(cr.cost < 0){
+				std::cout << "waaaaaat" << std::endl;
+			}	
 			result.cost += cr.cost;
 		}
 

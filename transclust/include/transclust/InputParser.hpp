@@ -64,8 +64,8 @@ class InputParser
 		{
 			if (name2id.find(o) == name2id.end())
 			{
+				unsigned _id = result.id2name.size();
 				result.id2name.push_back(o);
-				unsigned _id = result.id2name.size()-1;
 				name2id[o] = _id;
 			}
 		}

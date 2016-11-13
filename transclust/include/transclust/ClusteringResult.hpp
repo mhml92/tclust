@@ -4,6 +4,7 @@
 #include <deque>
 #include <deque>
 #include <string>
+#include "transclust/Common.hpp"
 #include "transclust/ConnectedComponent.hpp"
 
 namespace RES
@@ -44,11 +45,11 @@ namespace RES
 						&& _cost > 0.0)
 				{
 
-					cost += _cost;
+					cost += TCC::round(_cost);
 				}else if((membership.at(i) == membership.at(j))
 						&& _cost < 0.0)
 				{
-					cost -= _cost;
+					cost -= TCC::round(_cost);
 				}
 			}
 		}
@@ -74,7 +75,7 @@ namespace RES
 					float edge_cost = cc.getCost(_i,_j,false);
 					if(edge_cost < 0.0)
 					{
-						cost += std::fabs(edge_cost);
+						cost += TCC::round(std::fabs(edge_cost));
 					}
 				}
 			}
@@ -94,7 +95,7 @@ namespace RES
 						float edge_cost = cc.getCost(_u,_v,false);
 						if(edge_cost > 0.0)
 						{
-							cost += edge_cost;
+							cost += TCC::round(edge_cost);
 						}
 					}
 				}
