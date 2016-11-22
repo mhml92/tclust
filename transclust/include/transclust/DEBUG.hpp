@@ -14,9 +14,9 @@ namespace DEBUG
 			double cost)
 	{
 		double alt_cost = RES::calculateCost_membership(cc,clustering);
-
-		if(alt_cost != cost){
+		if(TCC::round(alt_cost) != TCC::round(cost)){
 			std::cout << "[ERROR] COST NOT RIGHT\n" 
+				<< "diff:     " << std::setprecision(15) << std::fabs(cost-alt_cost) << "\n"
 				<< "cost:     " << std::setprecision(15) << cost << "\n"
 				<< "alt_cost: " << std::setprecision(15) << alt_cost << "\n" << __FILE__ << " at line: " << __LINE__ << std::endl;
 		}

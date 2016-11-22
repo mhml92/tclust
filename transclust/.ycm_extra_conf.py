@@ -38,7 +38,7 @@ flags = [
 '-x',
 'c++',
 
-
+'-lboost',
 '-I',
 WD + '/include/',
 '-I',

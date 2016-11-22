@@ -12,9 +12,6 @@
 #include <boost/filesystem.hpp>
 #include "transclust/InputParser.hpp"
 
-
-
-
 /**
  * Initializes the InputParser class
  *
@@ -30,21 +27,18 @@ InputParser::InputParser(
 		tcp(_tcp),
 		duf()
 {
-	if(!boost::filesystem::exists(filename)){
+	if(!boost::filesystem::exists(filename))
+	{
 		std::cout << "Could not find file " << filename << std::endl;
 		exit(1);
 	}
 }
-
-
 
 void InputParser::getConnectedComponents(
 		std::deque<ConnectedComponent>& ccs,
 		RES::Clustering& result
 		)
 {
-
-
 	boost::unordered_map<std::string, unsigned> name2id;
 
 	// create sorter object (CompareType(), MainMemoryLimit)
@@ -76,9 +70,13 @@ void InputParser::getConnectedComponents(
 		// if inf/-inf replace with numericlimits 
 		if(std::isinf(value))
 		{
-			LOGW_IF(!has_inf_in_input) << "Input contains 'Inf' or '-Inf' values. These will be truncated to max/min observed value in input."; 
+			LOGW_IF(!has_inf_in_input) << "Input contains 'Inf' or '-Inf' values. "
+				<< "These will be truncated to max/min observed value in input."; 
+			
 			has_inf_in_input = true;
-			if(value < 0 ){
+			
+			if(value < 0 )
+			{
 				value = std::numeric_limits<float>::lowest();
 			}else{
 				value = std::numeric_limits<float>::max();
@@ -92,6 +90,7 @@ void InputParser::getConnectedComponents(
 		uint64_t key;
 		unsigned o1_id = name2id[o1];
 		unsigned o2_id = name2id[o2];
+
 		if (o1_id < o2_id)
 		{
 			key = TCC::fuse(o1_id, o2_id);
@@ -140,7 +139,7 @@ void InputParser::getConnectedComponents(
 			// get the similarity value
 			float value = (*similarity_sorter).sim;
 
-			if(value != std::numeric_limits<float>::lowest() ||
+			if(value != std::numeric_limits<float>::lowest() &&
 					value != std::numeric_limits<float>::max())
 			{
 				if(max_value < value){ max_value = value;}
@@ -173,9 +172,9 @@ void InputParser::getConnectedComponents(
 		unsigned rootId = duf.find(i);
 
 		// see if the connected component has not been created 
+		// if it has not been created do so and update the rootId2cc	
 		if(rootId2cc.find(rootId) == rootId2cc.end())
 		{
-			// if it has not been created do so and update the rootId2cc
 			unsigned cc_id = ccs.size();
 
 			// insert a new connected component with id,number of edges and tcp
@@ -203,7 +202,7 @@ void InputParser::getConnectedComponents(
 
 	/////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////
-	LOGI << "Adding costs to connected components";
+	LOGI << "Adding cost values to connected components";
 	/////////////////////////////////////////////////////////////////////////////
 	// reset internal pointer to start of input
 	similarity_sorter.rewind();
@@ -211,13 +210,13 @@ void InputParser::getConnectedComponents(
 	// To ensure that we only use the first occurance of an object pair we keep 
 	// track of the current id (no object pair has id 0)
 	current_id = 0;
-	long num_added_edges = 0;
+	long num_used_edges = 0;
 	while (!similarity_sorter.empty())
 	{
 		// if we see an object pair which we have not seen before
 		if((*similarity_sorter).id != current_id){
 
-			num_added_edges++;
+			num_used_edges++;
 
 			// update current_id 
 			current_id = (*similarity_sorter).id;
@@ -228,17 +227,6 @@ void InputParser::getConnectedComponents(
 			// get the similarity value
 			float value = (*similarity_sorter).sim;
 
-			if(value == std::numeric_limits<float>::lowest() ||
-					value == std::numeric_limits<float>::max())
-			{
-				if(value > 0){
-					value = max_value;
-				}
-				else{
-					value = min_value;
-				}
-			}
-
 			// find the roots of each element
 			unsigned root_id_1 = duf.find(ids.first);
 			unsigned root_id_2 = duf.find(ids.second);
@@ -247,8 +235,24 @@ void InputParser::getConnectedComponents(
 			// connected component) then add cost value
 			if(root_id_1 == root_id_2)
 			{
+				
+				// if inf values was present in the similarity file - then exchange for
+				// min/max value
+				//
+				if(value == std::numeric_limits<float>::lowest() ||
+						value == std::numeric_limits<float>::max())
+				{
+					if(value > 0)
+					{
+						value = max_value;
+					}
+					else{
+						value = min_value;
+					}
+				}
+
 				// the cost is (similarity - threshold)
-				float cost = TCC::round(value - tcp.threshold);
+				float cost = value - tcp.threshold;
 
 				// find the index in 'ccs' which holds the relevant connected 
 				// component
@@ -266,9 +270,9 @@ void InputParser::getConnectedComponents(
 	/////////////////////////////////////////////////////////////////////////////
 	LOGI << "Adding costs to connected components...done";
 
-	LOGW_IF(num_added_edges != TCC::calc_num_sym_elem(result.id2name.size())) 
+	LOGW_IF(num_used_edges != TCC::calc_num_sym_elem(result.id2name.size())) 
 		<< "Similarity file is incomplete. Only " 
-		<< num_added_edges 
+		<< num_used_edges 
 		<< " out of " 
 		<< TCC::calc_num_sym_elem(result.id2name.size()) 
 		<< " possible edges for " 

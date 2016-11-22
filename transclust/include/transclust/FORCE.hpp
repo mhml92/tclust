@@ -18,7 +18,18 @@ namespace FORCE{
 			const unsigned R,
 			float start_t,
 			const unsigned dim,
-			unsigned seed = 42);
+			unsigned seed);
+
+	void layout_parallel(
+			ConnectedComponent& cc,
+			std::vector<std::vector<float>>& pos,
+			float p,
+			float f_att,
+			float f_rep,
+			const unsigned R,
+			float start_t,
+			const unsigned dim,
+			unsigned seed);
 
 	void partition(
 			ConnectedComponent& cc,
@@ -33,6 +44,12 @@ namespace FORCE{
 			std::vector<std::vector<float>>& pos,
 			float maxDist,
 			std::deque<std::deque<unsigned>>& objects);
+
+	void initial_layout(
+			std::vector<std::vector<float>>& pos,
+			unsigned dim,
+			float p,
+			unsigned seed);
 
 	void inline DEBUG_force(std::vector<std::vector<float>>& pos,int iter){
 

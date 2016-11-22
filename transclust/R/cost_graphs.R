@@ -1,39 +1,64 @@
 library(ggplot2)
 library(stringr)
-setwd("~/Dropbox/Datalogi/Speciale/repo/transclust/data/results/test_run_2016-11-12--16-09-21/")
-data <- read.table(file("costs.log"), header=TRUE, sep="\t")
-options(scipen=999)
+library(gridExtra)
+setwd("~/Dropbox/Datalogi/Speciale/repo/transclust/data/results/")
 
-fpt_data = data[which(data$fpt == "True"),]
-fpt_data_cpp <- fpt_data[which(fpt_data$program == "cpp"),]
-fpt_data_cpp$program <- "cpp_fpt"
-fpt_data_java <-fpt_data[which(fpt_data$program == "java"),]
-fpt_data_java$program <- "java_fpt"
+parse_data <- function(data, name,include_fpt = F){
+  programs <- unique(data$program)
+  fpt <- unique(data$fpt)
+  if(!include_fpt){
+    fpt <- c("False")
+  }
+  for(program in programs){
+    for(using_fpt in fpt){
+      res <- data[which(data$program == program),]
+      res <- data[which(res$fpt == using_fpt),]
+      if(using_fpt == "True"){
+        res$program <- paste(name,program,"wFPT",sep="_")
+      }else{
+        res$program <- paste(name,program,sep="_")
+      }
+      if(exists("result")){
+        result <- rbind(result,res)
+      }else{
+        result <- res
+      }
+    }
+  }
+  result
+}
 
-fpt_data <- rbind(fpt_data_cpp,fpt_data_java)
+# Read cost logs
+## JAVA BASELINE COST
+java_tc <- read.table(file("2016-11-19--18-09-31__java_tc2/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
+java_tc_new <- read.table(file("2016-11-20--16-43-32__java_2.0.1/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
 
-force_data = data[which(data$fpt == "False"),]
-force_data_cpp <- force_data[which(force_data$program == "cpp"),]
-force_data_cpp$program <- "cpp_force"
-force_data_java <-force_data[which(force_data$program == "java"),]
-force_data_java$program <- "java_force"
+# bad normalization 0:1 and no check for fallback-threshold is smallest value
+cpp_bad_norm <- read.table(file("2016-11-21--10-46-20__cpp_bad_norm/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
+cpp_normal_force <- read.table(file("2016-11-21--10-59-22__cpp_normal_force/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
+cpp_no_force <- read.table(file("2016-11-21--13-38-17__cpp_no_force/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
+cpp_no_force_small_gml <- read.table(file("2016-11-21--13-49-18__cpp_no_force_gml_small/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
+cpp_no_force_small_gml_vsmall_gml <- read.table(file("2016-11-21--14-00-38__cpp_no_force_gml_small_diff_seed_vsmall_gml/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
+cpp_no_force_small_gml_diff_seed <- read.table(file("2016-11-21--13-56-02__cpp_no_force_gml_small_diff_seed/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
+
 
 data <- rbind(
-  fpt_data,
-  force_data_cpp,
-  force_data_java
-  )
-
-#data_cpp <- data[which(grepl("cpp", data$program)),]
-#data_java <- data[which(grepl("java", data$program)),]
-#data <- data_cpp
+  #parse_data(cpp_bad_norm,"cpp_bad_norm"),
+  parse_data(cpp_no_force_small_gml_vsmall_gml,"no_force_vsmall_gml"),
+  parse_data(cpp_normal_force,"normal_force"),
+  parse_data(java_tc,"java_tc")
+  #parse_data(java_tc_new,"java_tc_new"),
+)
 
 files = unique(data$filename)
+
+#pdf("tc_comparison.pdf")
 for(f in files){
   plot <- ggplot(data = data[which(data$filename==f),],aes(x=threshold,y=cost,colour = program)) +
-    geom_line(alpha = 0.75) +
+    geom_line(alpha = 0.5) +
     geom_point(alpha = 0.5) +
     #scale_y_log10() +
-    ggtitle(f)
+    ggtitle(paste0(f,sep=" ")) 
   print(plot)
 }
+#dev.off()

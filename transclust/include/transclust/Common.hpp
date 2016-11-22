@@ -20,6 +20,7 @@ namespace TCC
 		unsigned R = 100;
 		unsigned dim = 3;
 		float start_t = 100;
+		unsigned force_min_size_parallel = 1000;
 
 		// geometric linking parameters
 		float d_init = 0.01;
@@ -37,10 +38,10 @@ namespace TCC
 		float sim_fallback = 0.0;
 		bool disable_force = false;
 		bool disable_fpt = false;
-		std::string normalization = "ABSOLUTE";
+		//std::string normalization = "ABSOLUTE";
 		std::string tmp_dir = "/tmp/tclust/";
 		unsigned seed = 42;
-		unsigned max_ram = 1024;
+		double memory_limit = 1024.0;
 
 		// debug
 		bool debug_cost_only = false;
@@ -59,6 +60,7 @@ namespace TCC
 		TransClustParams& set_d_maximal(float val){d_maximal = val;return *this;}
 		TransClustParams& set_s_init(float val){s_init = val;return *this;}
 		TransClustParams& set_f_s(float val){f_s = val;return *this;}
+		TransClustParams& set_force_min_size_parallel(unsigned val){force_min_size_parallel = val;return *this;}
 
 		TransClustParams& set_fpt_time_limit(float val){fpt_time_limit = val;return *this;}
 		TransClustParams& set_fpt_max_edge_conflicts(unsigned val){fpt_max_edge_conflicts = val;return *this;}
@@ -68,9 +70,10 @@ namespace TCC
 		TransClustParams& set_sim_fallback(float val){sim_fallback = val;return *this;}
 		TransClustParams& set_disable_force(bool val){disable_force = val;return *this;}
 		TransClustParams& set_disable_fpt(bool val){disable_fpt = val;return *this;}
-		TransClustParams& set_normalization(std::string val){normalization = val;return *this;}
+		//TransClustParams& set_normalization(std::string val){normalization = val;return *this;}
 		TransClustParams& set_tmp_dir(std::string val){tmp_dir = val;return *this;}
 		TransClustParams& set_seed(bool val){seed = val;return *this;}
+		TransClustParams& set_memory_limit(double val){memory_limit = val;return *this;}
 
 		TransClustParams& set_debug_cost_only(bool val){debug_cost_only = val;return *this;}
 	};
@@ -79,7 +82,7 @@ namespace TCC
 	inline uint64_t fuse(unsigned i,unsigned j)
 	{
 		if(i > j){ std::swap(i,j);}
-		return (( (std::uint64_t)j << 32) | (std::uint64_t)i);
+		return (( (std::uint64_t)i << 32) | (std::uint64_t)j);
 	}
 	
 	inline std::pair<unsigned,unsigned> defuse(long l)
@@ -92,7 +95,7 @@ namespace TCC
 
 	inline float round(float f)
 	{
-		return std::rint(f*10000.0f)/10000.0f;
+		return (std::rint(f*100000.0f))/100000.0f;
 	}
 
 	inline float dist(std::vector<std::vector<float>>& pos,unsigned i, unsigned j)

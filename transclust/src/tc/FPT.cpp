@@ -214,7 +214,7 @@ void FPT::find_solution(Node& fptn0)
 	}
 
 	
-	if(TCC::round(highestoccurence) == 0.0){
+	if(highestoccurence == 0.0){
 		solution_found = true;
 		solution_cost = fptn0.cost;
 		solution_edgeCost = fptn0.edgeCost;
@@ -324,7 +324,7 @@ void FPT::clone_node(Node& fptn0,Node& fptn1){
 void FPT::buildSolution(RES::ClusteringResult &cr)
 {
 	if(solution_found){
-		cr.cost = TCC::round(solution_cost);
+		cr.cost = solution_cost;
 
 		/////////////////////////////////////////////////////////////////////////////
 		// find connected components in the reduced fptn

@@ -26,6 +26,7 @@ include_directories(
 
 message(STATUS "${CMAKE_CXX_COMPILER_ID}") 
 message(STATUS "${CMAKE_BUILD_TYPE}") 
+message(STATUS "${Boost_INCLUDE_DIR}") 
 
 # Set the output folder where your program will be created
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)

@@ -136,17 +136,19 @@ def calculate_cost(sim_data,threshold,clustering):
 			o2 = index2object[j]
 			key = o1 + "_" + o2
 			if key in sim_map:
-				sim_value = sim_map[key] - threshold
+				sim_value = sim_map[key]
 			else:
-				sim_value = 0 - threshold
+				sim_value = 0
 
 			if sim_value == float("inf"):
 				sim_value = max_value
 
-			if membership[i] == membership[j] and sim_value < 0:
-				cost += round(abs(sim_value),4)
-			elif membership[i] != membership[j] and sim_value > 0:
-				cost += round(abs(sim_value),4)
+			cost_value = sim_value - threshold
+
+			if membership[i] == membership[j] and cost_value < 0:
+				cost = cost + abs(cost_value)
+			elif membership[i] != membership[j] and cost_value > 0:
+				cost = cost + abs(cost_value)
 	return cost
 
 ################################################################################
@@ -254,22 +256,21 @@ logging.info("Collecting result files ... done")
 cost_log = os.path.join(args.r,"costs.log")
 with open(cost_log, "w") as f:
 	f.write("\t".join(["filename","threshold","fpt","program","cost","cpp_cost","\n"]))
+
 for simfile in SIMILARITY_FILES:
 
 	logging.info("Loading similarity file " + str(simfile))
 	sim_data = load_sim_data(simfile)
-	logging.info("Loading similarity file " + str(simfile) + " ... done" )
 
 
 	simfile_name = os.path.basename(simfile).split(".")[0]
 
 	# collect res files and load
 	resfiles = []
+	logging.info("Loading result files")
 	for resfile in RESULT_FILES:
 		if simfile_name in resfile:
-			logging.info("Loading result file " + str(resfile))
 			resfiles.append({"filename":resfile,"result":load_result_file(resfile)})
-			logging.info("Loading result file " + str(resfile) + " ... done")
 
 	# calculate costs
 	for resfile in resfiles:
@@ -279,6 +280,17 @@ for simfile in SIMILARITY_FILES:
 			clusters = res["clusters"]
 			num_clusters = len(clusters)
 			cost = calculate_cost(sim_data,float(threshold),clusters)
+			_cpp_cost = res["_cost"]
+			if _cpp_cost != -1:
+				if round(_cpp_cost - cost,1) > 0:
+					print("ERROR ERROR ERROR")
+					print("Cost difference for:")
+					print(resfile["filename"])
+					print("with threshold: " + str(threshold))
+					print("cpp cost:  " +str(_cpp_cost))
+					print("calc cost: " +str(cost))
+					print("diff:      " + str(abs(_cpp_cost-cost)))
+
 
 			# write to log
 			with open(cost_log, "a") as f:
@@ -291,37 +303,3 @@ for simfile in SIMILARITY_FILES:
 					str(res["_cost"]),
 					"\n"
 				]))
-
-## load similarity file
-#sim_data = load_sim_data(args.simfile)
-#
-## load result files
-#resfiles = []
-#for filename in args.resfiles:
-#	if os.path.isdir(filename):
-#		for f in os.listdir(filename):
-#			f = os.path.join(filename,f)
-#			if os.path.isfile(f):
-#				resfiles.append({"filename":f,"result":load_result_file(f)})
-#
-#	else:
-#		resfiles.append({"filename":filename,"result":load_result_file(filename)})
-#
-## calculate cost for each result
-#data = {}
-#for resfile in resfiles:
-#	data[resfile["filename"]] = []
-#	filename = os.path.basename(resfile["filename"])
-#	for res in resfile["result"]:
-#		threshold = float(res["threshold"])
-#		clusters = res["clusters"]
-#		cost = calculate_cost(sim_data,threshold,clusters)
-#		data[resfile["filename"]].append({"threshold":threshold,"cost":cost})
-#
-## print data
-#if args.R:
-#	print_R(data)
-#elif args.J:
-#	print_JSON(data)
-#
-

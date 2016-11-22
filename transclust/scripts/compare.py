@@ -38,11 +38,16 @@ parser.add_argument(
 	action="store_true",
 	help="Only test on Java Transclust")
 
+parser.add_argument(
+	"--force_only",
+	action="store_true",
+	help="Only test on with FORCE")
+
 # path to java Transclust
 parser.add_argument(
 	"--java",
 	help="path/to/java transclust",
-	default="/home/mikkel/Dropbox/Datalogi/Speciale/ref_code/TransClustJava/export/TransClustNew.jar"
+	default="/home/mikkel/Dropbox/Datalogi/Speciale/ref_code/TransClust-2.0.0.25.jar"
 )
 
 # output path
@@ -64,20 +69,21 @@ parser.add_argument(
 	default=10)
 
 parser.add_argument(
+	"--memory_limit",
+	help="Memory limit, in MB,  for each connected component. 0 is unlimited",
+	default=0)
+
+parser.add_argument(
 	"--tag",
 	help="Will be prepended to the output dir",
 	default="test_run")
 
-# path to config file
-parser.add_argument(
-	"--config",
-		help="path/to/config file")
 args = parser.parse_args()
 
 ################################################################################
 # Setup output directory
 ################################################################################
-oname = str(args.tag) + "_"+time.strftime("%Y-%-m-%d--%H-%M-%S")
+oname = time.strftime("%Y-%-m-%d--%H-%M-%S") + "__" + str(args.tag)
 odir = os.path.join(args.o,oname)
 
 try:
@@ -155,7 +161,13 @@ def getCommand(simfile_name,threshold,fpt,program):
 			args.cpp,
 			"-s",simfile,
 			"-o",outfile,
-			"-t",threshold
+			"-t",threshold,
+			#"--f_s","0",
+			#"--d_init","0.001",
+			#"--s_init","0.001",
+			#"--d_maximal","2",
+			#"--seed","389742",
+			"--memory_limit",str(args.memory_limit)
 		])
 		if not fpt:
 			command = command + " --disable_fpt"
@@ -166,7 +178,10 @@ def getCommand(simfile_name,threshold,fpt,program):
 			args.java,
 			"-s",simfile,
 			"-o",outfile,
-			"-t",threshold
+			"-t",threshold,
+			"-p","NONE",
+			"--defaultmissing","0",
+			"--simfileformat","SIMPLE"
 		])
 		if not fpt:
 			command = command + " FPTConfig.MAX_SIZE 0"
@@ -180,6 +195,12 @@ def getCommand(simfile_name,threshold,fpt,program):
 logging.info("Runnig program")
 program_output_log = os.path.join(odir,"run.log")
 execution_durations = os.path.join(odir,"execution_duration.log")
+
+if args.force_only:
+	algs = [False]
+else:
+	algs = [True,False]
+
 with open(execution_durations, "a") as f:
 	f.write("\t".join(["program","using_fpt","threshold","similarity_file","time","\n"]))
 for simfile in SIMILARITY_FILES:
@@ -207,7 +228,7 @@ for simfile in SIMILARITY_FILES:
 
 	logging.info("Running  with thresholds: [" + ", ".join(THRESHOLDS)+ "]")
 	for threshold in THRESHOLDS:
-		for fpt in [True,False]:
+		for fpt in algs:
 			for program in ["java","cpp"]:
 				if (args.cpp_only and program == "cpp") or (args.java_only and program == "java") or (not args.cpp_only and not args.java_only):
 					command = getCommand(simfile_name,threshold,fpt,program)
@@ -215,6 +236,7 @@ for simfile in SIMILARITY_FILES:
 					t1 = time.time()
 					os.system(command + " >> " + program_output_log)
 					t2 = time.time()
+					logging.info("running: " + command + " ... done")
 
 					with open(execution_durations, "a") as f:
 						f.write("\t".join([program,str(fpt),threshold,simfile_name,str(t2-t1),"\n"]))

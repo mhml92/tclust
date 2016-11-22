@@ -24,21 +24,11 @@
 namespace FORCE
 {
 
-	void layout(
-			ConnectedComponent& cc,
+	void initial_layout(
 			std::vector<std::vector<float>>& pos,
-			float p,
-			float f_att,
-			float f_rep,
-			unsigned R,
-			float start_t,
 			unsigned dim,
-			unsigned seed
-			)
-	{
-		/*************************************************************************
-		 * INITIAL LAYOUT
-		 ************************************************************************/
+			float p,
+			unsigned seed){
 		if(dim == 2)
 		{
 			//uniform 2d layout
@@ -73,6 +63,25 @@ namespace FORCE
 				}
 			}
 		}
+
+	};
+
+	void layout(
+			ConnectedComponent& cc,
+			std::vector<std::vector<float>>& pos,
+			float p,
+			float f_att,
+			float f_rep,
+			unsigned R,
+			float start_t,
+			unsigned dim,
+			unsigned seed
+			)
+	{
+		/*************************************************************************
+		 * INITIAL LAYOUT
+		 ************************************************************************/
+		initial_layout(pos,dim,p,seed);
 		//DEBUG_force(pos,-1);
 		/*************************************************************************
 		 * MAIN LOOP
@@ -80,17 +89,17 @@ namespace FORCE
 		std::vector<std::vector<float>> delta;
 		delta.resize(pos.size(), std::vector<float>(dim,0.0f));
 
-		//f_att /= static_cast<float>(cc.size());
-		//f_rep /= static_cast<float>(cc.size());
-		float num_nodes = cc.size();
+		f_att /= static_cast<float>(cc.size());
+		f_rep /= static_cast<float>(cc.size());
+		//float num_nodes = cc.size();
 
 		for(unsigned r = 0; r < R; r++)
 		{
 			// zero delta vectors
 			for(auto& v:delta){std::fill(v.begin(),v.end(),0.0f);}
 
-
-			float temp = (start_t*(float)cc.size())*std::pow((1.0f/(r+1)),2);
+			//float temp = (start_t*(float)cc.size())*(1.0f/std::pow(((r+1)),2));
+			float temp = (start_t*(float)cc.size())*(std::pow(1.0f/(r+1),2));
 			/**********************************************************************
 			 * CALCULATE DELTA VECTOR
 			 *********************************************************************/
@@ -99,52 +108,48 @@ namespace FORCE
 
 				// read all neseccary cost values for object i in to a buffer
 				// to minimoze potential I/Os
-				//std::vector<float> cost_buffer(pos.size()-(i+1),0);
-				//unsigned j_pos = 0;
-				////#pragma omp critical
-				//{
-				//	for(unsigned j = i+1;j < pos.size();j++)
-				//	{
-				//		cost_buffer.at(j_pos) = cc.getCost(i,j);
-				//		j_pos++;
-				//	}
-
-				//}
-				//j_pos = 0;
+				std::vector<float> cost_buffer(pos.size()-(i+1),0);
+				
+				cc.getBufferedCost(cost_buffer,i,i+1);
+				
+				unsigned j_pos = 0;
 
 				for(unsigned j = i+1; j < pos.size(); j++)
 				{
-					float _distance = TCC::dist(pos,i,j);
-					if(_distance > 0.0f)
+					float distance = TCC::dist(pos,i,j);
+					if(distance > 0.0)
 					{
 						
-						float log_d = std::log(_distance+1);
+						float log_d = std::log(distance+1);
 
 						float force = 0.0f;
 
-						//float edge_weight = cost_buffer.at(j_pos);//cc.getCost(i,j);
-						float edge_weight = cc.getCost(i,j);
-						//						j_pos++;
+						float edge_weight = cost_buffer.at(j_pos);
+						j_pos++;
+
+						//float edge_weight = cc.getCost(i,j);
 						if(edge_weight > 0)
 						{
-							force = ((edge_weight * f_att * log_d))/num_nodes;//_distance;
+							force = ((edge_weight * f_att * log_d))/distance;
 						}else{
-							if(_distance > 4){
-								//std::cout << "dist > 5\n"
-								//	<< "edge_weight <- " << edge_weight << "\n"
-								//	<< "f_rep       <- " << f_rep << "\n"
-								//	<< "log_d       <- " << log_d << "\n"
-								//	<< "num_nodes   <- " << num_nodes << "\n"
-								//	<< "#force:        " << ((edge_weight * f_rep))/(log_d*num_nodes) 
-								//	<< std::endl;
-								continue;
-							
-							}
-							force = ((edge_weight * f_rep))/(log_d*num_nodes);
+							//if(distance > 5){
+							//	//std::cout << "dist > 5\n"
+							//	//	<< "edge_weight <- " << edge_weight << "\n"
+							//	//	<< "f_rep       <- " << f_rep << "\n"
+							//	//	<< "log_d       <- " << log_d << "\n"
+							//	//	<< "num_nodes   <- " << num_nodes << "\n"
+							//	//	<< "#force:        " << ((edge_weight * f_rep))/(log_d*num_nodes) 
+							//	//	<< std::endl;
+							//	continue;
+							//	
+							//}else{
+							//	force = ((edge_weight * f_rep))/(log_d*num_nodes);
+							//}
+							force = ((edge_weight * f_rep)/log_d)/distance;
 						}
 						for(unsigned d = 0; d < dim; d++)
 						{
-							float displacement = (force * (pos[j][d]-pos[i][d])/_distance);
+							float displacement = TCC::round(force * (pos[j][d]-pos[i][d]));
 							delta[i][d] += displacement;
 							delta[j][d] -= displacement;
 						}
@@ -170,10 +175,143 @@ namespace FORCE
 					{
 						pd = (pd/len)*temp;
 					}
-					pos[i][d] = pos[i][d] + pd;
+					pos[i][d] += pd;
 				}
 			}
 			//DEBUG_force(pos,r);
+		}
+	}
+
+	void layout_parallel(
+			ConnectedComponent& cc,
+			std::vector<std::vector<float>>& pos,
+			float p,
+			float f_att,
+			float f_rep,
+			unsigned R,
+			float start_t,
+			unsigned dim,
+			unsigned seed
+			)
+	{
+		/*************************************************************************
+		 * INITIAL LAYOUT
+		 ************************************************************************/
+		initial_layout(pos,dim,p,seed);
+		//DEBUG_force(pos,-1);
+		/*************************************************************************
+		 * MAIN LOOP
+		 ************************************************************************/
+		std::vector<std::vector<float>> delta;
+		delta.resize(pos.size(), std::vector<float>(dim,0.0f));
+
+		f_att /= static_cast<float>(cc.size());
+		f_rep /= static_cast<float>(cc.size());
+		//float num_nodes = cc.size();
+		float temp = 0;
+		#pragma omp parallel
+		{
+			for(unsigned r = 0; r < R; r++)
+			{
+				#pragma omp single
+				{
+					// zero delta vectors
+					for(auto& v:delta){std::fill(v.begin(),v.end(),0.0f);}
+
+					//float temp = (start_t*(float)cc.size())*(1.0f/std::pow(((r+1)),2));
+					temp = (start_t*(float)cc.size())*(std::pow(1.0f/(r+1),2));
+				}
+				#pragma omp barrier
+				/**********************************************************************
+				 * CALCULATE DELTA VECTOR
+				 *********************************************************************/
+				#pragma omp for schedule(dynamic)
+				for(unsigned i = 0; i < pos.size();i++)
+				{
+
+					// read all neseccary cost values for object i in to a buffer
+					// to minimoze potential I/Os
+					std::vector<float> cost_buffer(pos.size()-(i+1),0);
+
+					#pragma omp critical(getCost)
+					{
+						cc.getBufferedCost(cost_buffer,i,i+1);
+					}
+
+					unsigned j_pos = 0;
+
+					for(unsigned j = i+1; j < pos.size(); j++)
+					{
+						float distance = TCC::dist(pos,i,j);
+						if(distance > 0.0)
+						{
+
+							float log_d = std::log(distance+1);
+
+							float force = 0.0f;
+
+							float edge_weight = cost_buffer.at(j_pos);
+							j_pos++;
+
+							//float edge_weight = cc.getCost(i,j);
+							if(edge_weight > 0)
+							{
+								force = ((edge_weight * f_att * log_d))/distance;
+							}else{
+								//if(distance > 5){
+								//	//std::cout << "dist > 5\n"
+								//	//	<< "edge_weight <- " << edge_weight << "\n"
+								//	//	<< "f_rep       <- " << f_rep << "\n"
+								//	//	<< "log_d       <- " << log_d << "\n"
+								//	//	<< "num_nodes   <- " << num_nodes << "\n"
+								//	//	<< "#force:        " << ((edge_weight * f_rep))/(log_d*num_nodes) 
+								//	//	<< std::endl;
+								//	continue;
+								//	
+								//}else{
+								//	force = ((edge_weight * f_rep))/(log_d*num_nodes);
+								//}
+								force = ((edge_weight * f_rep)/log_d)/distance;
+							}
+
+							for(unsigned d = 0; d < dim; d++)
+							{
+								float displacement = TCC::round(force * (pos[j][d]-pos[i][d]));
+
+								#pragma omp atomic
+								delta[i][d] += displacement;
+
+								#pragma omp atomic
+								delta[j][d] -= displacement;
+							}
+						}
+					}
+				}
+				/*******************************************************************
+				 * APPLY COOLING FUNCTION AND UPDATE POSITIONS
+				 ******************************************************************/
+				#pragma omp for schedule(dynamic)
+				for(unsigned i = 0; i < pos.size(); i++)
+				{
+					float len = 0.0;
+					for(unsigned d = 0; d < dim;d++){
+						len += delta[i][d]*delta[i][d];
+					}
+					len = std::sqrt(len);
+
+					for(unsigned d = 0; d < dim;d++)
+					{
+						float pd = delta[i][d];
+						if(len > temp)
+						{
+							pd = (pd/len)*temp;
+						}
+						#pragma omp atomic
+						pos[i][d] += pd;
+					}
+				}
+				//DEBUG_force(pos,r);
+			}
 		}
 	}
 
@@ -210,6 +348,7 @@ namespace FORCE
 
 			double cost = RES::calculateCost(cc,clustering);
 
+			
 			DEBUG_COST(cc,clustering,cost);
 
 			if(cost < cr.cost)
