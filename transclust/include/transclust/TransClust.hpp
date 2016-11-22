@@ -2,14 +2,21 @@
 #define TRANSCLUST_HPP
 #include <string>
 #include <queue>
+#include <deque>
 #include <vector>
 #include <map>
 #include <cmath>
+#include <plog/Log.h>
 #include "transclust/Common.hpp"
-#include "transclust/TriangularMatrix.hpp"
+#include "transclust/InputParser.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/ClusteringResult.hpp"
-#include "transclust/Result.hpp"
+#ifndef NDEBUG
+#	include "transclust/DEBUG.hpp"
+#	define DEBUG_COST(cc,clustering,cost) DEBUG::test_cost(cc,clustering,cost);
+#else
+#	define DEBUG_COST(cc,clustering,cost) {} 
+#endif
 
 class TransClust{
 
@@ -19,20 +26,41 @@ class TransClust{
 				TCC::TransClustParams& _tcp
 				);
 
-		TransClust(
-				std::vector<float>& sim_matrix_1d,
-				unsigned num_o,
-				TCC::TransClustParams& _tcp
-				);
-
-		clustering cluster();
+		RES::Clustering cluster();
 	private:
+
+		inline void addResult(
+				ConnectedComponent& cc,
+				RES::ClusteringResult& cr)
+		{
+			if(cc.isTransitive())
+			{
+				cr.cost = 0;
+				result.clusters.push_back(cc.getIndex2ObjectId());
+			}else{
+
+				for(auto cluster:cr.clusters)
+				{
+					result.clusters.push_back(std::deque<unsigned>());
+					for(unsigned local_id:cluster)
+					{
+						result.clusters.back().push_back(cc.getObjectId(local_id));
+					}
+				}
+			}
+			if(cr.cost < 0){
+				std::cout << "waaaaaat" << std::endl;
+			}	
+			result.cost += cr.cost;
+		}
+
 		TCC::TransClustParams tcp;
-
-		// LOG current threshold
-		float log_current_threshold = std::numeric_limits<float>::lowest();
-
-		std::queue<ConnectedComponent> ccs;
-		std::vector<std::string> id2object;
+		InputParser ip;
+		float total_cost = 0;
+		std::deque<ConnectedComponent> ccs;
+		std::deque<std::string> id2name; 
+		std::deque<std::deque<unsigned>> clusters;
+		RES::Clustering result;
+		
 };
 #endif

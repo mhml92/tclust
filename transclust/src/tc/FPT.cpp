@@ -3,38 +3,42 @@
 #include <iomanip>
 #include <queue>
 #include <iomanip>
-
-#ifdef _OPENMP
-#	include <omp.h>
+#include <algorithm>
+#ifndef NDEBUG
+#	include "transclust/DEBUG.hpp"
+#	define DEBUG_COST(cc,clustering,cost) DEBUG::test_cost(cc,clustering,cost);
+#else
+#	define DEBUG_COST(cc,clustering,cost) {} 
 #endif
-
 #include "transclust/FPT.hpp"
 
 FPT::FPT(
 		ConnectedComponent& cc,
 		float time_limit,
-		float stepSize,
-		float mockInf)
+		float stepSize)
 	:
 		cc(cc),
 		time_limit(time_limit),
 		stepSize(stepSize),
-		maxK(0),
-		inf(mockInf),
+		maxK(stepSize),
+		inf(2*maxK+1),
 		solution_found(false),
-		solution_cost(0)
+		solution_cost(std::numeric_limits<float>::max())
 { }
 
 
-void FPT::cluster(ClusteringResult &cr)
+void FPT::cluster(RES::ClusteringResult &cr)
 {
 	cr.cost = -1;
 	start = std::chrono::system_clock::now();
-	while(!solution_found){
+	while(!solution_found)
+	{
 		/**********************************************************************
 		 * Track time
 		 *********************************************************************/
 		if(getDeltaTime() > time_limit){ return; }
+
+		LOGD << "FPT with max cost: " << maxK;
 
 		/**********************************************************************
 		 * Init root node
@@ -47,25 +51,22 @@ void FPT::cluster(ClusteringResult &cr)
 		 * vector of vectors with the index number of each node
 		 * [[0],[1],...,[n]]
 		 */
-		for(unsigned i = 0; i < fptn.size;i++)
-		{
-			fptn.nodeParents.push_back(std::vector<unsigned>(1,i));
-		}
-
 		/* Construct 'edgeCost'
 		 * A 2d matrix of edge costs, initially a copy of cc's similaritys
 		 */
 		for(unsigned i = 0; i < fptn.size;i++)
 		{
-			fptn.edgeCost.push_back(std::vector<float>());
-			for(unsigned j = 0; j < fptn.size;j++)
+			fptn.nodeParents.push_back(std::vector<unsigned>(1,i));
+			fptn.edgeCost.push_back(std::vector<float>(fptn.size,0));
+		}
+
+		for(unsigned i = 0; i < fptn.size;i++)
+		{
+			for(unsigned j = i+1; j < fptn.size;j++)
 			{
-				if(i == j)
-				{
-					fptn.edgeCost.at(i).push_back(0);
-				}else{
-					fptn.edgeCost.at(i).push_back(cc.at(i,j,false));
-				}
+					float cost = cc.getCost(i,j,false);
+					fptn.edgeCost.at(i).at(j) = cost;
+					fptn.edgeCost.at(j).at(i) = cost;
 			}
 		}
 
@@ -73,6 +74,7 @@ void FPT::cluster(ClusteringResult &cr)
 		 * Reduce node
 		 ************************************************************************/
 		reduce(fptn);
+
 		/*************************************************************************
 		 * Start recursion
 		 ************************************************************************/
@@ -82,6 +84,8 @@ void FPT::cluster(ClusteringResult &cr)
 		 * Increase K
 		 ************************************************************************/
 		maxK += stepSize;
+		inf = 2*maxK+1;
+
 	}
 	buildSolution(cr);
 }
@@ -96,24 +100,23 @@ reduceLoopStart:
 	{
 		for(unsigned v = u+1; v < fptn.size; v++)
 		{
-			if(fptn.edgeCost.at(u).at(u) <= 0){ continue; }
+			if(fptn.edgeCost.at(u).at(v) <= 0){ continue; }
 
-			float cost_uv = fptn.edgeCost[u][v];
-			float sumIcf = std::max(0.0f,cost_uv) + costSetForbidden(fptn,u,v);
-			float sumIcp = std::max(0.0f,-cost_uv) + costSetPermanent(fptn,u,v);
+			double cost_uv = fptn.edgeCost[u][v];
+			double sumIcf = std::max(0.0,cost_uv) + costSetForbidden(fptn,u,v);
+			double sumIcp = std::max(0.0,-cost_uv) + costSetPermanent(fptn,u,v);
 
 			if(sumIcf + fptn.cost > maxK && sumIcp + fptn.cost > maxK)
 			{
 				fptn.cost = inf;
 				return;
-				goto reduceLoopStart;
 			}else if( sumIcf + fptn.cost > maxK)
 			{
 				mergeNodes(fptn,u,v,sumIcp);
 				goto reduceLoopStart;
 			}else if(sumIcp + fptn.cost > maxK)
 			{
-				fptn.cost += std::max(0.0f,cost_uv);
+				fptn.cost += cost_uv;
 				fptn.edgeCost[u][v] = -inf;
 				fptn.edgeCost[v][u] = -inf;
 				goto reduceLoopStart;
@@ -122,19 +125,18 @@ reduceLoopStart:
 		}
 	}
 }
-float FPT::costSetForbidden(
+double FPT::costSetForbidden(
 		Node& fptn,
 		unsigned u,
 		unsigned v)
 {
-	float costs = 0;
+	double costs = 0; //fptn.edgeCost.at(u).at(v);
 
 	for (unsigned w = 0; w < fptn.size; w++)
 	{
 		if( u == w || v == w){ continue; }
 
-		if (fptn.edgeCost.at(u).at(w) > 0
-				&& fptn.edgeCost.at(v).at(w) > 0)
+		if (fptn.edgeCost.at(u).at(w) > 0 && fptn.edgeCost.at(v).at(w) > 0)
 		{
 			costs += std::min(
 					fptn.edgeCost.at(u).at(w),
@@ -144,22 +146,19 @@ float FPT::costSetForbidden(
 	return costs;
 }
 
-float FPT::costSetPermanent(
+double FPT::costSetPermanent(
 		Node& fptn,
 		unsigned u,
 		unsigned v)
 {
-	float cost = 0;
+	double cost = 0;
 
 	for (unsigned  w = 0; w < fptn.size; w++)
 	{
-		if (w == u || w == v)
-		{
-			continue;
-		}
+		if (w == u || w == v){ continue; }
+
 		// sum cost of symmetric set difference
-		if( (fptn.edgeCost.at(u).at(w) > 0)
-				!= (fptn.edgeCost.at(v).at(w) > 0) )
+		if( (fptn.edgeCost.at(u).at(w) > 0) != (fptn.edgeCost.at(v).at(w) > 0) )
 		{
 			cost += std::min(
 				std::abs(fptn.edgeCost.at(u).at(w)),
@@ -174,34 +173,39 @@ void FPT::find_solution(Node& fptn0)
 {
 	// terminaiton conditions
 	if(getDeltaTime() > time_limit){
+		solution_found = false;
 		return;
 	}
 	/*************************************************************************
 	 * Find conflict triple
 	 ************************************************************************/
 	unsigned edge[2];
-	float highestoccurence = 0;
-	float occurence = 0;
+	double highestoccurence = 0;
+	double occurence = 0;
+	bool foundEdge = false;
 
 	for (unsigned u = 0; u < fptn0.size; u++)
 	{
 		for (unsigned v = u + 1; v < fptn0.size; v++)
 		{
+			double cost_uv = fptn0.edgeCost[u][v];
 
-			if (fptn0.edgeCost[u][v] > 0) {
+			if (fptn0.edgeCost[u][v] > 0) 
+			{
 
-				//occurence = std::abs(
-				//		costSetPermanent(fptn0, u, v)
-				//		- costSetForbidden(fptn0,u, v)
+
+				//occurence = std::fabs(
+				//		(std::max(0.0,-cost_uv) + costSetPermanent(fptn0, u, v)) - std::max(0.0,cost_uv) + costSetForbidden(fptn0, u, v)
 				//		);
-				occurence = std::max(
-						costSetPermanent(fptn0, u, v),
-						costSetForbidden(fptn0, u, v)
-						);
-
+				occurence = std::min(
+					std::max(0.0,-cost_uv) + costSetPermanent(fptn0, u, v),
+					std::max(0.0,cost_uv) + costSetForbidden(fptn0, u, v)
+					);
+			
 				if (occurence > highestoccurence)
 				{
 					highestoccurence = occurence;
+					foundEdge = true;
 					edge[0] = u;
 					edge[1] = v;
 				}
@@ -209,7 +213,8 @@ void FPT::find_solution(Node& fptn0)
 		}
 	}
 
-	if(highestoccurence == 0){
+	
+	if(highestoccurence == 0.0){
 		solution_found = true;
 		solution_cost = fptn0.cost;
 		solution_edgeCost = fptn0.edgeCost;
@@ -217,48 +222,61 @@ void FPT::find_solution(Node& fptn0)
 		maxK = fptn0.cost;
 		return;
 	}
+	//LOGI << "found edge: " << edge[0] << ", " << edge[1] << ", solution cost: " << fptn0.cost;
 
 	unsigned u = edge[0];
 	unsigned v = edge[1];
-	float cost_uv = fptn0.edgeCost[u][v];
+	double cost_uv = fptn0.edgeCost[u][v];
 
 	/*************************************************************************
 	 * Branch merge
 	 ************************************************************************/
-	float csp = std::max(0.0f,-cost_uv) + costSetPermanent(fptn0,u,v);
+	double csp = std::max(0.0,-cost_uv) + costSetPermanent(fptn0,u,v);
 	if (csp + fptn0.cost <= maxK)
 	{
 		Node fptn1;
 		clone_node(fptn0,fptn1);
 
 		mergeNodes(fptn1,u,v, csp);
+
 		find_solution(fptn1);
 	}
 
 	/*************************************************************************
 	 * Branch forbidden
 	 ************************************************************************/
-	float csf = std::max(0.0f,cost_uv) + costSetForbidden(fptn0,u,v);
+	double csf = std::max(0.0,cost_uv) + costSetForbidden(fptn0,u,v);
 	if (csf + fptn0.cost <= maxK)
 	{
-		float origCost = fptn0.edgeCost[u][v];
 
-		fptn0.cost += std::max(0.0f,cost_uv);
+		//Node fptn1;
+		//clone_node(fptn0,fptn1);
+		//fptn1.cost += cost_uv;
+		//fptn1.edgeCost[u][v] = -inf;
+		//fptn1.edgeCost[v][u] = -inf;
+
+		//find_solution(fptn1);
+
+
+		double origCost = fptn0.edgeCost[u][v];
+
+		fptn0.cost += cost_uv;
 		fptn0.edgeCost[u][v] = -inf;
 		fptn0.edgeCost[v][u] = -inf;
 
 		find_solution(fptn0);
 
-		fptn0.cost -= std::max(0.0f,cost_uv);
+		fptn0.cost -= cost_uv;
 		fptn0.edgeCost[u][v] = origCost;
 		fptn0.edgeCost[v][u] = origCost;
 	}
 
 }
-void FPT::mergeNodes(Node& fptn, unsigned node_i,unsigned node_j, float costForMerging)
+void FPT::mergeNodes(Node& fptn, unsigned node_i,unsigned node_j, double costForMerging)
 {
 	unsigned l = std::min(node_i,node_j);
 	unsigned h = std::max(node_i,node_j);
+
 	/* EDGECOST MATRIX */
 
 	// add costs from the node with the higher index to the node with the
@@ -267,11 +285,12 @@ void FPT::mergeNodes(Node& fptn, unsigned node_i,unsigned node_j, float costForM
 	{
 		if( i == l ){
 			fptn.edgeCost.at(l).at(i) = 0.0f;
+		}else if(h == i){
+			fptn.edgeCost.at(h).at(i) = 0.0f;
 		}else{
-
-
-			fptn.edgeCost.at(l).at(i) += fptn.edgeCost.at(h).at(i);
-			fptn.edgeCost.at(i).at(l) += fptn.edgeCost.at(i).at(h);
+			float h_cost = fptn.edgeCost.at(h).at(i);
+			fptn.edgeCost.at(l).at(i) += h_cost;
+			fptn.edgeCost.at(i).at(l) += h_cost;
 		}
 	}
 	// remove the element with the higher index from the matrix (in both the
@@ -302,65 +321,77 @@ void FPT::clone_node(Node& fptn0,Node& fptn1){
 	fptn1.edgeCost = fptn0.edgeCost;
 }
 
-void FPT::buildSolution(ClusteringResult &cr)
+void FPT::buildSolution(RES::ClusteringResult &cr)
 {
-	std::vector<unsigned> membership(
-			solution_edgeCost.size(),
-			std::numeric_limits<unsigned>::max());
+	if(solution_found){
+		cr.cost = solution_cost;
 
-	std::vector<std::vector<unsigned>> result;
-	result.push_back(std::vector<unsigned>());
-	std::queue<unsigned> Q;
+		/////////////////////////////////////////////////////////////////////////////
+		// find connected components in the reduced fptn
+		/////////////////////////////////////////////////////////////////////////////
+		std::list<unsigned> nodes;
 
-	unsigned componentId = 0;
-	Q.push(0);
-	membership.at(0) = componentId;
-	result.at(componentId).push_back(0);
-	while(true){
-
-		unsigned i = Q.front();
-		Q.pop();
-
-		for(unsigned j = 0; j < solution_edgeCost.size();j++)
+		// fill list of nodes
+		for (unsigned i=1; i< solution_edgeCost.size();i++)
 		{
-			if(membership.at(j) == std::numeric_limits<unsigned>::max())
+			nodes.push_back(i);
+		}
+
+		std::vector<std::vector<unsigned>> reduced_clusters(1,std::vector<unsigned>());
+
+		std::queue<unsigned> Q;
+		unsigned componentId = 0;
+		Q.push(0);
+		reduced_clusters.at(componentId).push_back(0);
+		while(!nodes.empty())
+		{
+			unsigned i = Q.front();
+			for (auto it = nodes.begin(); it != nodes.end();)
 			{
-				if(solution_edgeCost.at(i).at(j) > 0)
+				unsigned j = *it;
+				if(j != i)
 				{
-					Q.push(j);
-					membership.at(j) = componentId;
-					result.at(componentId).push_back(j);
+					if (solution_edgeCost.at(i).at(j) > 0.0)
+					{
+						Q.push(j);
+						reduced_clusters.at(componentId).push_back(j);
+						it = nodes.erase(it);
+					}else{
+						++it;
+					}
+				}else{
+					++it;
+				}
+			}
+
+			Q.pop();
+
+			if(Q.empty())
+			{
+				if(!nodes.empty())
+				{
+					componentId++;
+					reduced_clusters.push_back(std::vector<unsigned>());
+					Q.push(nodes.front());
+					reduced_clusters.at(componentId).push_back(nodes.front());
+					nodes.pop_front();
 				}
 			}
 		}
-
-		if(Q.empty())
+		/////////////////////////////////////////////////////////////////////////////
+		// Add result to the cr
+		/////////////////////////////////////////////////////////////////////////////
+		for(auto& cluster:reduced_clusters)
 		{
-			componentId++;
-			// could be done smarter by by saving 'last known nonmember'
-			for(unsigned s = 0; s < membership.size();s++)
+			cr.clusters.push_back(std::deque<unsigned>());
+			for(unsigned i = 0; i < cluster.size(); i++)
 			{
-				if(membership.at(s) == std::numeric_limits<unsigned>::max())
+				for(unsigned j = 0; j < solution_nodeParents.at(cluster.at(i)).size();j++)
 				{
-					Q.push(s);
-					membership.at(s) = componentId;
-					result.push_back(std::vector<unsigned>());
-					result.at(componentId).push_back(s);
-					break;
+					cr.clusters.back().push_back(solution_nodeParents.at(cluster.at(i)).at(j));
 				}
 			}
-			if(Q.empty()){
-				break;
-			}
 		}
+		DEBUG_COST(cc,cr.clusters,cr.cost);
 	}
-	cr.membership.resize(cc.size());
-	for(unsigned i = 0; i < solution_edgeCost.size(); i++)
-	{
-		for(unsigned j = 0; j < solution_nodeParents.at(i).size(); j++)
-		{
-			cr.membership.at(solution_nodeParents.at(i).at(j)) = membership.at(i);
-		}
-	}
-	cr.cost = solution_cost;
 }

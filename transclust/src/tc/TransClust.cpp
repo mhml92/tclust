@@ -1,116 +1,227 @@
-#include <plog/Log.h>
+#include <chrono>
+#ifdef _OPENMP
+#	include <omp.h>
+#endif
 #include "transclust/TransClust.hpp"
 #include "transclust/ConnectedComponent.hpp"
-#include "transclust/FindConnectedComponents.hpp"
+#include "transclust/InputParser.hpp"
 #include "transclust/FORCE.hpp"
 #include "transclust/FPT.hpp"
 #include "transclust/ClusteringResult.hpp"
-#include "transclust/Result.hpp"
+#include "transclust/Common.hpp"
 
 TransClust::TransClust(
 		const std::string& filename,
 		TCC::TransClustParams& _tcp
 		)
-{
-   tcp = _tcp;
-	// Read input similarity file
-	ConnectedComponent sim_matrix(filename,tcp);
-	sim_matrix.load();
-	id2object = sim_matrix.getObjectNames();
-	if(tcp.use_default_interval){
-		tcp.th_min = sim_matrix.getMinSimilarity();
-		tcp.th_max = sim_matrix.getMaxSimilarity();
-		tcp.th_step = TCC::round(tcp.th_max-tcp.th_min)/100;
-	}
-	FCC::findConnectedComponents(tcp,sim_matrix,ccs,TCC::round(tcp.th_min));
-	sim_matrix.free();
-}
+	:
+		tcp(_tcp),
+		ip(filename,tcp),
+		ccs(),
+		result()
+{ }
 
-TransClust::TransClust(
-      std::vector<float>& sim_matrix_1d,
-      unsigned num_o,
-		TCC::TransClustParams& _tcp
-		)
-{
-	tcp = _tcp;
-	ConnectedComponent sim_matrix(sim_matrix_1d,num_o,tcp);
-	sim_matrix.load();
-	id2object = sim_matrix.getObjectNames();
-	if(tcp.use_default_interval){
-		tcp.th_min = sim_matrix.getMinSimilarity();
-		tcp.th_max = sim_matrix.getMaxSimilarity();
-		tcp.th_step = TCC::round(tcp.th_max-tcp.th_min)/100;
-	}
-	FCC::findConnectedComponents(tcp,sim_matrix,ccs,TCC::round(tcp.th_min));
-	sim_matrix.free();
-}
-
-
-clustering TransClust::cluster()
+RES::Clustering TransClust::cluster()
 {
 
-	Result result(id2object);
+	// read input file and initialize connected components
+	ip.getConnectedComponents(ccs,result);
+	result.threshold = tcp.threshold;
 
-	while(!ccs.empty()){
-		ConnectedComponent& cc = ccs.front();
+	// array holding indexes for connected components which could not succesfully
+	// be clustered using the FPT algorithm but is to small enough to be run 
+	// single threaded
+	std::deque<unsigned> force_cc_small;
+	std::deque<unsigned> force_cc_large;
 
-		if(cc.getThreshold() > log_current_threshold){
-			log_current_threshold = cc.getThreshold();
-			LOGI << "Clustering for threshold: " << log_current_threshold;
-		};
+	/////////////////////////////////////////////////////////////////////////////
+	// Try to cluster all connected components using the FPT algorithm
+	// If a connected component could not be clusterd it will clusterd with 
+	// FORCE
+	/////////////////////////////////////////////////////////////////////////////
+	if(!tcp.disable_fpt)
+	{
+		LOGI << "Clustering using FPT algorithm";
+		#pragma omp parallel
+		{
+			#pragma omp for schedule(dynamic)
+			for(unsigned i = 0; i < ccs.size(); i++)
+			{
 
-		cc.load();
+				// get a reference to the connected component at i 
+				ConnectedComponent& cc = ccs.at(i);
 
-		ClusteringResult cr;
+				// load the memorymapped file holding the cost-matrix 
+				cc.load();
 
-		// set initial cost to negativ, indicating 'no solution found (yet)'
-		cr.cost = -1;
+				// initialize a struct holding the clustering result
+				RES::ClusteringResult cr;
 
-		// if cc is at least a conflict tripple
-		if(cc.size() > 2){
+				// set initial cost to negativ, indicating 'no solution found'
+				cr.cost = -1;
 
-			/**********************************************************************
-			 * Cluster using FORCE
-			 *********************************************************************/
-			if(!tcp.disable_force){
-				// init position array
-				std::vector<std::vector<float>> pos;
-				pos.resize(cc.size(), std::vector<float>(tcp.dim,0));
+				// If the connected compoent was already found to be transitive 
+				// then we can skip any analysis and just add it to the result
+				if(!cc.isTransitive())
+				{
+					// if the connected component is small enough we try clustering 
+					// using the FPT
+					if(cc.size() <= tcp.fpt_max_cc_size)
+					{
+						FPT fpt(cc,tcp.fpt_time_limit,tcp.fpt_step_size);
+						fpt.cluster(cr);
+					}		
 
-				// layout
-				FORCE::layout(cc, pos, tcp.p, tcp.f_att, tcp.f_rep, tcp.R, tcp.start_t, tcp.dim);
-				// partition
-				FORCE::partition(cc, pos, cr, tcp.d_init, tcp.d_maximal, tcp.s_init, tcp.f_s);
-			}
+					if(cr.cost < 0)
+					{
+						// test value... should be cml setable
+						if(cc.size() < tcp.force_min_size_parallel){
+							#pragma omp critical
+							force_cc_small.push_back(i);
+						}else{
+							#pragma omp critical
+							force_cc_large.push_back(i);
+						}
 
-			/**********************************************************************
-			 * Cluster using FPT
-			 *********************************************************************/
-			if(cr.cost <= tcp.fpt_max_cost && !tcp.disable_fpt){
+						cc.free();
 
-				float tmp_force_cost = cr.cost;
-				FPT fpt(cc,tcp.fpt_time_limit,tcp.fpt_step_size,cr.cost+1);
-				fpt.cluster(cr);
-
-				if(cr.cost < 0){
-					cr.cost = tmp_force_cost;
+						continue;
+					}
 				}
+
+				// add clusters to solution
+				#pragma omp critical
+				{
+					addResult(cc,cr);
+				}
+
+				cc.free(true);
 			}
-		}else{
-			// cc consist of 1 or 2 nodes and is a cluster
-			cr.cost = 0;
-			cr.membership = std::vector<unsigned>(cc.size(),0);
 		}
+		LOGI 
+			<< "Clustered " 
+			<< ccs.size()-force_cc_small.size() 
+			<< " connected components to optimality";
 
-		result.add(cc,cr);
-		float new_threshold = TCC::round(cc.getThreshold()+tcp.th_step);
-
-		if(new_threshold <= tcp.th_max){
-			FCC::findConnectedComponents(tcp,cc,ccs,new_threshold);
-		}
+	}else{
+		for(unsigned i = 0; i < ccs.size();i++)
+		{
+			if(ccs.at(i).size() < tcp.force_min_size_parallel){
+				force_cc_small.push_back(i);
+			}else{
+				force_cc_large.push_back(i);
+			}
 		
-		cc.free();
-		ccs.pop();
+		}
+		//force_cc_small.resize(ccs.size());
+		//std::iota(force_cc_small.begin(),force_cc_small.end(),0);
 	}
-	return result.get();
+
+	/////////////////////////////////////////////////////////////////////////////
+	// Cluster using FORCE
+	/////////////////////////////////////////////////////////////////////////////
+	if(!force_cc_small.empty())
+	{
+		LOGI 
+			<< "Clustering " 
+			<< force_cc_small.size() 
+			<< " connected components using FORCE";
+
+		#pragma omp parallel
+		{
+			#pragma omp for schedule(dynamic)
+			for(unsigned i = 0; i < force_cc_small.size();i++)
+			{
+				ConnectedComponent& cc = ccs.at(force_cc_small.at(i)); 
+
+				RES::ClusteringResult cr;
+				if(!cc.isTransitive())
+				{
+					cc.load();
+					LOGD << "clustering with FORCE";
+					// init position array
+					std::vector<std::vector<float>> pos;
+					pos.resize(cc.size(), std::vector<float>(tcp.dim,0));
+
+					// layout
+					FORCE::layout(
+							cc, 
+							pos, 
+							tcp.p, 
+							tcp.f_att, 
+							tcp.f_rep, 
+							tcp.R, 
+							tcp.start_t, 
+							tcp.dim,
+							tcp.seed);
+
+					// partition
+					FORCE::partition(
+							cc, 
+							pos, 
+							cr, 
+							tcp.d_init, 
+							tcp.d_maximal, 
+							tcp.s_init, 
+							tcp.f_s);
+				}				
+				
+				#pragma omp critical
+				{
+					addResult(cc,cr);
+				}
+
+
+				cc.free(true);
+			}
+		}
+	}
+	if(!force_cc_large.empty())
+	{
+		LOGI 
+			<< "Clustering " 
+			<< force_cc_large.size() 
+			<< " connected components using parallel FORCE";
+
+			for(unsigned i = 0; i < force_cc_large.size();i++)
+			{
+				ConnectedComponent& cc = ccs.at(force_cc_large.at(i)); 
+
+				RES::ClusteringResult cr;
+				if(!cc.isTransitive())
+				{
+					cc.load();
+					LOGD << "clustering with FORCE";
+					// init position array
+					std::vector<std::vector<float>> pos;
+					pos.resize(cc.size(), std::vector<float>(tcp.dim,0));
+
+					// layout
+					FORCE::layout_parallel(
+							cc, 
+							pos, 
+							tcp.p, 
+							tcp.f_att, 
+							tcp.f_rep, 
+							tcp.R, 
+							tcp.start_t, 
+							tcp.dim,
+							tcp.seed);
+
+					// partition
+					FORCE::partition(
+							cc, 
+							pos, 
+							cr, 
+							tcp.d_init, 
+							tcp.d_maximal, 
+							tcp.s_init, 
+							tcp.f_s);
+				}				
+				
+				addResult(cc,cr);
+				cc.free(true);
+			}
+	}
+	return result;
 }

@@ -1,3 +1,6 @@
 [submodule "transclust/lib/plog"]
 	path = transclust/lib/plog
 	url = https://github.com/SergiusTheBest/plog.git
+[submodule "transclust/stxxl"]
+	path = transclust/stxxl
+	url = http://github.com/stxxl/stxxl.git

@@ -2,17 +2,32 @@
 #define DEBUG_HPP
 #include <vector>
 #include <queue>
+#include "transclust/Common.hpp"
+#include "transclust/ClusteringResult.hpp"
 #include "transclust/ConnectedComponent.hpp"
 
 namespace DEBUG
 {
+	inline void test_cost(
+			ConnectedComponent& cc, 
+			std::deque<std::deque<unsigned>>& clustering, 
+			double cost)
+	{
+		double alt_cost = RES::calculateCost_membership(cc,clustering);
+		if(TCC::round(alt_cost) != TCC::round(cost)){
+			std::cout << "[ERROR] COST NOT RIGHT\n" 
+				<< "diff:     " << std::setprecision(15) << std::fabs(cost-alt_cost) << "\n"
+				<< "cost:     " << std::setprecision(15) << cost << "\n"
+				<< "alt_cost: " << std::setprecision(15) << alt_cost << "\n" << __FILE__ << " at line: " << __LINE__ << std::endl;
+		}
+	}
+
+
 	inline void geometricLinking(
-			std::vector<std::vector<unsigned>>& clustering, 
+			std::deque<std::deque<unsigned>>& clustering, 
 			std::vector<std::vector<float>>& pos, 
 			float distance)
 	{
-		//std::cout << "Debug geometricLinking" << std::endl;
-
 		for(unsigned i = 0; i < clustering.size(); i++){
 			// test that each connected component IS connected
 			std::vector<bool> assigned(clustering.at(i).size(),false);
@@ -58,7 +73,7 @@ namespace DEBUG
 			ConnectedComponent& cc, 
 			float threshold)
 	{
-		//std::cout << "Debug findConnectedComponents" << std::endl;
+		std::cout << "Debug findConnectedComponents" << std::endl;
 
 		for(unsigned i = 0; i < membership.size(); i++){
 			// test that each connected component IS connected
@@ -69,7 +84,7 @@ namespace DEBUG
 			while(!Q.empty()){
 				for(unsigned ei = 0; ei < membership.at(i).size(); ei++){
 					if( !assigned.at(ei) ){
-						if( cc.at( membership.at(i).at(Q.front()), membership.at(i).at(ei) ) > 0){
+						if( cc.getCost( membership.at(i).at(Q.front()), membership.at(i).at(ei) ) > 0){
 							assigned.at(ei) = true;
 							Q.push(ei);
 						}
@@ -90,7 +105,7 @@ namespace DEBUG
 				{
 					for(auto& j_ccv:membership.at(j))
 					{
-						if((cc.getMatrix().get(i_ccv,j_ccv) - threshold) > 0){
+						if(cc.getCost(i_ccv,j_ccv) > 0){
 							std::cout << "[ERROR]" << __FILE__ << " at line: " << __LINE__ << std::endl;
 						}
 					}
@@ -98,6 +113,7 @@ namespace DEBUG
 				}
 			}
 		}
+		std::cout << "Debug findConnectedComponents...done" << std::endl;
 	}
 
 	inline void round(float num){
