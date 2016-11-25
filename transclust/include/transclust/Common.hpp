@@ -95,7 +95,8 @@ namespace TCC
 
 	inline float round(float f)
 	{
-		return (std::rint(f*100000.0f))/100000.0f;
+		float precision = 100000;
+		return std::rint(f*precision)/precision;
 	}
 
 	inline float dist(std::vector<std::vector<float>>& pos,unsigned i, unsigned j)

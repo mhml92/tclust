@@ -455,24 +455,16 @@ class ConnectedComponent
 
 		inline unsigned long index(unsigned i,unsigned j) 
 		{
-			///* row-major index */
-			//if(j > i){
-			// std::swap(j,i);
-			//}else if(i == j){
-			//	std::cout << "Error: attempt to index diagonal in TriangularMatrix" << std::endl;
-			//	return 0;
-			//}
-			//
-			//return (((i*(i-1))/2)+j);
-
-			/* column-mojor index */
-
 			if(j < i){
 				std::swap(j,i);
 			}else if(i == j){
 				std::cout << "Error: attempt tojindex diagonal in TriangularMatrix" << std::endl;
-				return 0;
+				exit(0);
 			}
+			///* row-major index */
+			//return (((i*(i-1))/2)+j);
+
+			/* column-mojor index */
 			return (size()*i - ((i+1)*i)/2 + j-(i+1));
 		};
 

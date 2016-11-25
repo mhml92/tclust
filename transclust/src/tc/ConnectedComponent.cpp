@@ -75,6 +75,7 @@ void ConnectedComponent::getBufferedCost(
 
 void ConnectedComponent::commit()
 {
+	//LOGI_IF(globalId2localId.size() > 1000) << "max_value: " << max_value << "\t" << "min_value: " << min_value;
 	// this is no longer needed as all costs have been added and given local ids
 	globalId2localId.clear();
 

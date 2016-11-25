@@ -89,8 +89,8 @@ namespace FORCE
 		std::vector<std::vector<float>> delta;
 		delta.resize(pos.size(), std::vector<float>(dim,0.0f));
 
-		f_att /= static_cast<float>(cc.size());
-		f_rep /= static_cast<float>(cc.size());
+		f_att /= (float)cc.size();
+		f_rep /= (float)cc.size();
 		//float num_nodes = cc.size();
 
 		for(unsigned r = 0; r < R; r++)
@@ -98,8 +98,6 @@ namespace FORCE
 			// zero delta vectors
 			for(auto& v:delta){std::fill(v.begin(),v.end(),0.0f);}
 
-			//float temp = (start_t*(float)cc.size())*(1.0f/std::pow(((r+1)),2));
-			float temp = (start_t*(float)cc.size())*(std::pow(1.0f/(r+1),2));
 			/**********************************************************************
 			 * CALCULATE DELTA VECTOR
 			 *********************************************************************/
@@ -109,50 +107,34 @@ namespace FORCE
 				// read all neseccary cost values for object i in to a buffer
 				// to minimoze potential I/Os
 				std::vector<float> cost_buffer(pos.size()-(i+1),0);
-				
 				cc.getBufferedCost(cost_buffer,i,i+1);
-				
 				unsigned j_pos = 0;
 
 				for(unsigned j = i+1; j < pos.size(); j++)
 				{
 					float distance = TCC::dist(pos,i,j);
-					if(distance > 0.0)
+					if(distance > 0.0001f)
 					{
-						
-						float log_d = std::log(distance+1);
-
-						float force = 0.0f;
 
 						float edge_weight = cost_buffer.at(j_pos);
 						j_pos++;
 
-						//float edge_weight = cc.getCost(i,j);
-						if(edge_weight > 0)
-						{
-							force = ((edge_weight * f_att * log_d))/distance;
-						}else{
-							//if(distance > 5){
-							//	//std::cout << "dist > 5\n"
-							//	//	<< "edge_weight <- " << edge_weight << "\n"
-							//	//	<< "f_rep       <- " << f_rep << "\n"
-							//	//	<< "log_d       <- " << log_d << "\n"
-							//	//	<< "num_nodes   <- " << num_nodes << "\n"
-							//	//	<< "#force:        " << ((edge_weight * f_rep))/(log_d*num_nodes) 
-							//	//	<< std::endl;
-							//	continue;
-							//	
-							//}else{
-							//	force = ((edge_weight * f_rep))/(log_d*num_nodes);
-							//}
-							force = ((edge_weight * f_rep)/log_d)/distance;
-						}
+						float force = calculate_force(
+								edge_weight,
+								f_att,
+								f_rep,
+								distance,
+								cc.size()
+								);
+
 						for(unsigned d = 0; d < dim; d++)
 						{
-							float displacement = TCC::round(force * (pos[j][d]-pos[i][d]));
-							delta[i][d] += displacement;
-							delta[j][d] -= displacement;
+							float displacement = (pos[j][d]-pos[i][d]) * force;
+							delta[i][d] = delta[i][d] + displacement;
+							delta[j][d] = delta[j][d] - displacement;
 						}
+					}else{
+						j_pos++;
 					}
 				}
 			}
@@ -160,11 +142,13 @@ namespace FORCE
 			/*******************************************************************
 			 * APPLY COOLING FUNCTION AND UPDATE POSITIONS
 			 ******************************************************************/
+			//float temp = (start_t*(float)cc.size())*(1.0f/std::pow(((r+1)),2));
+			float temp = (start_t*(float)cc.size())*(std::pow(1.0f/((float)r+1.0f),2.0f));
 			for(unsigned i = 0; i < pos.size(); i++)
 			{
 				float len = 0.0;
 				for(unsigned d = 0; d < dim;d++){
-					len += delta[i][d]*delta[i][d];
+					len += std::pow(delta[i][d],2.0f);//*delta[i][d];
 				}
 				len = std::sqrt(len);
 
@@ -205,8 +189,8 @@ namespace FORCE
 		std::vector<std::vector<float>> delta;
 		delta.resize(pos.size(), std::vector<float>(dim,0.0f));
 
-		f_att /= static_cast<float>(cc.size());
-		f_rep /= static_cast<float>(cc.size());
+		f_att /= (float)cc.size();
+		f_rep /= (float)cc.size();
 		//float num_nodes = cc.size();
 		float temp = 0;
 		#pragma omp parallel
@@ -243,40 +227,22 @@ namespace FORCE
 					for(unsigned j = i+1; j < pos.size(); j++)
 					{
 						float distance = TCC::dist(pos,i,j);
-						if(distance > 0.0)
+						if(distance > 0.0f)
 						{
-
-							float log_d = std::log(distance+1);
-
-							float force = 0.0f;
-
 							float edge_weight = cost_buffer.at(j_pos);
 							j_pos++;
-
-							//float edge_weight = cc.getCost(i,j);
-							if(edge_weight > 0)
-							{
-								force = ((edge_weight * f_att * log_d))/distance;
-							}else{
-								//if(distance > 5){
-								//	//std::cout << "dist > 5\n"
-								//	//	<< "edge_weight <- " << edge_weight << "\n"
-								//	//	<< "f_rep       <- " << f_rep << "\n"
-								//	//	<< "log_d       <- " << log_d << "\n"
-								//	//	<< "num_nodes   <- " << num_nodes << "\n"
-								//	//	<< "#force:        " << ((edge_weight * f_rep))/(log_d*num_nodes) 
-								//	//	<< std::endl;
-								//	continue;
-								//	
-								//}else{
-								//	force = ((edge_weight * f_rep))/(log_d*num_nodes);
-								//}
-								force = ((edge_weight * f_rep)/log_d)/distance;
-							}
+							
+							float force = calculate_force(
+									edge_weight,
+									f_att,
+									f_rep,
+									distance,
+									cc.size()
+									);
 
 							for(unsigned d = 0; d < dim; d++)
 							{
-								float displacement = TCC::round(force * (pos[j][d]-pos[i][d]));
+								float displacement = force * (pos[j][d]-pos[i][d]);
 
 								#pragma omp atomic
 								delta[i][d] += displacement;
@@ -284,6 +250,8 @@ namespace FORCE
 								#pragma omp atomic
 								delta[j][d] -= displacement;
 							}
+						}else{
+							j_pos++;
 						}
 					}
 				}
@@ -313,6 +281,44 @@ namespace FORCE
 				//DEBUG_force(pos,r);
 			}
 		}
+	}
+
+	float calculate_force(
+			float edge_weight,
+			float f_att,
+			float f_rep,
+			float distance,
+			unsigned size
+			)
+	{
+		float force = 0.0;
+		float log_d = std::log(distance+1);
+		if(edge_weight > 0.0f)
+		{
+			force = (edge_weight * f_att * log_d);
+		}else{
+			//if(distance > 1){
+			//	//std::cout << "dist > 5\n"
+			//	//	<< "edge_weight <- " << edge_weight << "\n"
+			//	//	<< "f_rep       <- " << f_rep << "\n"
+			//	//	<< "log_d       <- " << log_d << "\n"
+			//	//	<< "num_nodes   <- " << num_nodes << "\n"
+			//	//	<< "#force:        " << ((edge_weight * f_rep))/(log_d*num_nodes) 
+			//	//	<< std::endl;
+			//	//break;
+
+			//}else{
+			//	force = (edge_weight * f_rep)/log_d;
+			//}
+			force = (edge_weight * f_rep)/log_d;
+		}
+		//LOGI_IF(size > 1000 ) << "\n"
+		//		<< "edge_weight <- " << edge_weight << "\n"
+		//		<< "f_att       <- " << f_att << "\n"
+		//		<< "f_rep       <- " << f_rep << "\n"
+		//		<< "distance    <- " << distance << "\n"
+		//		<< "force       <- " << force;
+		return force/distance;
 	}
 
 	void partition(
@@ -355,6 +361,7 @@ namespace FORCE
 			{
 				cr.cost = cost;
 				cr.clusters = clustering;
+				//LOGI << "found " << clustering.size() << " cc";
 				if(cr.cost == 0){break;}
 			}
 		}

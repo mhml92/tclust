@@ -31,6 +31,14 @@ namespace FORCE{
 			const unsigned dim,
 			unsigned seed);
 
+	float calculate_force(
+			float edge_weight,
+			float f_att,
+			float f_rep,
+			float distance,
+			unsigned size
+			);
+
 	void partition(
 			ConnectedComponent& cc,
 			std::vector<std::vector<float>>& pos,

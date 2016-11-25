@@ -7,9 +7,10 @@
 #include <stxxl/sorter>
 #include <stxxl/stats>
 #include <plog/Log.h>
-#include "transclust/Common.hpp"
+#include <boost/algorithm/string.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/filesystem.hpp>
+#include "transclust/Common.hpp"
 #include "transclust/InputParser.hpp"
 
 /**
@@ -52,9 +53,12 @@ void InputParser::getConnectedComponents(
 	for (std::string line; std::getline(fs, line); )
 	{
 		// split line: o1, o2, val
-		std::istringstream buf(line);
-		std::istream_iterator<std::string> beg(buf), end;
-		std::vector<std::string> tokens(beg, end);
+		//std::istringstream buf(line);
+		//std::istream_iterator<std::string> beg(buf), end;
+		std::vector<std::string> tokens;
+		boost::algorithm::split(tokens,line,boost::is_any_of("\t"));
+		boost::algorithm::trim(tokens.at(0));
+		boost::algorithm::trim(tokens.at(1));
 
 		// object 1
 		std::string o1 = tokens.at(0);
@@ -75,7 +79,7 @@ void InputParser::getConnectedComponents(
 			
 			has_inf_in_input = true;
 			
-			if(value < 0 )
+			if(value < 0.0f )
 			{
 				value = std::numeric_limits<float>::lowest();
 			}else{
@@ -242,7 +246,7 @@ void InputParser::getConnectedComponents(
 				if(value == std::numeric_limits<float>::lowest() ||
 						value == std::numeric_limits<float>::max())
 				{
-					if(value > 0)
+					if(value > 0.0f)
 					{
 						value = max_value;
 					}

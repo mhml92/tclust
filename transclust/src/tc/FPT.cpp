@@ -217,6 +217,7 @@ void FPT::find_solution(Node& fptn0)
 	if(highestoccurence == 0.0){
 		solution_found = true;
 		solution_cost = fptn0.cost;
+		//LOGI << "cost: " << fptn0.cost;
 		solution_edgeCost = fptn0.edgeCost;
 		solution_nodeParents = fptn0.nodeParents;
 		maxK = fptn0.cost;

@@ -2,8 +2,8 @@ library(ggplot2)
 library(stringr)
 setwd("~/Dropbox/Datalogi/Speciale/repo/transclust/R/")
 #data <- read.table(file("stdin"), header=FALSE, sep=",")
-data <- read.table(file("../build/release/gavin_pos.txt"), header=FALSE, sep=",")
-names(data) <- c('r','x','y')
+data <- read.table(file("jtc_gavin_pos/hsphere.txt"), header=FALSE, sep=",")
+names(data) <- c('r','x','y','z')
 iter <- unique(data$r)
 options(scipen=999)
 for(i in iter){ 
@@ -13,11 +13,11 @@ for(i in iter){
       coord_fixed() +
       theme(legend.position="none")
   png(
-    filename = paste("pos_out/",str_pad(i,4,pad="0"),".png",sep = ""),
+    filename = paste("java_pos_out_hsphere/",str_pad(i,4,pad="0"),".png",sep = ""),
     width = 1024,
     height = 1024
     )
-  plot(plot)
+ plot(plot)
   dev.off()
 }
 #edge_weight <- -0.30004

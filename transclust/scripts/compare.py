@@ -47,7 +47,7 @@ parser.add_argument(
 parser.add_argument(
 	"--java",
 	help="path/to/java transclust",
-	default="/home/mikkel/Dropbox/Datalogi/Speciale/ref_code/TransClust-2.0.0.25.jar"
+	default="/home/mikkel/Dropbox/Datalogi/Speciale/ref_code/TransClust-2.1.0.23.jar"
 )
 
 # output path
@@ -162,11 +162,6 @@ def getCommand(simfile_name,threshold,fpt,program):
 			"-s",simfile,
 			"-o",outfile,
 			"-t",threshold,
-			#"--f_s","0",
-			#"--d_init","0.001",
-			#"--s_init","0.001",
-			#"--d_maximal","2",
-			#"--seed","389742",
 			"--memory_limit",str(args.memory_limit)
 		])
 		if not fpt:
@@ -201,8 +196,10 @@ if args.force_only:
 else:
 	algs = [True,False]
 
+# write header in output file
 with open(execution_durations, "a") as f:
 	f.write("\t".join(["program","using_fpt","threshold","similarity_file","time","\n"]))
+
 for simfile in SIMILARITY_FILES:
 
 	# simfile base name
@@ -214,6 +211,7 @@ for simfile in SIMILARITY_FILES:
 	#############################################################################
 	min_value = SIMILARITY_FILE_THRESHOLD[simfile_name]["min"]
 	max_value = SIMILARITY_FILE_THRESHOLD[simfile_name]["max"]
+
 	# Threshold sequence
 	t_step = (max_value-min_value)/(int(args.n)+2)
 

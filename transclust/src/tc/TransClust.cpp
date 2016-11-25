@@ -138,6 +138,10 @@ RES::Clustering TransClust::cluster()
 				if(!cc.isTransitive())
 				{
 					cc.load();
+					#pragma omp critical
+					{
+						LOGI << "Clustering connected component of size: " << cc.size();
+					}
 					LOGD << "clustering with FORCE";
 					// init position array
 					std::vector<std::vector<float>> pos;
