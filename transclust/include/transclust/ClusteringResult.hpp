@@ -4,6 +4,9 @@
 #include <deque>
 #include <deque>
 #include <string>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/serialization/deque.hpp>
 #include "transclust/Common.hpp"
 #include "transclust/ConnectedComponent.hpp"
 
@@ -13,13 +16,13 @@ namespace RES
 	struct ClusteringResult {
 		double cost;
 		std::deque<std::deque<unsigned>> clusters;
-	};
+		template <typename Archive>
+		void serialize(Archive& ar, const unsigned int version)
+		{
+			ar & cost;
+			ar & clusters;
+		}
 
-	struct Clustering {
-		std::deque<std::string> id2name;
-		float threshold;
-		float cost;
-		std::deque<std::deque<unsigned>> clusters;
 	};
 
 	inline double calculateCost_membership(

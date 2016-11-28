@@ -14,13 +14,12 @@ class InputParser
 {
 	public:
 		InputParser(
-				std::string _filename,
 				TCC::TransClustParams& _tcp
 				);
 
 		void getConnectedComponents(
 				std::deque<ConnectedComponent>& ccs,
-				RES::Clustering& result
+				std::deque<std::string>& id2name
 				);
 
 	private:
@@ -59,19 +58,19 @@ class InputParser
 		void buildObjectIdMaps(
 				std::string o,
 				boost::unordered_map<std::string, unsigned>& name2id,
-				RES::Clustering& result
+				std::deque<std::string>& id2name
 				)
 		{
 			if (name2id.find(o) == name2id.end())
 			{
-				unsigned _id = result.id2name.size();
-				result.id2name.push_back(o);
+				unsigned _id = id2name.size();
+				id2name.push_back(o);
 				name2id[o] = _id;
 			}
 		}
 
-		std::string filename;
 		TCC::TransClustParams tcp;
+		std::string filename;
 		float maxValue = std::numeric_limits<float>::lowest();
 		float minValue = std::numeric_limits<float>::max();
 		DynamicUnionFind duf;

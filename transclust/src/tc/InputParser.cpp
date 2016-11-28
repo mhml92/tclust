@@ -20,12 +20,11 @@
  * ConnectedCompoents. 
  */
 InputParser::InputParser(
-		std::string _filename,
 		TCC::TransClustParams& _tcp
 		)
 	:
-		filename(_filename),
 		tcp(_tcp),
+		filename(tcp.simfile),
 		duf()
 {
 	if(!boost::filesystem::exists(filename))
@@ -37,7 +36,7 @@ InputParser::InputParser(
 
 void InputParser::getConnectedComponents(
 		std::deque<ConnectedComponent>& ccs,
-		RES::Clustering& result
+		std::deque<std::string>& id2name
 		)
 {
 	boost::unordered_map<std::string, unsigned> name2id;
@@ -87,8 +86,8 @@ void InputParser::getConnectedComponents(
 			}
 		}
 
-		buildObjectIdMaps(o1,name2id,result);
-		buildObjectIdMaps(o2,name2id,result);
+		buildObjectIdMaps(o1,name2id,id2name);
+		buildObjectIdMaps(o2,name2id,id2name);
 
 		// create key
 		uint64_t key;
@@ -159,7 +158,7 @@ void InputParser::getConnectedComponents(
 		++similarity_sorter;
 	}
 	// make sure all elements are represented
-	duf.find(result.id2name.size()-1);
+	duf.find(id2name.size()-1);
 	/////////////////////////////////////////////////////////////////////////////
 	LOGI << "Building DUF...done";
 	/////////////////////////////////////////////////////////////////////////////
@@ -274,13 +273,13 @@ void InputParser::getConnectedComponents(
 	/////////////////////////////////////////////////////////////////////////////
 	LOGI << "Adding costs to connected components...done";
 
-	LOGW_IF(num_used_edges != TCC::calc_num_sym_elem(result.id2name.size())) 
+	LOGW_IF(num_used_edges != TCC::calc_num_sym_elem(id2name.size())) 
 		<< "Similarity file is incomplete. Only " 
 		<< num_used_edges 
 		<< " out of " 
-		<< TCC::calc_num_sym_elem(result.id2name.size()) 
+		<< TCC::calc_num_sym_elem(id2name.size()) 
 		<< " possible edges for " 
-		<< result.id2name.size() 
+		<< id2name.size() 
 		<< " nodes were found";
 	/////////////////////////////////////////////////////////////////////////////
 

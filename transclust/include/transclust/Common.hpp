@@ -5,12 +5,16 @@
 #include <vector>
 #include <deque>
 #include <iostream>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 
 // TransClust Commons
 namespace TCC
 {
 	/* Config struct with fluint interface */
 	struct TransClustParams {
+		std::string simfile = "";
+		std::string outfile = "";
 		float threshold = 0.0;
 
 		// force parameters
@@ -47,6 +51,8 @@ namespace TCC
 		bool debug_cost_only = false;
 
 
+		TransClustParams& set_simfile(std::string val){simfile = val;return *this;}
+		TransClustParams& set_outfile(std::string val){outfile = val;return *this;}
 		TransClustParams& set_threshold(float val){threshold = val;return *this;}
 
 		TransClustParams& set_p(float val){p = val;return *this;}
@@ -72,7 +78,7 @@ namespace TCC
 		TransClustParams& set_disable_fpt(bool val){disable_fpt = val;return *this;}
 		//TransClustParams& set_normalization(std::string val){normalization = val;return *this;}
 		TransClustParams& set_tmp_dir(std::string val){tmp_dir = val;return *this;}
-		TransClustParams& set_seed(bool val){seed = val;return *this;}
+		TransClustParams& set_seed(unsigned val){seed = val;return *this;}
 		TransClustParams& set_memory_limit(double val){memory_limit = val;return *this;}
 
 		TransClustParams& set_debug_cost_only(bool val){debug_cost_only = val;return *this;}

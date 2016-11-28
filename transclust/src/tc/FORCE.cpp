@@ -28,7 +28,8 @@ namespace FORCE
 			std::vector<std::vector<float>>& pos,
 			unsigned dim,
 			float p,
-			unsigned seed){
+			unsigned seed)
+	{
 		if(dim == 2)
 		{
 			//uniform 2d layout
@@ -64,7 +65,7 @@ namespace FORCE
 			}
 		}
 
-	};
+	}
 
 	void layout(
 			ConnectedComponent& cc,
@@ -312,7 +313,7 @@ namespace FORCE
 			//}
 			force = (edge_weight * f_rep)/log_d;
 		}
-		//LOGI_IF(size > 1000 ) << "\n"
+		//LOGI_IF(size > 284 ) << "\n"
 		//		<< "edge_weight <- " << edge_weight << "\n"
 		//		<< "f_att       <- " << f_att << "\n"
 		//		<< "f_rep       <- " << f_rep << "\n"
@@ -359,6 +360,7 @@ namespace FORCE
 
 			if(cost < cr.cost)
 			{
+
 				cr.cost = cost;
 				cr.clusters = clustering;
 				//LOGI << "found " << clustering.size() << " cc";

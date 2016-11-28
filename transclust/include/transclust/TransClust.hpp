@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <cmath>
+#include <boost/mpi.hpp>
 #include <plog/Log.h>
 #include "transclust/Common.hpp"
 #include "transclust/InputParser.hpp"
@@ -22,45 +23,40 @@ class TransClust{
 
 	public:
 		TransClust(
-				const std::string& filename,
 				TCC::TransClustParams& _tcp
 				);
 
-		RES::Clustering cluster();
+		RES::ClusteringResult cluster(
+				std::deque<ConnectedComponent>& css,
+				RES::ClusteringResult& result
+				);
 	private:
-
-		inline void addResult(
+		void addResult(
 				ConnectedComponent& cc,
-				RES::ClusteringResult& cr)
-		{
-			if(cc.isTransitive())
-			{
-				cr.cost = 0;
-				result.clusters.push_back(cc.getIndex2ObjectId());
-			}else{
+				RES::ClusteringResult& cr,
+				RES::ClusteringResult& result);
 
-				for(auto cluster:cr.clusters)
-				{
-					result.clusters.push_back(std::deque<unsigned>());
-					for(unsigned local_id:cluster)
-					{
-						result.clusters.back().push_back(cc.getObjectId(local_id));
-					}
-				}
-			}
-			if(cr.cost < 0){
-				std::cout << "waaaaaat" << std::endl;
-			}	
-			result.cost += cr.cost;
-		}
+		//void run_fpt(
+		//		std::deque<ConnectedComponent>& ccs,
+		//		std::deque<unsigned>& force_cc_small,
+		//		std::deque<unsigned>& force_cc_large
+		//		);
 
+		//void run_FORCE_concurrent(
+		//		std::deque<ConnectedComponent>& ccs,
+		//		std::deque<unsigned>& force_cc_small
+		//		);
+
+		//void run_FORCE_parallel(
+		//		std::deque<ConnectedComponent>& ccs,
+		//		std::deque<unsigned>& force_cc_large
+		//		);
 		TCC::TransClustParams tcp;
-		InputParser ip;
-		float total_cost = 0;
-		std::deque<ConnectedComponent> ccs;
-		std::deque<std::string> id2name; 
-		std::deque<std::deque<unsigned>> clusters;
-		RES::Clustering result;
+		//std::string filename;
+		//float total_cost = 0;
+		//std::deque<ConnectedComponent> ccs;
+		//std::deque<std::string> id2name; 
+		//std::deque<std::deque<unsigned>> clusters;
 		
 };
 #endif

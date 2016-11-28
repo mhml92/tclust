@@ -13,7 +13,13 @@ endif("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
 list(APPEND BOOST_REQUIRED_LIBRARIES iostreams)
 list(APPEND BOOST_REQUIRED_LIBRARIES system)
 list(APPEND BOOST_REQUIRED_LIBRARIES filesystem)
-find_package(Boost REQUIRED COMPONENTS ${BOOST_REQUIRED_LIBRARIES})
+list(APPEND BOOST_REQUIRED_LIBRARIES mpi)
+list(APPEND BOOST_REQUIRED_LIBRARIES serialization)
+find_package(Boost COMPONENTS ${BOOST_REQUIRED_LIBRARIES} REQUIRED)
+find_package(MPI REQUIRED)
+
+
+
 
 # get header files
 include_directories(
@@ -22,6 +28,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/lib/plog/include
 	${Boost_INCLUDE_DIR}
 	${STXXL_INCLUDE_DIRS}
+	${MPI_INCLUDE_PATH}
 	)
 
 message(STATUS "${CMAKE_CXX_COMPILER_ID}") 
@@ -34,7 +41,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
 # Set custom compile flags
 IF(${CMAKE_BUILD_TYPE} STREQUAL "Release" )
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -O2")
 ELSEIF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -pedantic -W -Wall")
 ELSE()
@@ -53,13 +60,11 @@ endif()
 # apply STXXL CXXFLAGS to our configuration
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STXXL_CXX_FLAGS}")
 
-
 # include the STXXL library in my-project
 
 # build a program and link it with STXXL.
 #add_executable(project main.cpp)
 #target_link_libraries(project ${STXXL_LIBRARIES})
-
 
 # build core static library
 #include_directories(${STXXL_INCLUDE_DIRS})
@@ -70,7 +75,11 @@ target_link_libraries(tclust
 	tc_core
 	${STXXL_LIBRARIES}
 	${Boost_LIBRARIES}
+	${MPI_LIBRARIES}
 	)
+
+
+
 
 
 #file(GLOB SOURCES "src/tc/*.cpp")

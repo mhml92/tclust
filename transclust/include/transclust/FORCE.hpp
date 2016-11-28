@@ -61,7 +61,7 @@ namespace FORCE{
 
 	void inline DEBUG_force(std::vector<std::vector<float>>& pos,int iter){
 
-		if(pos.size() > 1500){
+		if(pos.size() == 285){
 			for(unsigned i = 0; i < pos.size();i++){
 				std::cout << iter+1 << ",";
 				for(unsigned j = 0; j < pos[0].size();j++){
