@@ -181,7 +181,12 @@ void InputParser::getConnectedComponents(
 			unsigned cc_id = ccs.size();
 
 			// insert a new connected component with id,number of edges and tcp
-			ccs.push_back( ConnectedComponent(cc_id,-duf.at(rootId),tcp) );
+			long num_positive_edges = 0;
+			if(duf.at(rootId) != std::numeric_limits<long>::lowest())
+			{
+				num_positive_edges = std::abs(duf.at(rootId));
+			}
+			ccs.push_back( ConnectedComponent(cc_id,num_positive_edges,tcp) );
 
 			// insert rootId -> cc_id in map
 			rootId2cc.insert(std::make_pair(rootId,cc_id));

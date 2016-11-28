@@ -18,21 +18,23 @@ TransClust::TransClust(
 		tcp(_tcp)
 { }
 
-RES::ClusteringResult TransClust::cluster(
+void TransClust::cluster(
 		std::deque<ConnectedComponent>& ccs,
 		RES::ClusteringResult& result)
 {
+	unsigned num_fpt_solved = 0;
+	unsigned num_transitive = 0;
+	unsigned num_force_solved = 0;
 	#pragma omp parallel
 	{
 		#pragma omp for schedule(dynamic)
 		for(unsigned i = 0; i < ccs.size(); i++)
 		{
-
 			// get a reference to the connected component at i 
 			ConnectedComponent& cc = ccs.at(i);
 
 			// load the memorymapped file holding the cost-matrix 
-			cc.load();
+			cc.load(tcp);
 
 			// initialize a struct holding the clustering result
 			RES::ClusteringResult cr;
@@ -45,6 +47,7 @@ RES::ClusteringResult TransClust::cluster(
 			{
 				#pragma omp critical(addResult)
 				{
+					num_transitive++;
 					addResult(cc,cr,result);
 				}
 				cc.free(true);
@@ -62,6 +65,9 @@ RES::ClusteringResult TransClust::cluster(
 			// if no solution is found in fpt we cluster with FORCE
 			if(cr.cost < 0)
 			{
+				#pragma omp atomic
+				num_force_solved++;
+
 				std::vector<std::vector<float>> pos;
 				pos.resize(cc.size(), std::vector<float>(tcp.dim,0));
 
@@ -87,6 +93,9 @@ RES::ClusteringResult TransClust::cluster(
 						tcp.s_init, 
 						tcp.f_s);
 
+			}else{
+				#pragma omp atomic
+				num_fpt_solved++;
 			}
 
 			// add clusters to solution
@@ -98,9 +107,13 @@ RES::ClusteringResult TransClust::cluster(
 			cc.free(true);
 		}
 	}
-
-
-	return result;
+	if(num_transitive > 0){
+		LOGI << num_transitive << " were already transitive";
+	}
+	if(!tcp.disable_fpt){
+		LOGI << "Clustered " << num_fpt_solved << " Conneced Components to optimality";
+	}
+	LOGI << "Clustered " << num_force_solved << " Conneced Components with FORCE";
 }
 
 void TransClust::addResult(

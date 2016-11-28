@@ -16,6 +16,7 @@ namespace RES
 	struct ClusteringResult {
 		double cost;
 		std::deque<std::deque<unsigned>> clusters;
+
 		template <typename Archive>
 		void serialize(Archive& ar, const unsigned int version)
 		{

@@ -38,8 +38,8 @@ class ConnectedComponent
 
 		inline void addNode(unsigned id)
 		{
+			globalId2localId.insert(std::make_pair(id,localId2globalId.size()));
 			localId2globalId.push_back(id);
-			globalId2localId.insert(std::make_pair(id,localId2globalId.size()-1));
 		}
 
 		inline unsigned getId(){ return cc_id; }
@@ -48,7 +48,7 @@ class ConnectedComponent
 		inline bool isTransitive(){ return transitive; }
 		//inline float getMaxCost(){ return max_cost; }
 		inline std::deque<unsigned> getIndex2ObjectId(){ return localId2globalId; }
-		inline long getNumConflictingEdges(){ return num_conflicting_edges; }
+		//inline long getNumConflictingEdges(){ return num_conflicting_edges; }
 		inline unsigned getObjectId(unsigned i){ return localId2globalId.at(i); }
 
 		void getBufferedCost(
@@ -65,7 +65,7 @@ class ConnectedComponent
 		// information can be stored most efficiantly 
 		void commit();
 
-		void load();
+		void load(TCC::TransClustParams& _tcp);
 
 		inline void free(bool permanent = false)
 		{
@@ -147,7 +147,7 @@ class ConnectedComponent
 		float max_value = std::numeric_limits<float>::lowest();
 		float min_value = std::numeric_limits<float>::max();
 		//float max_cost = 0;
-		long num_conflicting_edges = 0;
+		//long num_conflicting_edges = 0;
 		long num_cost_values = 0;
 		enum CostFileFormat {MATRIX,FLAT};
 		CostFileFormat cff;

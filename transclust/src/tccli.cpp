@@ -31,245 +31,245 @@ void parse_args(int argc, char** argv,TCC::TransClustParams& tcp)
 	try {
 
 
-	TCLAP::CmdLine cmd("Distributed TransClust", ' ', "1.0");
+		TCLAP::CmdLine cmd("Distributed TransClust", ' ', "1.0");
 
-	TCLAP::ValueArg<unsigned> seed("","seed","(default: 42) Seed for random generation",false,42,"int",cmd);
+		TCLAP::ValueArg<unsigned> seed("","seed","(default: 42) Seed for random generation",false,42,"int",cmd);
 
-	TCLAP::ValueArg<unsigned> fpt_max_cc_size(
-			"",
-			"FPT_max_cc_size",
-			"(default: 200) The maximum size of connected components in the FPT.",
-			false,
-			200,
-			"int",
-			cmd);
+		TCLAP::ValueArg<unsigned> fpt_max_cc_size(
+				"",
+				"FPT_max_cc_size",
+				"(default: 200) The maximum size of connected components in the FPT.",
+				false,
+				200,
+				"int",
+				cmd);
 
-	TCLAP::ValueArg<float> fpt_step_size(
-			"",
-			"FPT_step_size",
-			"(default: 500) ",
-			false,
-			500.0,
-			"float",
-			cmd);
+		TCLAP::ValueArg<float> fpt_step_size(
+				"",
+				"FPT_step_size",
+				"(default: 500) ",
+				false,
+				500.0,
+				"float",
+				cmd);
 
-	TCLAP::ValueArg<float> fpt_time_limit(
-			"",
-			"FPT_time_limit",
-			"(default: 1) Specifies the maximal runtime for the FPT algorithm in" 
-			"seconds",
-			false,
-			1,
-			"float",
-			cmd);
+		TCLAP::ValueArg<float> fpt_time_limit(
+				"",
+				"FPT_time_limit",
+				"(default: 1) Specifies the maximal runtime for the FPT algorithm in" 
+				"seconds",
+				false,
+				1,
+				"float",
+				cmd);
 
-	TCLAP::ValueArg<float> f_s(
-			"",
-			"f_s",
-			"(default: 0.01) Stepsize factor for geometric linking",
-			false,
-			0.01,
-			"float",
-			cmd);
-
-
-	TCLAP::ValueArg<float> s_init(
-			"",
-			"s_init",
-			"(default: 0.01) Initial stepsize for geometric linking",
-			false,
-			0.01,
-			"float",
-			cmd);
-
-	TCLAP::ValueArg<float> d_maximal(
-			"",
-			"d_maximal",
-			"(default: 5.0) Maximal distance for geometric linking",
-			false,
-			5.0,
-			"float",
-			cmd);
+		TCLAP::ValueArg<float> f_s(
+				"",
+				"f_s",
+				"(default: 0.01) Stepsize factor for geometric linking",
+				false,
+				0.01,
+				"float",
+				cmd);
 
 
-	TCLAP::ValueArg<float> d_init(
-			"",
-			"d_init",
-			"(default: 0.01) Initital distance for geometric linking",
-			false,
-			0.01,
-			"float",
-			cmd);
+		TCLAP::ValueArg<float> s_init(
+				"",
+				"s_init",
+				"(default: 0.01) Initial stepsize for geometric linking",
+				false,
+				0.01,
+				"float",
+				cmd);
 
-	TCLAP::ValueArg<unsigned> FORCE_min_size_parallel(
-			"",
-			"FORCE_min_size_parallel",
-			"(default: 1000)",
-			false,
-			1000,
-			"int",
-			cmd);
+		TCLAP::ValueArg<float> d_maximal(
+				"",
+				"d_maximal",
+				"(default: 5.0) Maximal distance for geometric linking",
+				false,
+				5.0,
+				"float",
+				cmd);
 
-	TCLAP::ValueArg<float> FORCE_start_t(
-			"",
-			"FORCE_temperature",
-			"(default: 100) Defines the speed of how fast the movements are "
-			"cooled down in order to achieve a stable result.",
-			false,
-			100.0,
-			"float",
-			cmd);
 
-	TCLAP::ValueArg<float> FORCE_p(
-			"",
-			"p",
-			"(default: 1) Layout initial radius",
-			false,
-			1,
-			"float",
-			cmd);
+		TCLAP::ValueArg<float> d_init(
+				"",
+				"d_init",
+				"(default: 0.01) Initital distance for geometric linking",
+				false,
+				0.01,
+				"float",
+				cmd);
 
-	TCLAP::ValueArg<unsigned> FORCE_dim(
-			"",
-			"FORCE_dimension",
-			"(default: 3) Specifies the number of dimensions used for the "
-			"layouter. 2 or 3 dimensions are normally fine values.",
-			false,
-			3,
-			"int",
-			cmd);
+		TCLAP::ValueArg<unsigned> FORCE_min_size_parallel(
+				"",
+				"FORCE_min_size_parallel",
+				"(default: 1000)",
+				false,
+				1000,
+				"int",
+				cmd);
 
-	TCLAP::ValueArg<unsigned> FORCE_R(
-			"",
-			"FORCE_iterations",
-			"(default: 100) Number of iterations performed for the layouting "
-			"process. For large instances it might be beneficial to reduce this "
-			"number.",
-			false,
-			100,
-			"int",
-			cmd);
+		TCLAP::ValueArg<float> FORCE_start_t(
+				"",
+				"FORCE_temperature",
+				"(default: 100) Defines the speed of how fast the movements are "
+				"cooled down in order to achieve a stable result.",
+				false,
+				100.0,
+				"float",
+				cmd);
 
-	TCLAP::ValueArg<float> FORCE_rep(
-			"",
-			"FORCE_repulsion",
-			"(default: 100) Sets the repulsion parameter for the FORCE heuristic.",
-			false,
-			100.0,
-			"float",
-			cmd);
-	// layout vars
-	TCLAP::ValueArg<float> FORCE_att(
-			"",
-			"FORCE_attraction",
-			"(default: 100) Sets the attraction parameter for the FORCE heuristic.",
-			false,
-			100.0,
-			"float",
-			cmd);
+		TCLAP::ValueArg<float> FORCE_p(
+				"",
+				"p",
+				"(default: 1) Layout initial radius",
+				false,
+				1,
+				"float",
+				cmd);
 
-	TCLAP::SwitchArg disable_force(
-			"",
-			"disable_force",
-			"disables clustering with the FORCE heuristic",
-			cmd,
-			false);
+		TCLAP::ValueArg<unsigned> FORCE_dim(
+				"",
+				"FORCE_dimension",
+				"(default: 3) Specifies the number of dimensions used for the "
+				"layouter. 2 or 3 dimensions are normally fine values.",
+				false,
+				3,
+				"int",
+				cmd);
 
-	TCLAP::SwitchArg disable_fpt(
-			"",
-			"disable_fpt",
-			"Disables clustering with the exact FPT algorithm",
-			cmd,
-			false);
+		TCLAP::ValueArg<unsigned> FORCE_R(
+				"",
+				"FORCE_iterations",
+				"(default: 100) Number of iterations performed for the layouting "
+				"process. For large instances it might be beneficial to reduce this "
+				"number.",
+				false,
+				100,
+				"int",
+				cmd);
 
-	TCLAP::ValueArg<std::string> tmp_dir(
-			"",
-			"tmp_dir",
-			"(default: '/tmp/tclust') Temporary directory for auxiliary files "
-			"created during the run of the program",
-			false,
-			"/tmp/tclust/",
-			"string",
-			cmd);
+		TCLAP::ValueArg<float> FORCE_rep(
+				"",
+				"FORCE_repulsion",
+				"(default: 100) Sets the repulsion parameter for the FORCE heuristic.",
+				false,
+				100.0,
+				"float",
+				cmd);
+		// layout vars
+		TCLAP::ValueArg<float> FORCE_att(
+				"",
+				"FORCE_attraction",
+				"(default: 100) Sets the attraction parameter for the FORCE heuristic.",
+				false,
+				100.0,
+				"float",
+				cmd);
 
-	TCLAP::ValueArg<float> fallback_value(
-			"",
-			"defaultmissing",
-			"(default: 0.0) Sets the similarity value of edges not present in "
-			"the similarity file",
-			false,
-			0.0,
-			"float",
-			cmd);
+		TCLAP::SwitchArg disable_force(
+				"",
+				"disable_force",
+				"disables clustering with the FORCE heuristic",
+				cmd,
+				false);
 
-	TCLAP::ValueArg<double> memory_limit(
-			"",
-			"memory_limit",
-			"(default: 0) Sets the momory limit for each conneced component in MB." 
-			"The defualt value of 0 sets the limit to MAX",
-			false,
-			0,
-			"double",
-			cmd);
+		TCLAP::SwitchArg disable_fpt(
+				"",
+				"disable_fpt",
+				"Disables clustering with the exact FPT algorithm",
+				cmd,
+				false);
 
-	TCLAP::ValueArg<std::string> outfile(
-			"o",
-			"output",
-			"Path and filename of the ouput file. If not specified will the result be saved to transclust_result.txt",
-			false,
-			"transclust_result.txt",
-			"string",
-			cmd);									// parser
+		TCLAP::ValueArg<std::string> tmp_dir(
+				"",
+				"tmp_dir",
+				"(default: '/tmp/tclust') Temporary directory for auxiliary files "
+				"created during the run of the program",
+				false,
+				"/tmp/tclust/",
+				"string",
+				cmd);
 
-	TCLAP::ValueArg<float> threshold(
-			"t",                
-			"threshold",    
-			"Threshold for the clustering.",
-			true,               
-			0,               
-			"float",
-			cmd
-			);
+		TCLAP::ValueArg<float> fallback_value(
+				"",
+				"defaultmissing",
+				"(default: 0.0) Sets the similarity value of edges not present in "
+				"the similarity file",
+				false,
+				0.0,
+				"float",
+				cmd);
 
-	TCLAP::ValueArg<std::string> simfile(
-			"s",
-			"simfile",
-			"Path and filename of the input Similarity file.",
-			true,
-			"",
-			"string",
-			cmd);
+		TCLAP::ValueArg<double> memory_limit(
+				"",
+				"memory_limit",
+				"(default: 0) Sets the momory limit for each conneced component in MB." 
+				"The defualt value of 0 sets the limit to MAX",
+				false,
+				0,
+				"double",
+				cmd);
 
-	cmd.parse( argc, argv );
+		TCLAP::ValueArg<std::string> outfile(
+				"o",
+				"output",
+				"Path and filename of the ouput file. If not specified will the result be saved to transclust_result.txt",
+				false,
+				"transclust_result.txt",
+				"string",
+				cmd);									// parser
 
-	tcp.set_threshold(threshold.getValue())
-		.set_simfile(simfile.getValue())
-		.set_outfile(outfile.getValue())
-		.set_sim_fallback(fallback_value.getValue())
+		TCLAP::ValueArg<float> threshold(
+				"t",                
+				"threshold",    
+				"Threshold for the clustering.",
+				true,               
+				0,               
+				"float",
+				cmd
+				);
 
-		.set_p(FORCE_p.getValue())
-		.set_f_att(FORCE_att.getValue())
-		.set_f_rep(FORCE_rep.getValue())
-		.set_R(FORCE_R.getValue())
-		.set_dim(FORCE_dim.getValue())
-		.set_start_t(FORCE_start_t.getValue())
-		.set_force_min_size_parallel(FORCE_min_size_parallel.getValue())
+		TCLAP::ValueArg<std::string> simfile(
+				"s",
+				"simfile",
+				"Path and filename of the input Similarity file.",
+				true,
+				"",
+				"string",
+				cmd);
 
-		.set_d_init(d_init.getValue())
-		.set_d_maximal(d_maximal.getValue())
-		.set_s_init(s_init.getValue())
-		.set_f_s(f_s.getValue())
+		cmd.parse( argc, argv );
 
-		.set_fpt_time_limit(fpt_time_limit.getValue())
-		.set_fpt_step_size(fpt_step_size.getValue())
-		.set_fpt_max_cc_size(fpt_max_cc_size.getValue())
-		.set_memory_limit(memory_limit.getValue())
+		tcp.set_threshold(threshold.getValue())
+			.set_simfile(simfile.getValue())
+			.set_outfile(outfile.getValue())
+			.set_sim_fallback(fallback_value.getValue())
 
-		.set_disable_fpt(disable_fpt.getValue())
-		.set_disable_force(disable_force.getValue())
+			.set_p(FORCE_p.getValue())
+			.set_f_att(FORCE_att.getValue())
+			.set_f_rep(FORCE_rep.getValue())
+			.set_R(FORCE_R.getValue())
+			.set_dim(FORCE_dim.getValue())
+			.set_start_t(FORCE_start_t.getValue())
+			.set_force_min_size_parallel(FORCE_min_size_parallel.getValue())
 
-		.set_seed(seed.getValue())
-		.set_tmp_dir(tmp_dir.getValue());
+			.set_d_init(d_init.getValue())
+			.set_d_maximal(d_maximal.getValue())
+			.set_s_init(s_init.getValue())
+			.set_f_s(f_s.getValue())
+
+			.set_fpt_time_limit(fpt_time_limit.getValue())
+			.set_fpt_step_size(fpt_step_size.getValue())
+			.set_fpt_max_cc_size(fpt_max_cc_size.getValue())
+			.set_memory_limit(memory_limit.getValue())
+
+			.set_disable_fpt(disable_fpt.getValue())
+			.set_disable_force(disable_force.getValue())
+
+			.set_seed(seed.getValue())
+			.set_tmp_dir(tmp_dir.getValue());
 
 	}catch (TCLAP::ArgException &e){
 		std::cerr 
@@ -277,25 +277,31 @@ void parse_args(int argc, char** argv,TCC::TransClustParams& tcp)
 			<< " for arg " << e.argId() 
 			<< std::endl;
 	}
+} // parse args
 
-}
+
 void finalize_master(
-	boost::mpi::communicator& world,
-	RES::ClusteringResult& result,
+	std::vector<RES::ClusteringResult>& total_result,
 	std::deque<std::string>& id2name,
 	TCC::TransClustParams& tcp,
 	std::chrono::time_point<std::chrono::steady_clock> t1)
 {
-	std::vector<RES::ClusteringResult> total_result;
 
-	boost::mpi::gather(world,result,total_result,0);	
-	for(int i = 1; i < world.size();i++)
+	RES::ClusteringResult final_result;
+	final_result.cost = 0;
+	for(int i = 0; i < total_result.size();i++)
 	{
 		RES::ClusteringResult& r = total_result[i];
-		result.cost += r.cost;
+		//LOGI << 
+		//	"\nprocess: " << i << "\n" <<
+		//	"\thas cost: " << r.cost << "\n" << 
+		//	"\tnum clusters: " << r.clusters.size();
+		final_result.cost += r.cost;
 		for(auto& cluster:r.clusters)
 		{
-			result.clusters.push_back(cluster);
+			//LOGI << "\ncluster size: " << cluster.size();
+			//LOGI << "first value: "<< cluster[0];
+			final_result.clusters.push_back(cluster);
 		}
 	}
 	auto t2 = std::chrono::steady_clock::now();
@@ -328,9 +334,9 @@ void finalize_master(
 	///////////////////////////////////////////////////////////////////////
 
 	// print stats
-	std::string num_clusters = std::to_string(result.clusters.size());
+	std::string num_clusters = std::to_string(final_result.clusters.size());
 	std::stringstream tc;
-	tc << std::setprecision(2)<< std::fixed << result.cost;
+	tc << std::setprecision(2)<< std::fixed << final_result.cost;
 	std::string total_cost = tc.str();
 
 	unsigned width = 1+std::max({stime.length(),num_clusters.length(),total_cost.length()});
@@ -346,10 +352,10 @@ void finalize_master(
 	///////////////////////////////////////////////////////////////////////
 	FILE* ofile = fopen(tcp.outfile.c_str(),"w");
 	std::string s = "";
-	s += std::to_string(tcp.threshold) + "\t" + std::to_string(result.cost) + "\t";
+	s += std::to_string(tcp.threshold) + "\t" + std::to_string(final_result.cost) + "\t";
 	fputs(s.c_str(),ofile);
 
-	for(auto& cluster:result.clusters)
+	for(auto& cluster:final_result.clusters)
 	{
 		s = "";
 		for(unsigned id:cluster)
@@ -362,12 +368,13 @@ void finalize_master(
 	}
 	fclose(ofile);
 
-}
+}// finalize_master
+
 void init_master(
-		boost::mpi::communicator& world,
-		std::deque<ConnectedComponent>& ccs,
-		TCC::TransClustParams& tcp,
-		std::deque<std::string>& id2name)
+	boost::mpi::communicator& world,
+	std::deque<ConnectedComponent>& ccs,
+	TCC::TransClustParams& tcp,
+	std::deque<std::string>& id2name)
 {
 	// read input file and initialize connected components
 	InputParser ip(tcp);
@@ -407,6 +414,7 @@ void init_master(
 		}
 	}
 	LOGI << transitive_cc << " Connected Components were already transitive";
+	LOGI << "Clustering " << ccs.size()-transitive_cc << " Connected Components";
 
 	// send the connected components to the processes  (except for 0)
 	for(unsigned process = 1; process < process_cc.size();process++)
@@ -414,18 +422,24 @@ void init_master(
 		world.send(process,0,process_cc.at(process));	
 	}
 
+	for(unsigned i = 0; i < process_cc.size(); i++)
+	{
+		LOGI << "Process " << i << " has " << process_cc[i].size() << " Connected Components";
+	}
 	// assign the connected component to master process
 	ccs = process_cc[0];
 
-}
+}// init_master
 
-int main(int argc, char** argv){
+int main(int argc, char** argv)
+{
 	/////////////////////////////////////////////////////////////////////////////
 	// SETUP
 	/////////////////////////////////////////////////////////////////////////////
 	//Initialize mpi
 	boost::mpi::environment env{argc, argv};
 	boost::mpi::communicator world;
+
 
 	// timeing
 	auto t1 = std::chrono::steady_clock::now();
@@ -468,15 +482,18 @@ int main(int argc, char** argv){
 	/////////////////////////////////////////////////////////////////////////////
 	// FINALIZE PROCESSES AND PRNIT RESULT
 	/////////////////////////////////////////////////////////////////////////////
-	if(world.rank() != 0){
-		boost::mpi::gather(world,result,0);
-	}else{
+	if(world.rank() == 0)
+	{
+		std::vector<RES::ClusteringResult> total_result;
+		boost::mpi::gather(world,result,total_result,0);	
+
 		finalize_master(
-				world,
-				result,
+				total_result,
 				id2name,
 				tcp,
 				t1);
+	}else{
+		boost::mpi::gather(world,result,0);
 	}
 
 	return 0;

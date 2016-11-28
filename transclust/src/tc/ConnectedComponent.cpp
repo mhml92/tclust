@@ -12,9 +12,6 @@ ConnectedComponent::ConnectedComponent(
 		num_positive_edges(_num_positive_edges)
 {
 	flat_file_path = getFlatFilePath().string();
-	if(num_positive_edges == std::numeric_limits<long>::lowest()){
-		num_positive_edges = 0;
-	}
 }
 
 // TODO might be smart to add a buffer... 
@@ -53,8 +50,9 @@ void ConnectedComponent::addCost(uint64_t id, float cost)
 
 }
 
-void ConnectedComponent::load()
+void ConnectedComponent::load(TCC::TransClustParams& _tcp)
 {
+	tcp = _tcp;
 	// check that the file has not already ben configured and that it is 
 	// not transitive
 	if(!is_mmf_configured && !transitive)
@@ -212,9 +210,9 @@ void ConnectedComponent::commit()
 	// The number of edges in the triangular matrix
 	long expected_num_edges = TCC::calc_num_sym_elem(localId2globalId.size());
 
-	// number of negative weight edges (these edges contribute to the
-	// cost of the connected component)
-	num_conflicting_edges = expected_num_edges - num_positive_edges;
+	//// number of negative weight edges (these edges contribute to the
+	//// cost of the connected component)
+	//num_conflicting_edges = expected_num_edges - num_positive_edges;
 
 	if(expected_num_edges == num_positive_edges){
 		// the connected component is already transitive!!! nothing more to 

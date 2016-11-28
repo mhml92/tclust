@@ -26,7 +26,7 @@ class TransClust{
 				TCC::TransClustParams& _tcp
 				);
 
-		RES::ClusteringResult cluster(
+		void cluster(
 				std::deque<ConnectedComponent>& css,
 				RES::ClusteringResult& result
 				);
