@@ -29,8 +29,6 @@ const plog::Severity VERBOSITY = plog::info;
 void parse_args(int argc, char** argv,TCC::TransClustParams& tcp)
 {
 	try {
-
-
 		TCLAP::CmdLine cmd("Distributed TransClust", ' ', "1.0");
 
 		TCLAP::ValueArg<unsigned> seed("","seed","(default: 42) Seed for random generation",false,42,"int",cmd);
@@ -292,15 +290,9 @@ void finalize_master(
 	for(int i = 0; i < total_result.size();i++)
 	{
 		RES::ClusteringResult& r = total_result[i];
-		//LOGI << 
-		//	"\nprocess: " << i << "\n" <<
-		//	"\thas cost: " << r.cost << "\n" << 
-		//	"\tnum clusters: " << r.clusters.size();
 		final_result.cost += r.cost;
 		for(auto& cluster:r.clusters)
 		{
-			//LOGI << "\ncluster size: " << cluster.size();
-			//LOGI << "first value: "<< cluster[0];
 			final_result.clusters.push_back(cluster);
 		}
 	}
@@ -331,9 +323,10 @@ void finalize_master(
 		ss <<	((unsigned)(_time*1000))/1000.0 << "s";
 	}
 	std::string stime = ss.str();
-	///////////////////////////////////////////////////////////////////////
 
+	/////////////////////////////////////////////////////////////////////////////
 	// print stats
+	/////////////////////////////////////////////////////////////////////////////
 	std::string num_clusters = std::to_string(final_result.clusters.size());
 	std::stringstream tc;
 	tc << std::setprecision(2)<< std::fixed << final_result.cost;
@@ -347,9 +340,9 @@ void finalize_master(
 	LOGI << "Time       " << std::setw(width) << stime;
 
 
-	///////////////////////////////////////////////////////////////////////
-	//* Print result (java transclust style)
-	///////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
+	// Print result (java transclust style)
+	/////////////////////////////////////////////////////////////////////////////
 	FILE* ofile = fopen(tcp.outfile.c_str(),"w");
 	std::string s = "";
 	s += std::to_string(tcp.threshold) + "\t" + std::to_string(final_result.cost) + "\t";
@@ -452,7 +445,7 @@ int main(int argc, char** argv)
 	TCC::TransClustParams tcp;
 	parse_args(argc,argv,tcp);
 
-	// initialize commons
+	//initialize commons
 	TransClust transclust(tcp);
 	RES::ClusteringResult result;
 	std::deque<std::string> id2name;

@@ -19,7 +19,8 @@ find_package(Boost COMPONENTS ${BOOST_REQUIRED_LIBRARIES} REQUIRED)
 find_package(MPI REQUIRED)
 
 
-
+# add stxxl
+add_subdirectory(stxxl)
 
 # get header files
 include_directories(
@@ -41,7 +42,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
 # Set custom compile flags
 IF(${CMAKE_BUILD_TYPE} STREQUAL "Release" )
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -O2")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2")
 ELSEIF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -pedantic -W -Wall")
 ELSE()
@@ -55,20 +56,9 @@ if (OPENMP_FOUND)
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-
-
 # apply STXXL CXXFLAGS to our configuration
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STXXL_CXX_FLAGS}")
 
-# include the STXXL library in my-project
-
-# build a program and link it with STXXL.
-#add_executable(project main.cpp)
-#target_link_libraries(project ${STXXL_LIBRARIES})
-
-# build core static library
-#include_directories(${STXXL_INCLUDE_DIRS})
-add_subdirectory(stxxl)
 add_subdirectory(src/tc)
 add_executable(tclust src/tccli.cpp) 
 target_link_libraries(tclust 
@@ -78,14 +68,7 @@ target_link_libraries(tclust
 	${MPI_LIBRARIES}
 	)
 
-
-
-
-
-#file(GLOB SOURCES "src/tc/*.cpp")
-#add_library(transclust SHARED ${SOURCES})
-#target_link_libraries(transclust 
+#add_executable(cluster_cost src/cluster_cost.cpp)
+#target_link_libraries(cluster_cost 
 #	${Boost_LIBRARIES}
-#)
-#install(TARGETS transclust DESTINATION lib)
-#install(DIRECTORY include/transclust DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+#	)
