@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 3.5.1 FATAL_ERROR)
 
 project(TransClust) 
 
@@ -34,7 +34,6 @@ include_directories(
 
 message(STATUS "${CMAKE_CXX_COMPILER_ID}") 
 message(STATUS "${CMAKE_BUILD_TYPE}") 
-message(STATUS "${Boost_INCLUDE_DIR}") 
 
 # Set the output folder where your program will be created
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
