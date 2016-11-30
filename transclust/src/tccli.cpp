@@ -368,9 +368,9 @@ void init_master(
 	// sort connectede components by size
 	std::sort(ccs.begin(), ccs.end(), 
 			[](ConnectedComponent& a,ConnectedComponent& b) { 
-			return a.size() < b.size();
+				return a.size() > b.size();
 			}
-			);
+		);
 
 	// datastructure for holding the connected components for each process
 	std::deque<std::deque<ConnectedComponent>> process_cc(world.size(),std::deque<ConnectedComponent>());

@@ -6,7 +6,6 @@
 * [Manual setup](#manual-setup)
 * [Usage](#usage)
 
-
 ## Dependencies
 This project depends on:
 	- [CMake](https://cmake.org/) 
@@ -41,7 +40,7 @@ all dependencies are correctly installed.
 	# compile
 	make
 ```
-# Usage
+## Usage
 After setup has completed without error you can find the `tclust` binary in:
 	
 	build/release/bin/tclust
