@@ -2,7 +2,7 @@
 #ifdef _OPENMP
 #	include <omp.h>
 #endif
-#include <boost/mpi.hpp>
+#include <plog/Log.h>
 #include "transclust/TransClust.hpp"
 #include "transclust/ConnectedComponent.hpp"
 #include "transclust/InputParser.hpp"
@@ -12,10 +12,12 @@
 #include "transclust/Common.hpp"
 
 TransClust::TransClust(
-		TCC::TransClustParams& _tcp
+		TCC::TransClustParams& _tcp,
+		unsigned process_id
 		)
 	:
-		tcp(_tcp)
+		tcp(_tcp),
+		process_id(process_id)
 { }
 
 void TransClust::cluster(
@@ -54,7 +56,7 @@ void TransClust::cluster(
 				continue;	
 			}
 
-			// if the connected component is small enough we try clustering 
+			// if the connected component is small enough we can try clustering 
 			// using the FPT
 			if(cc.size() <= tcp.fpt_max_cc_size && !tcp.disable_fpt)
 			{
@@ -107,13 +109,23 @@ void TransClust::cluster(
 			cc.free(true);
 		}
 	}
-	if(num_transitive > 0){
-		LOGI << num_transitive << " were already transitive";
-	}
-	if(!tcp.disable_fpt){
-		LOGI << "Clustered " << num_fpt_solved << " Conneced Components to optimality";
-	}
-	LOGI << "Clustered " << num_force_solved << " Conneced Components with FORCE";
+	
+	LOGI_IF(num_transitive > 0) 
+		<< "p_" << process_id << ": " 
+		<< num_transitive 
+		<< " Connected Components were already transitive";
+
+	LOGI_IF(!tcp.disable_fpt && num_fpt_solved > 0) 
+		<< "p_" << process_id << ": "
+		<< "Clustered " 
+		<< num_fpt_solved 
+		<< " Connected Components to optimality";
+
+	LOGI_IF(num_force_solved > 0) 
+		<< "p_" << process_id << ": " 
+		<< "Clustered " 
+		<< num_force_solved 
+		<< " Connected Components with FORCE";
 }
 
 void TransClust::addResult(

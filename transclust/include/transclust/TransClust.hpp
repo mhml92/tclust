@@ -6,7 +6,6 @@
 #include <vector>
 #include <map>
 #include <cmath>
-#include <boost/mpi.hpp>
 #include <plog/Log.h>
 #include "transclust/Common.hpp"
 #include "transclust/InputParser.hpp"
@@ -23,7 +22,8 @@ class TransClust{
 
 	public:
 		TransClust(
-				TCC::TransClustParams& _tcp
+				TCC::TransClustParams& _tcp,
+				unsigned process_id = 0
 				);
 
 		void cluster(
@@ -52,6 +52,7 @@ class TransClust{
 		//		std::deque<unsigned>& force_cc_large
 		//		);
 		TCC::TransClustParams tcp;
+		unsigned process_id;
 		//std::string filename;
 		//float total_cost = 0;
 		//std::deque<ConnectedComponent> ccs;

@@ -120,7 +120,7 @@ void parse_args(int argc, char** argv,TCC::TransClustParams& tcp)
 
 		TCLAP::ValueArg<float> FORCE_p(
 				"",
-				"p",
+				"FORCEC_p",
 				"(default: 1) Layout initial radius",
 				false,
 				1,
@@ -165,13 +165,6 @@ void parse_args(int argc, char** argv,TCC::TransClustParams& tcp)
 				100.0,
 				"float",
 				cmd);
-
-		TCLAP::SwitchArg disable_force(
-				"",
-				"disable_force",
-				"disables clustering with the FORCE heuristic",
-				cmd,
-				false);
 
 		TCLAP::SwitchArg disable_fpt(
 				"",
@@ -264,7 +257,6 @@ void parse_args(int argc, char** argv,TCC::TransClustParams& tcp)
 			.set_memory_limit(memory_limit.getValue())
 
 			.set_disable_fpt(disable_fpt.getValue())
-			.set_disable_force(disable_force.getValue())
 
 			.set_seed(seed.getValue())
 			.set_tmp_dir(tmp_dir.getValue());
@@ -414,11 +406,6 @@ void init_master(
 	{
 		world.send(process,0,process_cc.at(process));	
 	}
-
-	for(unsigned i = 0; i < process_cc.size(); i++)
-	{
-		LOGI << "Process " << i << " has " << process_cc[i].size() << " Connected Components";
-	}
 	// assign the connected component to master process
 	ccs = process_cc[0];
 
@@ -446,7 +433,7 @@ int main(int argc, char** argv)
 	parse_args(argc,argv,tcp);
 
 	//initialize commons
-	TransClust transclust(tcp);
+	TransClust transclust(tcp,world.rank());
 	RES::ClusteringResult result;
 	std::deque<std::string> id2name;
 	std::deque<ConnectedComponent> ccs;

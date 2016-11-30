@@ -33,6 +33,12 @@ parser.add_argument(
 	"--cpp_only",
 	action="store_true",
 	help="Only test on C++ Transclust")
+
+parser.add_argument(
+	"--mpi",
+	default=1,
+	help="Number of mpi processes to spawn")
+
 parser.add_argument(
 	"--java_only",
 	action="store_true",
@@ -164,6 +170,7 @@ def getCommand(simfile_name,threshold,fpt,program):
 			"-t",threshold,
 			"--memory_limit",str(args.memory_limit)
 		])
+		command = "mpirun -n " + str(args.mpi) + " " + command
 		if not fpt:
 			command = command + " --disable_fpt"
 

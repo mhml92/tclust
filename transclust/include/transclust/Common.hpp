@@ -33,23 +33,16 @@ namespace TCC
 		float f_s = 0.01;
 
 		// fpt parameters
-		float fpt_time_limit = 0.02;
+		float fpt_time_limit = 0.01;
 		float fpt_step_size = 500;
-		unsigned fpt_max_edge_conflicts = 500;
 		unsigned fpt_max_cc_size = 50;
 
 		// misc
 		float sim_fallback = 0.0;
-		bool disable_force = false;
 		bool disable_fpt = false;
-		//std::string normalization = "ABSOLUTE";
 		std::string tmp_dir = "/tmp/tclust/";
 		unsigned seed = 42;
-		double memory_limit = 1024.0;
-
-		// debug
-		bool debug_cost_only = false;
-
+		float memory_limit = 0.0;
 
 		TransClustParams& set_simfile(std::string val){simfile = val;return *this;}
 		TransClustParams& set_outfile(std::string val){outfile = val;return *this;}
@@ -69,19 +62,14 @@ namespace TCC
 		TransClustParams& set_force_min_size_parallel(unsigned val){force_min_size_parallel = val;return *this;}
 
 		TransClustParams& set_fpt_time_limit(float val){fpt_time_limit = val;return *this;}
-		TransClustParams& set_fpt_max_edge_conflicts(unsigned val){fpt_max_edge_conflicts = val;return *this;}
 		TransClustParams& set_fpt_step_size(float val){fpt_step_size = val;return *this;}
 		TransClustParams& set_fpt_max_cc_size(unsigned val){fpt_max_cc_size = val;return *this;}
 
 		TransClustParams& set_sim_fallback(float val){sim_fallback = val;return *this;}
-		TransClustParams& set_disable_force(bool val){disable_force = val;return *this;}
 		TransClustParams& set_disable_fpt(bool val){disable_fpt = val;return *this;}
-		//TransClustParams& set_normalization(std::string val){normalization = val;return *this;}
 		TransClustParams& set_tmp_dir(std::string val){tmp_dir = val;return *this;}
 		TransClustParams& set_seed(unsigned val){seed = val;return *this;}
-		TransClustParams& set_memory_limit(double val){memory_limit = val;return *this;}
-
-		TransClustParams& set_debug_cost_only(bool val){debug_cost_only = val;return *this;}
+		TransClustParams& set_memory_limit(float val){memory_limit = val;return *this;}
 	};
 
 	

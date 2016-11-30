@@ -1,17 +1,16 @@
 # Setup project
 Initializes build directory, build types, submodules and compiles the project
 ```Bash
-	./SETUP.sh
+	./SETUP
 ```
 
-#How to build withohut SETUP.sh
+# How to build withohut `SETUP`
 This project uses 
 [CMake](https://cmake.org/), 
 [Doxygen](http://www.stack.nl/~dimitri/doxygen/index.html),
 [Boost C++ Libraries](http://www.boost.org/),
 [Open MPI](https://www.open-mpi.org/)
 
-Run `SETUP.sh` first
 ```Bash
 	mkdir build/release
 	cd build/release
@@ -19,7 +18,7 @@ Run `SETUP.sh` first
 	make
 ```
 
-#Rebuild doc
+# Rebuild doc
 From the root run
 ```Bash
    doxygen Doxyfile

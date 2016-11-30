@@ -41,20 +41,21 @@ cpp_normal_force <- read.table(file("2016-11-21--10-59-22__cpp_normal_force/cost
 #cpp_no_force_small_gml_vsmall_gml <- read.table(file("2016-11-21--14-00-38__cpp_no_force_gml_small_diff_seed_vsmall_gml/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
 #cpp_no_force_small_gml_diff_seed <- read.table(file("2016-11-21--13-56-02__cpp_no_force_gml_small_diff_seed/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
 java2_1_vs_cpp <- read.table(file("2016-11-22--13-25-25__jtc2.1_vs_cpp/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
-cpp_alt_force <- read.table(file("2016-11-22--15-33-58__cpp_alt_force/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
-cpp_better_force <- read.table(file("2016-11-23--10-29-40__better_force/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
-java_fixed <- read.table(file("2016-11-24--14-14-28__test_run/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
-cpp_square_dist <- read.table(file("2016-11-25--10-41-05__square_dist/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
+cpp_mpi_n_4 <- read.table(file("2016-11-28--14-35-52__test_run/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
+cpp_mpi_n_1 <- read.table(file("2016-11-28--14-44-09__mpi_n_1/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
+cpp_mpi_large_n_4 <- read.table(file("2016-11-28--14-57-36__large_mpi_4/costs.log"), header=TRUE, sep="\t",strip.white = T)[,1:6]
 
 
 data <- rbind(
   #parse_data(cpp_bad_norm,"cpp_bad_norm"),
   #parse_data(cpp_no_force_small_gml_vsmall_gml,"no_force_vsmall_gml"),
   parse_data(cpp_normal_force,"normal_force"),
-  parse_data(java_fixed,"java_tc"),
+  parse_data(java2_1_vs_cpp[which(java2_1_vs_cpp$program=="java"),],"java_tc"),
   #parse_data(java2_1_vs_cpp[which(java2_1_vs_cpp$program == "cpp"),],"cpp"),
   #parse_data(java2_1_vs_cpp[which(java2_1_vs_cpp$program == "java"),],"java"),
-  parse_data(cpp_square_dist,"square_dist")
+  parse_data(cpp_mpi_n_1,"mpi_n_1"),
+  parse_data(cpp_mpi_large_n_4,"mpi_large_n_4"),
+  parse_data(cpp_mpi_n_4,"mpi_n_4")
   #parse_data(java_tc_new,"java_tc_new"),
 )
 
