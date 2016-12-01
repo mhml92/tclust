@@ -44,6 +44,8 @@ all dependencies are correctly installed.
 	make
 ```
 ## Usage
+
+### Local
 After setup has completed without error you can find the `tclust` binary in:
 	
 	build/release/bin/tclust
@@ -52,9 +54,13 @@ Basic usage on local machine:
 
 	./build/release/bin/tclust -s <similarity file> -t <threshold> -o <output file>
 
+
+### MPI
 Basic usage with MPI:
 
-	mpirun -n <number of processes> ./build/release/bin/tclust -s <similarity file> -t <threshold> -o <output file>
+	mpirun -n <number of processes> --bind-to none ./build/release/bin/tclust -s <similarity file> -t <threshold> -o <output file>
+
+The `--bind-to none` option ensures that each spawned tclust process has access to more than one thread
 
 For more:
 

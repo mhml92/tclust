@@ -36,7 +36,7 @@ parser.add_argument(
 
 parser.add_argument(
 	"--mpi",
-	default=1,
+	default=0,
 	help="Number of mpi processes to spawn")
 
 parser.add_argument(
@@ -170,7 +170,8 @@ def getCommand(simfile_name,threshold,fpt,program):
 			"-t",threshold,
 			"--memory_limit",str(args.memory_limit)
 		])
-		command = "mpirun -n " + str(args.mpi) + " " + command
+		if args.mpi > 0 :
+			command = "mpirun -n " + str(args.mpi) + "--bind-to none " + command
 		if not fpt:
 			command = command + " --disable_fpt"
 

@@ -57,7 +57,7 @@ cat << EOF
 
    Basic usage with MPI:
 
-      mpirun -n <number of processes> ./build/release/bin/tclust -s <similarity file> -t <threshold> 
+      mpirun -n <number of processes> --bind-to none ./build/release/bin/tclust -s <similarity file> -t <threshold> 
 
    For more:
 

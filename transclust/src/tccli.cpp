@@ -6,6 +6,10 @@
 #include <chrono>
 #include <sstream>
 #include <iomanip>
+#include <chrono>
+#ifdef _OPENMP
+#	include <omp.h>
+#endif
 #include <tclap/CmdLine.h>
 #include <boost/mpi.hpp>
 #include <boost/algorithm/gather.hpp>
@@ -377,61 +381,61 @@ void finalize_master(
 
 }// finalize_master
 
-void init_master(
-	boost::mpi::communicator& world,
-	std::deque<ConnectedComponent>& ccs,
-	TCC::TransClustParams& tcp,
-	std::deque<std::string>& id2name)
-{
-	// read input file and initialize connected components
-	InputParser ip(tcp);
-	ip.getConnectedComponents(ccs,id2name);
-
-	// sort connectede components by size
-	std::sort(ccs.begin(), ccs.end(), 
-			[](ConnectedComponent& a,ConnectedComponent& b) { 
-				return a.size() > b.size();
-			}
-		);
-
-	// datastructure for holding the connected components for each process
-	std::deque<std::deque<ConnectedComponent>> process_cc(world.size(),std::deque<ConnectedComponent>());
-
-	// process counter
-	unsigned process_index = 0;
-
-	// counter for transitive connected components - just for logging
-	unsigned transitive_cc = 0;
-
-	// assigne connected components to processes
-	for(ConnectedComponent& cc:ccs)
-	{
-		// We let process 0 handle all transitive connected components
-		// (there is no need to send them around)
-		if(cc.isTransitive())
-		{
-			process_cc.at(0).push_back(cc);
-			transitive_cc++;
-		}else{
-			// assign connected components to processes
-			process_cc.at(process_index).push_back(cc);
-
-			process_index++;
-			process_index = process_index % world.size();
-		}
-	}
-	LOGI << transitive_cc << " Connected Components were already transitive";
-	LOGI << "Clustering " << ccs.size()-transitive_cc << " Connected Components";
-
-	// send the connected components to the processes  (except for 0)
-	for(unsigned process = 1; process < process_cc.size();process++)
-	{
-		world.send(process,0,process_cc.at(process));	
-	}
-	// assign the connected component to master process
-	ccs = process_cc[0];
-
-}// init_master
+//void init_master(
+//	boost::mpi::communicator& world,
+//	std::deque<ConnectedComponent>& ccs,
+//	TCC::TransClustParams& tcp,
+//	std::deque<std::string>& id2name)
+//{
+//	// read input file and initialize connected components
+//	InputParser ip(tcp);
+//	ip.getConnectedComponents(ccs,id2name);
+//
+//	// sort connectede components by size
+//	std::sort(ccs.begin(), ccs.end(), 
+//			[](ConnectedComponent& a,ConnectedComponent& b) { 
+//				return a.size() > b.size();
+//			}
+//		);
+//
+//	// datastructure for holding the connected components for each process
+//	std::deque<std::deque<ConnectedComponent>> process_cc(world.size(),std::deque<ConnectedComponent>());
+//
+//	// process counter
+//	unsigned process_index = 0;
+//
+//	// counter for transitive connected components - just for logging
+//	unsigned transitive_cc = 0;
+//
+//	// assigne connected components to processes
+//	for(ConnectedComponent& cc:ccs)
+//	{
+//		// We let process 0 handle all transitive connected components
+//		// (there is no need to send them around)
+//		if(cc.isTransitive())
+//		{
+//			process_cc.at(0).push_back(cc);
+//			transitive_cc++;
+//		}else{
+//			// assign connected components to processes
+//			process_cc.at(process_index).push_back(cc);
+//
+//			process_index++;
+//			process_index = process_index % world.size();
+//		}
+//	}
+//	LOGI << transitive_cc << " Connected Components were already transitive";
+//	LOGI << "Clustering " << ccs.size()-transitive_cc << " Connected Components";
+//
+//	// send the connected components to the processes  (except for 0)
+//	for(unsigned process = 1; process < process_cc.size();process++)
+//	{
+//		world.send(process,0,process_cc.at(process));	
+//	}
+//	// assign the connected component to master process
+//	ccs = process_cc[0];
+//
+//}// init_master
 
 int main(int argc, char** argv)
 {
@@ -465,12 +469,53 @@ int main(int argc, char** argv)
 	/////////////////////////////////////////////////////////////////////////////
 	if(world.rank() == 0)
 	{
-		init_master(
-				world,
-				ccs,
-				tcp,
-				id2name
+		// read input file and initialize connected components
+		InputParser ip(tcp);
+		ip.getConnectedComponents(ccs,id2name);
+
+		// sort connectede components by size
+		std::sort(ccs.begin(), ccs.end(), 
+				[](ConnectedComponent& a,ConnectedComponent& b) { 
+				return a.size() > b.size();
+				}
 				);
+
+		// datastructure for holding the connected components for each process
+		std::deque<std::deque<ConnectedComponent>> process_cc(world.size(),std::deque<ConnectedComponent>());
+
+		// process counter
+		unsigned process_index = 0;
+
+		// counter for transitive connected components - just for logging
+		unsigned transitive_cc = 0;
+
+		// assigne connected components to processes
+		for(ConnectedComponent& cc:ccs)
+		{
+			// We let process 0 handle all transitive connected components
+			// (there is no need to send them around)
+			if(cc.isTransitive())
+			{
+				process_cc.at(0).push_back(cc);
+				transitive_cc++;
+			}else{
+				// assign connected components to processes
+				process_cc.at(process_index).push_back(cc);
+
+				process_index++;
+				process_index = process_index % world.size();
+			}
+		}
+		LOGI << transitive_cc << " Connected Components were already transitive";
+		LOGI << "Clustering " << ccs.size()-transitive_cc << " Connected Components";
+
+		// send the connected components to the processes  (except for 0)
+		for(unsigned process = 1; process < process_cc.size();process++)
+		{
+			world.send(process,0,process_cc.at(process));	
+		}
+		// assign the connected component to master process
+		ccs = process_cc[0];
 	}else{
 		// wait and recieve connected components from master thread
 		world.recv(0,0,ccs);
