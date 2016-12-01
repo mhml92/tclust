@@ -31,6 +31,24 @@ void parse_args(int argc, char** argv,TCC::TransClustParams& tcp)
 	try {
 		TCLAP::CmdLine cmd("Distributed TransClust", ' ', "1.0");
 
+		TCLAP::ValueArg<unsigned> external_sorting_disk(
+				"",
+				"external_sorting_disk",
+				"(default: 1024) Megabytes available on disk for sorting of inpufile",
+				false,
+				1024,
+				"int",
+				cmd);
+
+		TCLAP::ValueArg<unsigned> external_sorting_ram(
+				"",
+				"external_sorting_ram",
+				"(default: 1024) Size of in rim buffer when sorting inputfile in megabyts",
+				false,
+				1024,
+				"int",
+				cmd);
+
 		TCLAP::ValueArg<unsigned> seed("","seed","(default: 42) Seed for random generation",false,42,"int",cmd);
 
 		TCLAP::ValueArg<unsigned> fpt_max_cc_size(
@@ -231,6 +249,7 @@ void parse_args(int argc, char** argv,TCC::TransClustParams& tcp)
 				"string",
 				cmd);
 
+
 		cmd.parse( argc, argv );
 
 		tcp.set_threshold(threshold.getValue())
@@ -259,7 +278,10 @@ void parse_args(int argc, char** argv,TCC::TransClustParams& tcp)
 			.set_disable_fpt(disable_fpt.getValue())
 
 			.set_seed(seed.getValue())
-			.set_tmp_dir(tmp_dir.getValue());
+			.set_tmp_dir(tmp_dir.getValue())
+
+			.set_external_sorting_disk(external_sorting_disk.getValue())
+			.set_external_sorting_ram(external_sorting_ram.getValue());
 
 	}catch (TCLAP::ArgException &e){
 		std::cerr 

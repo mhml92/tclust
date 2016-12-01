@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 cat << EOF
 
-+-------------------------------------------------------------------------------+
-|  TransClust++ Setup Script                                                    |
-+-------------------------------------------------------------------------------+
++-----------------------------+
+|  TransClust++ Setup Script  |
++-----------------------------+
 
 EOF
 # clean
@@ -25,7 +25,6 @@ doxygen Doxyfile
 #cmake -DCMAKE_BUILD_TYPE=Debug ../..
 #make
 #cd ../../
-
 cd build/release
 cmake -DCMAKE_BUILD_TYPE=Release ../..
 
@@ -34,9 +33,9 @@ make
 
 cat << EOF
 
-+-------------------------------------------------------------------------------+
-|  Done                                                                         |
-+-------------------------------------------------------------------------------+
++--------+
+|  Done  |
++--------+
 
    If the installation complete with errors remember to install: 
       - Cmake                >= 3.5.1
@@ -45,9 +44,9 @@ cat << EOF
       - doxygen              >= 1.8.11
       - Graphviz             >= 2.38
 
-+-------------------------------------------------------------------------------+
-|  Usage                                                                        |
-+-------------------------------------------------------------------------------+
++---------+
+|  Usage  |
++---------+
    After setup has completed without errer you can find the tclust binary in:
 
       build/release/bin/tclust

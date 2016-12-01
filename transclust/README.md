@@ -1,12 +1,15 @@
 # TransClust++ 
 
 ## Table of Content
-* [Dependencies](#dependencies)
-* [Automated setup](#automated-setup)
-* [Manual setup](#manual-setup)
+* [Setup](#setup)
+	* [Dependencies](#dependencies)
+	* [Automated setup](#automated-setup)
+	* [Manual setup](#manual-setup)
 * [Usage](#usage)
 
-## Dependencies
+
+## Setup
+### Dependencies
 This project depends on:
 	- [CMake](https://cmake.org/) 
 	- [Boost C++ Libraries](http://www.boost.org/)
@@ -14,14 +17,14 @@ This project depends on:
 	- [Doxygen](http://www.stack.nl/~dimitri/doxygen/index.html)
 	- [Graphviz](http://www.graphviz.org/)
 
-## Automated setup
+### Automated setup
 For automated setup run `./SETUP`. 
 
 This will initializes build directory's, build types, submodules, documentation 
 and compile the project. If something fails during compilation, make sure that 
 all dependencies are correctly installed.
 
-## Manual setup
+### Manual setup
 
 ```Bash
 	# Make sure all submodules are initialized
@@ -47,11 +50,11 @@ After setup has completed without error you can find the `tclust` binary in:
 
 Basic usage on local machine:
 
-	./build/release/bin/tclust -s <similarity file> -t <threshold> 
+	./build/release/bin/tclust -s <similarity file> -t <threshold> -o <output file>
 
 Basic usage with MPI:
 
-	mpirun -n <number of processes> ./build/release/bin/tclust -s <similarity file> -t <threshold> 
+	mpirun -n <number of processes> ./build/release/bin/tclust -s <similarity file> -t <threshold> -o <output file>
 
 For more:
 

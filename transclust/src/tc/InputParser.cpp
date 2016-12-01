@@ -41,8 +41,16 @@ void InputParser::getConnectedComponents(
 {
 	boost::unordered_map<std::string, unsigned> name2id;
 
+	// get uninitialized config singleton
+	stxxl::config * cfg = stxxl::config::get_instance();
+	// create a disk_config structure.
+	stxxl::disk_config disk1("/tmp/stxxl.tmp", tcp.external_sorting_disk*1024*1024, "syscall unlink");
+	disk1.direct = stxxl::disk_config::DIRECT_ON; // force O_DIRECT
+	// add disk to config
+	cfg->add_disk(disk1);
+
 	// create sorter object (CompareType(), MainMemoryLimit)
-	external_sorter similarity_sorter(similarity_comparator(),1024 * 1024 * 1024);
+	external_sorter similarity_sorter(similarity_comparator(),tcp.external_sorting_ram * 1024 * 1024);
 
 	/////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////
