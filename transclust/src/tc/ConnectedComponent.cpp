@@ -34,20 +34,29 @@ void ConnectedComponent::addCost(uint64_t id, float cost)
 	// create 64bit local id
 	unsigned long lid = TCC::fuse(li,lj);
 
+	cost_buffer.push_back(Cost(lid,cost));
 
+	if(cost_buffer.size() > 1000)
+	{
+		flushCostBuffer();
+	}
+}
+
+void ConnectedComponent::flushCostBuffer(){
 	FILE* flatFile = fopen(flat_file_path.c_str(),"a");
 	if(flatFile != NULL)
 	{
-		Cost _cost(lid,cost); 
-		fwrite(&_cost,sizeof(struct Cost),1,flatFile);
+		for(auto& c:cost_buffer){
+			fwrite(&c,sizeof(struct Cost),1,flatFile);
+		}
 		fclose(flatFile);
+		cost_buffer.clear();
 	}else{
 		std::cout 
 			<< "ERROR FILE COULD NOT BE OPENED " 
 			<< flat_file_path << std::endl;
 		exit(1);
 	}
-
 }
 
 void ConnectedComponent::load(TCC::TransClustParams& _tcp)
@@ -204,6 +213,7 @@ void ConnectedComponent::getBufferedCost(
 
 void ConnectedComponent::commit()
 {
+	flushCostBuffer();
 	// this is no longer needed as all costs have been added and given local ids
 	globalId2localId.clear();
 

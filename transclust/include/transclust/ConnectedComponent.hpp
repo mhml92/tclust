@@ -60,6 +60,7 @@ class ConnectedComponent
 		float getCost(unsigned i,unsigned j,bool normalized = true);
 		void addCost(uint64_t id, float cost);
 
+
 		// the connected component has now been given all known information
 		// and now a decision can be made as to how this
 		// information can be stored most efficiantly 
@@ -109,6 +110,7 @@ class ConnectedComponent
 		}
 		void initMatrixFile();
 		void initFlatFile();
+		void flushCostBuffer();
 
 		void getInMemoryBufferedCostMatrix(
 				std::vector<float>& buffer,
@@ -154,6 +156,8 @@ class ConnectedComponent
 
 		std::string matrix_file_path;
 		std::string flat_file_path;
+
+		std::vector<Cost> cost_buffer;
 
 		boost::unordered_map<unsigned long,float> flat_map;
 		std::map<unsigned long,unsigned> flat_map_index;
