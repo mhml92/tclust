@@ -26,7 +26,7 @@ doxygen Doxyfile
 #make
 #cd ../../
 cd build/release
-cmake -DCMAKE_BUILD_TYPE=Release ../..
+if cmake -DCMAKE_BUILD_TYPE=Release ../..; then  echo "Success!"; make; else echo "ERROR!"; fi
 
 # make release version
 #make

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 project(TransClust) 
 
@@ -15,6 +15,7 @@ list(APPEND BOOST_REQUIRED_LIBRARIES system)
 list(APPEND BOOST_REQUIRED_LIBRARIES filesystem)
 list(APPEND BOOST_REQUIRED_LIBRARIES mpi)
 list(APPEND BOOST_REQUIRED_LIBRARIES serialization)
+find_package(Boost 1.58.0 REQUIRED)
 find_package(Boost COMPONENTS ${BOOST_REQUIRED_LIBRARIES} REQUIRED)
 find_package(MPI REQUIRED)
 
