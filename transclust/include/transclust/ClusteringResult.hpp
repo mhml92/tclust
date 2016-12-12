@@ -14,7 +14,7 @@ namespace RES
 {
 	// Struct holding a partial clustering
 	struct ClusteringResult {
-		double cost;
+		double cost = 0;
 		std::deque<std::deque<unsigned>> clusters;
 
 		template <typename Archive>

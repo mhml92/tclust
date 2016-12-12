@@ -36,7 +36,11 @@ void FPT::cluster(RES::ClusteringResult &cr)
 		/**********************************************************************
 		 * Track time
 		 *********************************************************************/
-		if(getDeltaTime() > time_limit){ return; }
+		if(getDeltaTime() > time_limit){ 
+			cr.cost = -1;
+			solution_found = false;
+			return; 
+		}
 
 		LOGD << "FPT with max cost: " << maxK;
 
@@ -94,7 +98,10 @@ void FPT::reduce(Node& fptn)
 {
 reduceLoopStart:
 	// terminaiton conditions
-	if(getDeltaTime() > time_limit){ return; }
+	if(getDeltaTime() > time_limit){
+		solution_found = false;
+		return; 
+	}
 
 	for(unsigned u = 0; u < fptn.size; u++)
 	{
@@ -121,10 +128,10 @@ reduceLoopStart:
 				fptn.edgeCost[v][u] = -inf;
 				goto reduceLoopStart;
 			}
-
 		}
 	}
 }
+
 double FPT::costSetForbidden(
 		Node& fptn,
 		unsigned u,
@@ -171,6 +178,7 @@ double FPT::costSetPermanent(
 
 void FPT::find_solution(Node& fptn0)
 {
+	reduce(fptn0);
 	// terminaiton conditions
 	if(getDeltaTime() > time_limit){
 		solution_found = false;
@@ -192,8 +200,6 @@ void FPT::find_solution(Node& fptn0)
 
 			if (fptn0.edgeCost[u][v] > 0) 
 			{
-
-
 				//occurence = std::fabs(
 				//		(std::max(0.0,-cost_uv) + costSetPermanent(fptn0, u, v)) - std::max(0.0,cost_uv) + costSetForbidden(fptn0, u, v)
 				//		);
@@ -237,9 +243,7 @@ void FPT::find_solution(Node& fptn0)
 	{
 		Node fptn1;
 		clone_node(fptn0,fptn1);
-
 		mergeNodes(fptn1,u,v, csp);
-
 		find_solution(fptn1);
 	}
 
@@ -249,27 +253,12 @@ void FPT::find_solution(Node& fptn0)
 	double csf = std::max(0.0,cost_uv) + costSetForbidden(fptn0,u,v);
 	if (csf + fptn0.cost <= maxK)
 	{
-
-		//Node fptn1;
-		//clone_node(fptn0,fptn1);
-		//fptn1.cost += cost_uv;
-		//fptn1.edgeCost[u][v] = -inf;
-		//fptn1.edgeCost[v][u] = -inf;
-
-		//find_solution(fptn1);
-
-
-		double origCost = fptn0.edgeCost[u][v];
-
-		fptn0.cost += cost_uv;
-		fptn0.edgeCost[u][v] = -inf;
-		fptn0.edgeCost[v][u] = -inf;
-
-		find_solution(fptn0);
-
-		fptn0.cost -= cost_uv;
-		fptn0.edgeCost[u][v] = origCost;
-		fptn0.edgeCost[v][u] = origCost;
+		Node fptn1;
+		clone_node(fptn0,fptn1);
+		fptn1.cost += cost_uv;
+		fptn1.edgeCost[u][v] = -inf;
+		fptn1.edgeCost[v][u] = -inf;
+		find_solution(fptn1);
 	}
 
 }
@@ -394,5 +383,7 @@ void FPT::buildSolution(RES::ClusteringResult &cr)
 			}
 		}
 		DEBUG_COST(cc,cr.clusters,cr.cost);
+	}else{
+		cr.cost = -1;
 	}
 }
