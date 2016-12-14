@@ -44,7 +44,7 @@ namespace TCC
 		unsigned seed = 42;
 		float memory_limit = 0.0;
 
-		unsigned external_sorting_ram = 0;
+		unsigned external_sorting_ram = 1024;
 
 		TransClustParams& set_simfile(std::string val){simfile = val;return *this;}
 		TransClustParams& set_outfile(std::string val){outfile = val;return *this;}

@@ -38,9 +38,9 @@ void parse_args(int argc, char** argv,TCC::TransClustParams& tcp)
 		TCLAP::ValueArg<unsigned> external_sorting_ram(
 				"",
 				"external_sorting_ram",
-				"(default: 0) Size of in ram buffer when sorting inputfile in megabyts, 0 is unlimited",
+				"(default: 1024) Size of in ram buffer when sorting inputfile in megabyts, 0 is unlimited",
 				false,
-				0,
+				1024,
 				"int",
 				cmd);
 
