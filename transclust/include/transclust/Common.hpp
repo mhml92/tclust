@@ -44,8 +44,7 @@ namespace TCC
 		unsigned seed = 42;
 		float memory_limit = 0.0;
 
-		unsigned external_sorting_disk = 1024;
-		unsigned external_sorting_ram = 1024;
+		unsigned external_sorting_ram = 0;
 
 		TransClustParams& set_simfile(std::string val){simfile = val;return *this;}
 		TransClustParams& set_outfile(std::string val){outfile = val;return *this;}
@@ -74,7 +73,6 @@ namespace TCC
 		TransClustParams& set_seed(unsigned val){seed = val;return *this;}
 		TransClustParams& set_memory_limit(float val){memory_limit = val;return *this;}
 
-		TransClustParams& set_external_sorting_disk(unsigned val){external_sorting_disk = val;return *this;}
 		TransClustParams& set_external_sorting_ram(unsigned val){external_sorting_ram = val;return *this;}
 	};
 
