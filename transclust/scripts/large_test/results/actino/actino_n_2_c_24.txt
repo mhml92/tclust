@@ -1,0 +1,28 @@
+[STXXL-MSG] STXXL v1.4.99 (prerelease/Release) (git 78dd7ec6e72d7d6ef1209e594fc08e3759af5099) + gnu parallel(20160603)
+2016-12-17 12:34:00.751 INFO  [15703] [InputParser::getConnectedComponents@71] Reading input file
+2016-12-17 12:34:13.997 INFO  [15703] [InputParser::getConnectedComponents@129] Reading input file...done
+2016-12-17 12:34:13.997 INFO  [15703] [InputParser::getConnectedComponents@135] Sorting input
+[STXXL-MSG] Disk '/home/milev10/tmp/stxxl.tmp' is allocated, space: 365 MiB, I/O implementation: syscall direct=on queue=0 devid=0 unlink_on_open
+2016-12-17 12:34:20.447 INFO  [15703] [InputParser::getConnectedComponents@139] Sorting input...done
+2016-12-17 12:34:20.447 INFO  [15703] [InputParser::getConnectedComponents@145] Building DUF
+2016-12-17 12:34:20.793 INFO  [15703] [InputParser::getConnectedComponents@185] Building DUF...done
+2016-12-17 12:34:20.793 INFO  [15703] [InputParser::getConnectedComponents@191] Initializing ConnectedComponents
+2016-12-17 12:34:21.119 INFO  [15703] [InputParser::getConnectedComponents@224] Initializing ConnectedComponents...done
+2016-12-17 12:34:21.119 INFO  [15703] [InputParser::getConnectedComponents@225] Found 62072 ConnectedComponents
+2016-12-17 12:34:21.119 INFO  [15703] [InputParser::getConnectedComponents@235] Adding cost values to connected components
+2016-12-17 12:34:24.035 INFO  [15703] [InputParser::getConnectedComponents@301] Adding costs to connected components...done
+2016-12-17 12:34:24.035 WARN  [15703] [InputParser::getConnectedComponents@303] Similarity file is incomplete. Only 9620488 out of 55005645360 possible edges for 331680 nodes were found
+2016-12-17 12:34:24.035 INFO  [15703] [InputParser::getConnectedComponents@315] Committinig connected components
+2016-12-17 12:34:58.685 INFO  [15703] [InputParser::getConnectedComponents@319] Committinig connected components...done
+2016-12-17 12:35:12.872 INFO  [15703] [main@499] 57583 Connected Components were already transitive
+2016-12-17 12:35:12.872 INFO  [15703] [main@500] Clustering 4489 Connected Components
+2016-12-17 12:35:56.334 INFO  [15703] [TransClust::cluster@113] p_0: 28783 Connected Components were already transitive
+2016-12-17 12:35:56.335 INFO  [15703] [TransClust::cluster@118] p_0: Clustered 2199 Connected Components to optimality
+2016-12-17 12:35:56.335 INFO  [15703] [TransClust::cluster@124] p_0: Clustered 54 Connected Components with FORCE
+2016-12-17 12:35:58.083 INFO  [13873] [TransClust::cluster@113] p_1: 28800 Connected Components were already transitive
+2016-12-17 12:35:58.083 INFO  [13873] [TransClust::cluster@118] p_1: Clustered 2191 Connected Components to optimality
+2016-12-17 12:35:58.083 INFO  [13873] [TransClust::cluster@124] p_1: Clustered 45 Connected Components with FORCE
+2016-12-17 12:36:26.543 INFO  [15703] [finalize_master@345] Threshold:           42
+2016-12-17 12:36:26.543 INFO  [15703] [finalize_master@346] Clusters          68485
+2016-12-17 12:36:26.543 INFO  [15703] [finalize_master@347] Cost        10505668.73
+2016-12-17 12:36:26.543 INFO  [15703] [finalize_master@348] Time        00:02:25.79
