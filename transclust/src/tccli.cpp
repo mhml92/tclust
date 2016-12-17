@@ -462,6 +462,7 @@ int main(int argc, char** argv)
 		// read input file and initialize connected components
 		InputParser ip(tcp);
 		ip.getConnectedComponents(ccs,id2name);
+		LOGI << "Sending Connected Components to processes";
 
 		// sort connectede components by size
 		std::sort(ccs.begin(), ccs.end(), 
@@ -496,8 +497,6 @@ int main(int argc, char** argv)
 			process_index = process_index % world.size();
 			//}
 		}
-		LOGI << transitive_cc << " Connected Components were already transitive";
-		LOGI << "Clustering " << ccs.size()-transitive_cc << " Connected Components";
 
 		// send the connected components to the processes  (except for 0)
 		for(unsigned process = 1; process < process_cc.size();process++)
@@ -506,6 +505,9 @@ int main(int argc, char** argv)
 		}
 		// assign the connected component to master process
 		ccs = process_cc[0];
+		LOGI << "Sending Connected Components to processes...done";
+		LOGI << transitive_cc << " Connected Components were already transitive";
+		LOGI << "Clustering " << ccs.size()-transitive_cc << " Connected Components";
 	}else{
 		// wait and recieve connected components from master thread
 		world.recv(0,0,ccs);
