@@ -486,15 +486,15 @@ int main(int argc, char** argv)
 			// (there is no need to send them around)
 			if(cc.isTransitive())
 			{
-				process_cc.at(0).push_back(cc);
+				//process_cc.at(0).push_back(cc);
 				transitive_cc++;
-			}else{
+			}//else{
 				// assign connected components to processes
-				process_cc.at(process_index).push_back(cc);
+			process_cc.at(process_index).push_back(cc);
 
-				process_index++;
-				process_index = process_index % world.size();
-			}
+			process_index++;
+			process_index = process_index % world.size();
+			//}
 		}
 		LOGI << transitive_cc << " Connected Components were already transitive";
 		LOGI << "Clustering " << ccs.size()-transitive_cc << " Connected Components";
