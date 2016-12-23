@@ -135,6 +135,6 @@ for i in range(int(args.num_cc)):
 # gen connected components
 mp_handler(data)
 
-os.system("cat *.cc >> num_cluster_"+str(int(args.num_cc)*int(args.num_clusters_pr_cc))+"_t_50.sim && rm *.cc")
+os.system("cat *.cc >> num_objects_"+ str(int(args.num_cc)*int(args.num_clusters_pr_cc)*int(args.cluster_size)) +"_num_cluster_"+str(int(args.num_cc)*int(args.num_clusters_pr_cc))+"_t_50.sim && rm *.cc")
 
 
