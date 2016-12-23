@@ -1,0 +1,28 @@
+[STXXL-MSG] STXXL v1.4.99 (prerelease/Release) (git 78dd7ec6e72d7d6ef1209e594fc08e3759af5099) + gnu parallel(20160609)
+2016-12-23 22:24:45.180 INFO  [38475] [InputParser::getConnectedComponents@71] Reading input file
+2016-12-23 22:24:52.135 INFO  [38475] [InputParser::getConnectedComponents@129] Reading input file...done
+2016-12-23 22:24:52.135 INFO  [38475] [InputParser::getConnectedComponents@135] Sorting input
+[STXXL-MSG] Disk '/tmp/tclust/stxxl.tmp' is allocated, space: 126 MiB, I/O implementation: syscall direct=on queue=0 devid=0 unlink_on_open
+2016-12-23 22:24:52.864 INFO  [38475] [InputParser::getConnectedComponents@139] Sorting input...done
+2016-12-23 22:24:52.864 INFO  [38475] [InputParser::getConnectedComponents@145] Building DUF
+2016-12-23 22:24:53.169 INFO  [38475] [InputParser::getConnectedComponents@185] Building DUF...done
+2016-12-23 22:24:53.169 INFO  [38475] [InputParser::getConnectedComponents@191] Initializing ConnectedComponents
+2016-12-23 22:24:53.170 INFO  [38475] [InputParser::getConnectedComponents@224] Initializing ConnectedComponents...done
+2016-12-23 22:24:53.170 INFO  [38475] [InputParser::getConnectedComponents@225] Found 1 ConnectedComponents
+2016-12-23 22:24:53.170 INFO  [38475] [InputParser::getConnectedComponents@235] Adding cost values to connected components
+2016-12-23 22:24:53.697 INFO  [38475] [InputParser::getConnectedComponents@301] Adding costs to connected components...done
+2016-12-23 22:24:53.697 WARN  [38475] [InputParser::getConnectedComponents@303] Similarity file is incomplete. Only 3773172 out of 4191960 possible edges for 2896 nodes were found
+2016-12-23 22:24:53.697 INFO  [38475] [InputParser::getConnectedComponents@315] Committinig connected components
+2016-12-23 22:24:53.697 INFO  [38475] [InputParser::getConnectedComponents@319] Committinig connected components...done
+2016-12-23 22:24:53.697 INFO  [38475] [main@465] Sending Connected Components to processes
+2016-12-23 22:24:53.697 INFO  [38475] [main@508] Sending Connected Components to processes...done
+2016-12-23 22:24:53.697 INFO  [38475] [main@509] 0 Connected Components were already transitive
+2016-12-23 22:24:53.697 INFO  [38475] [main@510] Clustering 1 Connected Components
+2016-12-23 22:24:53.697 WARN  [38525] [ConnectedComponent::load@97] Cost matrix file of size 15.9911 MB does not fit within the 8 MB limit - USING EXTERNAL MEMORY
+2016-12-23 22:25:23.459 INFO  [38475] [TransClust::cluster@179] p_0: Clustered 1 Connected Components with FORCE
+2016-12-23 22:25:23.459 INFO  [38475] [main@526] Receiving results from processes
+2016-12-23 22:25:23.459 INFO  [38475] [main@529] Receiving results from processes...done
+2016-12-23 22:25:23.460 INFO  [38475] [finalize_master@345] Threshold:           50
+2016-12-23 22:25:23.460 INFO  [38475] [finalize_master@346] Clusters              7
+2016-12-23 22:25:23.460 INFO  [38475] [finalize_master@347] Cost        21345107.68
+2016-12-23 22:25:23.460 INFO  [38475] [finalize_master@348] Time             38.28s
