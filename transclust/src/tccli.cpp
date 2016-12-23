@@ -523,8 +523,10 @@ int main(int argc, char** argv)
 	/////////////////////////////////////////////////////////////////////////////
 	if(world.rank() == 0)
 	{
+		LOGI << "Receiving results from processes";
 		std::vector<RES::ClusteringResult> total_result;
 		boost::mpi::gather(world,result,total_result,0);	
+		LOGI << "Receiving results from processes...done";
 
 		finalize_master(
 				total_result,
@@ -532,6 +534,7 @@ int main(int argc, char** argv)
 				tcp,
 				t1);
 	}else{
+
 		boost::mpi::gather(world,result,0);
 	}
 

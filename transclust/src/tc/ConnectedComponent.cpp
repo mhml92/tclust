@@ -81,7 +81,7 @@ void ConnectedComponent::load(TCC::TransClustParams& _tcp)
 			{
 				case CostFileFormat::MATRIX:
 					// get the size of the file (in bytes)
-					f_size = TCC::calc_num_sym_elem(localId2globalId.size()); 
+					f_size = TCC::calc_num_sym_elem(localId2globalId.size())*4; 
 					break;
 				case CostFileFormat::FLAT:
 					// get the size of the file (in bytes)

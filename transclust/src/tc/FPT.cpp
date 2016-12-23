@@ -178,7 +178,7 @@ double FPT::costSetPermanent(
 
 void FPT::find_solution(Node& fptn0)
 {
-	reduce(fptn0);
+	//reduce(fptn0);
 	// terminaiton conditions
 	if(getDeltaTime() > time_limit){
 		solution_found = false;
@@ -244,6 +244,7 @@ void FPT::find_solution(Node& fptn0)
 		Node fptn1;
 		clone_node(fptn0,fptn1);
 		mergeNodes(fptn1,u,v, csp);
+		reduce(fptn1);
 		find_solution(fptn1);
 	}
 
@@ -253,12 +254,17 @@ void FPT::find_solution(Node& fptn0)
 	double csf = std::max(0.0,cost_uv) + costSetForbidden(fptn0,u,v);
 	if (csf + fptn0.cost <= maxK)
 	{
-		Node fptn1;
-		clone_node(fptn0,fptn1);
-		fptn1.cost += cost_uv;
-		fptn1.edgeCost[u][v] = -inf;
-		fptn1.edgeCost[v][u] = -inf;
-		find_solution(fptn1);
+		//Node fptn1;
+		//clone_node(fptn0,fptn1);
+		float fptn0_old_cost = fptn0.cost;
+		float fptn0_old_edge_cost = fptn0.edgeCost[u][v];
+		fptn0.cost += cost_uv;
+		fptn0.edgeCost[u][v] = -inf;
+		fptn0.edgeCost[v][u] = -inf;
+		find_solution(fptn0);
+		fptn0.cost = fptn0_old_cost;
+		fptn0.edgeCost[u][v] = fptn0_old_edge_cost;
+		fptn0.edgeCost[v][u] = fptn0_old_edge_cost;
 	}
 
 }
