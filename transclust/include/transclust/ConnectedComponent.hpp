@@ -59,6 +59,7 @@ class ConnectedComponent
 
 		float getCost(unsigned i,unsigned j,bool normalized = true);
 		void addCost(uint64_t id, float cost);
+		bool getFitInMemory();
 
 
 		// the connected component has now been given all known information
@@ -131,6 +132,7 @@ class ConnectedComponent
 				std::vector<float>& buffer,
 				unsigned i,
 				unsigned j);
+		void loadMatrixBuffer();
 
 		/**
 		 * Contructs a filename and creates path if neccesary
@@ -161,6 +163,7 @@ class ConnectedComponent
 
 		boost::unordered_map<unsigned long,float> flat_map;
 		std::map<unsigned long,unsigned> flat_map_index;
+		std::deque<float> matrix_buffer;
 
 		boost::iostreams::mapped_file_source mm_file;
 		bool is_mmf_configured = false;

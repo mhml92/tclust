@@ -353,7 +353,14 @@ namespace FORCE
 
 			DEBUG_GM(clustering,pos,*it);
 
-			double cost = RES::calculateCost(cc,clustering);
+			double cost = 0;
+			cost = RES::calculateCost_membership(cc,clustering);
+			//if(cc.getFitInMemory())
+			//{
+			//	cost = RES::calculateCost(cc,clustering);
+			//}else{
+			//	cost = RES::calculateCost_membership(cc,clustering);
+			//}
 
 			
 			DEBUG_COST(cc,clustering,cost);

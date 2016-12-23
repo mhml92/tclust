@@ -42,6 +42,11 @@ void ConnectedComponent::addCost(uint64_t id, float cost)
 	}
 }
 
+bool ConnectedComponent::getFitInMemory()
+{
+	return fit_in_memory;
+}
+
 void ConnectedComponent::flushCostBuffer(){
 	FILE* flatFile = fopen(flat_file_path.c_str(),"a");
 	if(flatFile != NULL)
@@ -58,6 +63,7 @@ void ConnectedComponent::flushCostBuffer(){
 		exit(1);
 	}
 }
+
 
 void ConnectedComponent::load(TCC::TransClustParams& _tcp)
 {
@@ -97,8 +103,11 @@ void ConnectedComponent::load(TCC::TransClustParams& _tcp)
 		{
 			case CostFileFormat::MATRIX:
 				initMatrixFile();
+
 				if(fit_in_memory){
 					mm_file.open(matrix_file_path);
+				}else{
+					loadMatrixBuffer();
 				}
 				break;
 			case CostFileFormat::FLAT:
@@ -110,6 +119,57 @@ void ConnectedComponent::load(TCC::TransClustParams& _tcp)
 		}
 		is_mmf_configured = true;
 	}
+}
+
+void ConnectedComponent::loadMatrixBuffer()
+{
+	// get the Memory Allocation Granularity
+	unsigned mag = mm_file.alignment();
+
+	// calculate max number of floats that fit in limited memory
+	unsigned nf = (tcp.memory_limit*1024*1024)/sizeof(float);
+
+	// calculate number of columns which fit in memory
+	unsigned nc = 0.5*(sqrt(8*nf+1)-1);
+
+	// calculate the number of elements
+	unsigned ne = ((nc*nc)-nc)/2;
+
+	// resize matrix_buffer
+	matrix_buffer.resize(ne,0);
+
+	// start column
+	unsigned sc = size()-nc;
+
+	// get the Start Index (index by byte) of the values 
+	unsigned si = index(sc,sc+1)*sizeof(float);
+
+	// calculate the Offset Scalar with respect to the memory allocation 
+	// granularity
+	unsigned os = si/mag;
+
+	// calculate File Offset
+	unsigned fo = os*mag;
+
+	// calculate the Index Offset (in float values - 4 bytes) from the file 
+	// offset to the start index
+	unsigned io = (si - fo)/4;
+
+	// calculate number of bytes to map from the file offset (in bytes)
+	unsigned nb = (((((nc*nc)-nc)/2)+io)*sizeof(float));
+
+	// open the file from the offset
+	mm_file.open(matrix_file_path,nb,fo);
+
+	float* data_p = (float*)mm_file.data();
+
+	// read the data in to the buffer and close
+	for(unsigned i = 0; i  < matrix_buffer.size();i++)
+	{
+		matrix_buffer.at(i) = *(data_p + io+i);
+	}
+	mm_file.close();
+	
 }
 
 float ConnectedComponent::getCost(unsigned i,unsigned j,bool normalized){
@@ -172,6 +232,9 @@ void ConnectedComponent::getBufferedCost(
 	{
 		std::cout << "[ERROR] cost file not loaded - getBufferedCost" << std::endl;
 		exit(1);
+	}
+	if(buffer.size() == 0){
+		return;
 	}
 
 	if(fit_in_memory)
@@ -456,44 +519,55 @@ void ConnectedComponent::getExternalBufferedCostMatrix(
 		unsigned i,
 		unsigned j)
 {
-	// Since the file does not fit in memory, we need to calculate the offset
-	// from which the file should be mapped and then only map from this offset 
-	// to the size of the buffer. 
-	// BUT we can not offset a file from any position.Any offset must be a 
-	// multiple of the operating system's virtual memory allocation 
-	// granularity.
+	unsigned ind = index(i,j);
+	unsigned total_size = ((size()*size())-size())/2;
+	unsigned external = total_size-matrix_buffer.size();
+	if(ind >= external){
+		ind = ind-external;
+		for(unsigned i = 0; i < buffer.size();i++)
+		{
+			buffer.at(i) = matrix_buffer.at(ind+i);
+		}
+	}else{
+		// Since the file does not fit in memory, we need to calculate the offset
+		// from which the file should be mapped and then only map from this offset 
+		// to the size of the buffer. 
+		// BUT we can not offset a file from any position.Any offset must be a 
+		// multiple of the operating system's virtual memory allocation 
+		// granularity.
 
-	// get the Memory Allocation Granularity
-	unsigned mag = mm_file.alignment();
+		// get the Memory Allocation Granularity
+		unsigned mag = mm_file.alignment();
 
-	// get the Start Index (index by byte) of the values 
-	unsigned si = index(i,j)*sizeof(float);
+		// get the Start Index (index by byte) of the values 
+		unsigned si = index(i,j)*sizeof(float);
 
-	// calculate the Offset Scalar with respect to the memory allocation 
-	// granularity
-	unsigned os = si/mag;
+		// calculate the Offset Scalar with respect to the memory allocation 
+		// granularity
+		unsigned os = si/mag;
 
-	// calculate File Offset
-	unsigned fo = os*mag;
+		// calculate File Offset
+		unsigned fo = os*mag;
 
-	// calculate the Index Offset (in float values - 4 bytes) from the file 
-	// offset to the start index
-	unsigned io = (si - fo)/4;
+		// calculate the Index Offset (in float values - 4 bytes) from the file 
+		// offset to the start index
+		unsigned io = (si - fo)/4;
 
-	// calculate number of bytes to map from the file offset (in bytes)
-	unsigned nb = ((buffer.size()+io)*sizeof(float));
+		// calculate number of bytes to map from the file offset (in bytes)
+		unsigned nb = ((buffer.size()+io)*sizeof(float));
 
-	// open the file from the offset
-	mm_file.open(matrix_file_path,nb,fo);
+		// open the file from the offset
+		mm_file.open(matrix_file_path,nb,fo);
 
-	float* data_p = (float*)mm_file.data();
+		float* data_p = (float*)mm_file.data();
 
-	// read the data in to the buffer and close
-	for(unsigned i = 0; i  < buffer.size();i++)
-	{
-		buffer[i] = *(data_p + io+i);
+		// read the data in to the buffer and close
+		for(unsigned i = 0; i  < buffer.size();i++)
+		{
+			buffer[i] = *(data_p + io+i);
+		}
+		mm_file.close();
 	}
-	mm_file.close();
 
 }
 

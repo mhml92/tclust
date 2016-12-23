@@ -53,14 +53,14 @@ namespace RES
 
 			for(unsigned j = i+1; j < membership.size(); j++)
 			{
-				float alt_cost = cost_buffer.at(j_pos);
+				float _cost = cost_buffer.at(j_pos);
 				j_pos++;
-				float _cost = cc.getCost(i,j,false);
-				if(_cost - alt_cost != 0){
-					std::cout << "diff in fetched cost:\n"
-						<< "direct cost:   " << _cost << "\n"
-						<< "buffered cost: " << alt_cost << std::endl;
-				}
+				//float _cost = cc.getCost(i,j,false);
+				//if(_cost - alt_cost != 0){
+				//	std::cout << "diff in fetched cost:\n"
+				//		<< "direct cost:   " << _cost << "\n"
+				//		<< "buffered cost: " << alt_cost << std::endl;
+				//}
 				if((membership.at(i) != membership.at(j)) && _cost > 0.0)
 				{
 					cost += _cost;

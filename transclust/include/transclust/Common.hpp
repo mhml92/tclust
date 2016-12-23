@@ -24,7 +24,7 @@ namespace TCC
 		unsigned R = 100;
 		unsigned dim = 3;
 		float start_t = 100;
-		unsigned force_min_size_parallel = 1000;
+		int force_min_size_parallel = -1;
 
 		// geometric linking parameters
 		float d_init = 0.01;
@@ -61,7 +61,7 @@ namespace TCC
 		TransClustParams& set_d_maximal(float val){d_maximal = val;return *this;}
 		TransClustParams& set_s_init(float val){s_init = val;return *this;}
 		TransClustParams& set_f_s(float val){f_s = val;return *this;}
-		TransClustParams& set_force_min_size_parallel(unsigned val){force_min_size_parallel = val;return *this;}
+		TransClustParams& set_force_min_size_parallel(int val){force_min_size_parallel = val;return *this;}
 
 		TransClustParams& set_fpt_time_limit(float val){fpt_time_limit = val;return *this;}
 		TransClustParams& set_fpt_step_size(float val){fpt_step_size = val;return *this;}

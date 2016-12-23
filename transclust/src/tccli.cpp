@@ -112,12 +112,12 @@ void parse_args(int argc, char** argv,TCC::TransClustParams& tcp)
 				"float",
 				cmd);
 
-		TCLAP::ValueArg<unsigned> FORCE_min_size_parallel(
+		TCLAP::ValueArg<int> FORCE_min_size_parallel(
 				"",
 				"FORCE_min_size_parallel",
-				"(default: 1000)",
+				"(default: -1) Negative values indicate this this should not be used",
 				false,
-				1000,
+				-1,
 				"int",
 				cmd);
 

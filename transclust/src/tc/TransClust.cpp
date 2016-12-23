@@ -27,6 +27,8 @@ void TransClust::cluster(
 	unsigned num_fpt_solved = 0;
 	unsigned num_transitive = 0;
 	unsigned num_force_solved = 0;
+
+	std::deque<ConnectedComponent> large_cc;
 	#pragma omp parallel
 	{
 		#pragma omp for schedule(dynamic)
@@ -34,9 +36,6 @@ void TransClust::cluster(
 		{
 			// get a reference to the connected component at i 
 			ConnectedComponent& cc = ccs.at(i);
-
-			// load the memorymapped file holding the cost-matrix 
-			cc.load(tcp);
 
 			// initialize a struct holding the clustering result
 			RES::ClusteringResult cr;
@@ -55,6 +54,17 @@ void TransClust::cluster(
 				cc.free(true);
 				continue;	
 			}
+
+			if(cc.size() >= tcp.force_min_size_parallel && tcp.force_min_size_parallel >= 0){
+				#pragma omp critical(add_large_force)
+				{
+					large_cc.push_back(cc);
+				}
+				continue;
+			}
+
+			// load the memorymapped file holding the cost-matrix 
+			cc.load(tcp);
 
 			// if the connected component is small enough we can try clustering 
 			// using the FPT
@@ -108,6 +118,51 @@ void TransClust::cluster(
 
 			cc.free(true);
 		}
+	}
+
+	for(unsigned i = 0; i < large_cc.size(); i++)
+	{
+		// get a reference to the connected component at i 
+		ConnectedComponent& cc = large_cc.at(i);
+
+		// load the memorymapped file holding the cost-matrix 
+		cc.load(tcp);
+
+		// initialize a struct holding the clustering result
+		RES::ClusteringResult cr;
+
+		// set initial cost to negativ, indicating 'no solution found'
+		cr.cost = -1;
+
+		num_force_solved++;
+
+		std::vector<std::vector<float>> pos;
+		pos.resize(cc.size(), std::vector<float>(tcp.dim,0));
+
+		// layout
+		FORCE::layout_parallel(
+				cc, 
+				pos, 
+				tcp.p, 
+				tcp.f_att, 
+				tcp.f_rep, 
+				tcp.R, 
+				tcp.start_t, 
+				tcp.dim,
+				tcp.seed);
+
+		// partition
+		FORCE::partition(
+				cc, 
+				pos, 
+				cr, 
+				tcp.d_init, 
+				tcp.d_maximal, 
+				tcp.s_init, 
+				tcp.f_s);
+
+		addResult(cc,cr,result);
+		cc.free(true);
 	}
 	
 	LOGI_IF(num_transitive > 0) 
