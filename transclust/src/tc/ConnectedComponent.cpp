@@ -88,6 +88,9 @@ void ConnectedComponent::load(TCC::TransClustParams& _tcp)
 					f_size = boost::filesystem::file_size(flat_file_path);
 			}
 			fit_in_memory = (tcp.memory_limit >= ((double)f_size/1024)/1024);
+			LOGW_IF(!fit_in_memory) << "Cost matrix file of size " 
+				<< ((double)f_size/1024)/1024 << " MB does not fit within the " 
+				<< tcp.memory_limit << " MB limit - USING EXTERNAL MEMORY";
 		}
 
 		switch(cff)
