@@ -26,14 +26,14 @@ for root, dirs, files in os.walk(args.i):
 			TCR.append(os.path.join(root, f))
 
 # print header
-print("input,file,nproc,ncpu,phase,seconds")
+print("input,file,phase,seconds")
 for file in TCR:
 	abs_path = os.path.abspath(file)
 	dir_name = os.path.dirname(abs_path).split("/")[-1]
 
 	filename = file.split("/")[-1].split(".")[0]
-	nproc = int(filename.split("_")[-3])
-	ncpu = int(filename.split("_")[-1])
+	#nproc = int(filename.split("_")[-3])
+	#ncpu = int(filename.split("_")[-1])
 
 	read_file_time = 0
 	sort_file_time = 0
@@ -62,7 +62,7 @@ for file in TCR:
 			if "[InputParser::getConnectedComponents@145] Building DUF" in line:
 				init_start = getTimeFromLine(line)
 
-			if "[main@500] Clustering " in line:
+			if "[main@510] Clustering " in line:
 				init_end = getTimeFromLine(line)
 				init_cc_time = (init_end - init_start).total_seconds()
 				cluster_start = init_end
@@ -72,8 +72,8 @@ for file in TCR:
 				clustering_time = (cluster_end - cluster_start).total_seconds()
 
 	input = filename.split("_")[0]
-	print(",".join((input,filename,str(nproc),str(ncpu),"reading file",str(read_file_time))))
-	print(",".join((input,filename,str(nproc),str(ncpu),"sorting file",str(sort_file_time))))
-	print(",".join((input,filename,str(nproc),str(ncpu),"Init CC",str(init_cc_time))))
-	print(",".join((input,filename,str(nproc),str(ncpu),"Clustering",str(clustering_time))))
+	print(",".join((input,filename,"reading file",str(read_file_time))))
+	print(",".join((input,filename,"sorting file",str(sort_file_time))))
+	print(",".join((input,filename,"Init CC",str(init_cc_time))))
+	print(",".join((input,filename,"Clustering",str(clustering_time))))
 
