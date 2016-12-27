@@ -105,6 +105,7 @@ class ConnectedComponent
 			ar & min_value;
 			ar & cff;
 			ar & num_cost_values;
+			ar & max_num_cost_values;
 			ar & flat_file_path;
 			ar & normalization_factor;
 			ar & transitive;
@@ -153,6 +154,7 @@ class ConnectedComponent
 		//float max_cost = 0;
 		//long num_conflicting_edges = 0;
 		long num_cost_values = 0;
+		long max_num_cost_values = 0;
 		enum CostFileFormat {MATRIX,FLAT};
 		CostFileFormat cff;
 

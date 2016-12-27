@@ -94,9 +94,23 @@ void ConnectedComponent::load(TCC::TransClustParams& _tcp)
 					f_size = boost::filesystem::file_size(flat_file_path);
 			}
 			fit_in_memory = (tcp.memory_limit >= ((double)f_size/1024)/1024);
-			LOGW_IF(!fit_in_memory) << "Cost matrix file of size " 
-				<< ((double)f_size/1024)/1024 << " MB does not fit within the " 
-				<< tcp.memory_limit << " MB limit - USING EXTERNAL MEMORY";
+			if(!fit_in_memory)
+			{
+				std::string ff = "";
+				switch(cff)
+				{
+					case CostFileFormat::MATRIX:
+						ff = "MATRIX";
+						break;
+					case CostFileFormat::FLAT:
+						ff = "FLAT";
+						break;
+				}
+				LOGW  << "Cost matrix ( "<< ff <<" format ) of size " 
+					<< ((double)f_size/1024)/1024 << " MB does not fit within the " 
+					<< tcp.memory_limit << " MB limit - USING EXTERNAL MEMORY";
+			
+			}
 		}
 
 		switch(cff)
@@ -123,6 +137,7 @@ void ConnectedComponent::load(TCC::TransClustParams& _tcp)
 
 void ConnectedComponent::loadMatrixBuffer()
 {
+	max_num_cost_values = ((size()*size())-size())/2;
 	// get the Memory Allocation Granularity
 	unsigned mag = mm_file.alignment();
 
@@ -519,9 +534,10 @@ void ConnectedComponent::getExternalBufferedCostMatrix(
 		unsigned i,
 		unsigned j)
 {
+	// get the index of the value
 	unsigned ind = index(i,j);
-	unsigned total_size = ((size()*size())-size())/2;
-	unsigned external = total_size-matrix_buffer.size();
+
+	unsigned external = max_num_cost_values-matrix_buffer.size();
 	if(ind >= external){
 		ind = ind-external;
 		for(unsigned i = 0; i < buffer.size();i++)
