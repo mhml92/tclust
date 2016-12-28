@@ -479,6 +479,7 @@ int main(int argc, char** argv)
 
 		// counter for transitive connected components - just for logging
 		unsigned transitive_cc = 0;
+		unsigned num_non_transitive_cc = 0;
 
 		// assigne connected components to processes
 		for(ConnectedComponent& cc:ccs)
@@ -489,7 +490,10 @@ int main(int argc, char** argv)
 			{
 				//process_cc.at(0).push_back(cc);
 				transitive_cc++;
-			}//else{
+			}else{
+				num_non_transitive_cc++;
+			}
+			//else{
 				// assign connected components to processes
 			process_cc.at(process_index).push_back(cc);
 
@@ -507,7 +511,7 @@ int main(int argc, char** argv)
 		ccs = process_cc[0];
 		LOGI << "Sending Connected Components to processes...done";
 		LOGI << transitive_cc << " Connected Components were already transitive";
-		LOGI << "Clustering " << ccs.size()-transitive_cc << " Connected Components";
+		LOGI << "Clustering " << num_non_transitive_cc << " Connected Components";
 	}else{
 		// wait and recieve connected components from master thread
 		world.recv(0,0,ccs);
