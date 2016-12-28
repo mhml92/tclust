@@ -21,7 +21,7 @@ else
 fi
 export OMP_NUM_THREADS=$omp_threads
 echo Start time: "$(date)"
-srun ../../build/release/bin/tclust -s ../../data/actino/actino.sim -t 42 --external_sorting_ram 0 --tmp_dir /home/milev10/tmp/ > actino_n_16_c_24.txt
+srun ../../build/release/bin/tclust -s num_cluster_15000_t_50.sim -t 50 --external_sorting_ram 0 --tmp_dir /home/milev10/tmp/ > large_test3_n_16_c_24.txt
 echo End time: "$(date)"
 
 echo Done.

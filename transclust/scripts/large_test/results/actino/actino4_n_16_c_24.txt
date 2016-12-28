@@ -1,0 +1,74 @@
+[STXXL-MSG] STXXL v1.4.99 (prerelease/Release) (git 78dd7ec6e72d7d6ef1209e594fc08e3759af5099) + gnu parallel(20160603)
+2016-12-28 14:19:19.338 INFO  [3988] [InputParser::getConnectedComponents@71] Reading input file
+2016-12-28 14:19:32.585 INFO  [3988] [InputParser::getConnectedComponents@129] Reading input file...done
+2016-12-28 14:19:32.585 INFO  [3988] [InputParser::getConnectedComponents@135] Sorting input
+[STXXL-MSG] Disk '/home/milev10/tmp/stxxl.tmp' is allocated, space: 365 MiB, I/O implementation: syscall direct=on queue=0 devid=0 unlink_on_open
+2016-12-28 14:19:38.142 INFO  [3988] [InputParser::getConnectedComponents@139] Sorting input...done
+2016-12-28 14:19:38.142 INFO  [3988] [InputParser::getConnectedComponents@145] Building DUF
+2016-12-28 14:19:38.486 INFO  [3988] [InputParser::getConnectedComponents@185] Building DUF...done
+2016-12-28 14:19:38.486 INFO  [3988] [InputParser::getConnectedComponents@191] Initializing ConnectedComponents
+2016-12-28 14:19:38.851 INFO  [3988] [InputParser::getConnectedComponents@224] Initializing ConnectedComponents...done
+2016-12-28 14:19:38.851 INFO  [3988] [InputParser::getConnectedComponents@225] Found 62072 ConnectedComponents
+2016-12-28 14:19:38.851 INFO  [3988] [InputParser::getConnectedComponents@235] Adding cost values to connected components
+2016-12-28 14:19:44.303 INFO  [3988] [InputParser::getConnectedComponents@301] Adding costs to connected components...done
+2016-12-28 14:19:44.303 WARN  [3988] [InputParser::getConnectedComponents@303] Similarity file is incomplete. Only 9620488 out of 55005645360 possible edges for 331680 nodes were found
+2016-12-28 14:19:44.303 INFO  [3988] [InputParser::getConnectedComponents@315] Committinig connected components
+2016-12-28 14:21:00.992 INFO  [3988] [InputParser::getConnectedComponents@319] Committinig connected components...done
+2016-12-28 14:21:01.044 INFO  [3988] [main@465] Sending Connected Components to processes
+2016-12-28 14:21:02.626 INFO  [3988] [main@508] Sending Connected Components to processes...done
+2016-12-28 14:21:02.691 INFO  [3988] [main@509] 57583 Connected Components were already transitive
+2016-12-28 14:21:02.691 INFO  [3988] [main@510] Clustering 18446744073709497913 Connected Components
+2016-12-28 14:21:17.343 INFO  [3988] [TransClust::cluster@168] p_0: 3585 Connected Components were already transitive
+2016-12-28 14:21:17.343 INFO  [3988] [TransClust::cluster@173] p_0: Clustered 288 Connected Components to optimality
+2016-12-28 14:21:17.343 INFO  [3988] [TransClust::cluster@179] p_0: Clustered 7 Connected Components with FORCE
+2016-12-28 14:21:17.343 INFO  [3988] [main@526] Receiving results from processes
+2016-12-28 14:21:17.729 INFO  [19834] [TransClust::cluster@168] p_2: 3616 Connected Components were already transitive
+2016-12-28 14:21:17.729 INFO  [19834] [TransClust::cluster@173] p_2: Clustered 256 Connected Components to optimality
+2016-12-28 14:21:17.729 INFO  [19834] [TransClust::cluster@179] p_2: Clustered 8 Connected Components with FORCE
+2016-12-28 14:21:18.311 INFO  [21758] [TransClust::cluster@168] p_1: 3597 Connected Components were already transitive
+2016-12-28 14:21:18.312 INFO  [21758] [TransClust::cluster@173] p_1: Clustered 276 Connected Components to optimality
+2016-12-28 14:21:18.312 INFO  [21758] [TransClust::cluster@179] p_1: Clustered 7 Connected Components with FORCE
+2016-12-28 14:21:18.516 INFO  [18255] [TransClust::cluster@168] p_4: 3613 Connected Components were already transitive
+2016-12-28 14:21:18.516 INFO  [18255] [TransClust::cluster@173] p_4: Clustered 259 Connected Components to optimality
+2016-12-28 14:21:18.516 INFO  [18255] [TransClust::cluster@179] p_4: Clustered 8 Connected Components with FORCE
+2016-12-28 14:21:18.952 INFO  [19694] [TransClust::cluster@168] p_3: 3617 Connected Components were already transitive
+2016-12-28 14:21:18.952 INFO  [19694] [TransClust::cluster@173] p_3: Clustered 257 Connected Components to optimality
+2016-12-28 14:21:18.952 INFO  [19694] [TransClust::cluster@179] p_3: Clustered 6 Connected Components with FORCE
+2016-12-28 14:21:19.036 INFO  [18599] [TransClust::cluster@168] p_9: 3589 Connected Components were already transitive
+2016-12-28 14:21:19.036 INFO  [18599] [TransClust::cluster@173] p_9: Clustered 285 Connected Components to optimality
+2016-12-28 14:21:19.036 INFO  [18599] [TransClust::cluster@179] p_9: Clustered 5 Connected Components with FORCE
+2016-12-28 14:21:19.895 INFO  [16453] [TransClust::cluster@168] p_11: 3590 Connected Components were already transitive
+2016-12-28 14:21:19.895 INFO  [16453] [TransClust::cluster@173] p_11: Clustered 282 Connected Components to optimality
+2016-12-28 14:21:19.895 INFO  [16453] [TransClust::cluster@179] p_11: Clustered 7 Connected Components with FORCE
+2016-12-28 14:21:20.048 INFO  [13780] [TransClust::cluster@168] p_13: 3609 Connected Components were already transitive
+2016-12-28 14:21:20.048 INFO  [13780] [TransClust::cluster@173] p_13: Clustered 267 Connected Components to optimality
+2016-12-28 14:21:20.048 INFO  [13780] [TransClust::cluster@179] p_13: Clustered 3 Connected Components with FORCE
+2016-12-28 14:21:20.124 INFO  [17844] [TransClust::cluster@168] p_5: 3618 Connected Components were already transitive
+2016-12-28 14:21:20.127 INFO  [17844] [TransClust::cluster@173] p_5: Clustered 254 Connected Components to optimality
+2016-12-28 14:21:20.127 INFO  [17844] [TransClust::cluster@179] p_5: Clustered 8 Connected Components with FORCE
+2016-12-28 14:21:20.376 INFO  [13864] [TransClust::cluster@168] p_15: 3599 Connected Components were already transitive
+2016-12-28 14:21:20.376 INFO  [13864] [TransClust::cluster@173] p_15: Clustered 273 Connected Components to optimality
+2016-12-28 14:21:20.376 INFO  [13864] [TransClust::cluster@179] p_15: Clustered 7 Connected Components with FORCE
+2016-12-28 14:21:20.853 INFO  [14813] [TransClust::cluster@168] p_8: 3589 Connected Components were already transitive
+2016-12-28 14:21:20.856 INFO  [14813] [TransClust::cluster@173] p_8: Clustered 282 Connected Components to optimality
+2016-12-28 14:21:20.856 INFO  [14813] [TransClust::cluster@179] p_8: Clustered 8 Connected Components with FORCE
+2016-12-28 14:21:20.984 INFO  [14916] [TransClust::cluster@168] p_14: 3593 Connected Components were already transitive
+2016-12-28 14:21:20.984 INFO  [14916] [TransClust::cluster@173] p_14: Clustered 280 Connected Components to optimality
+2016-12-28 14:21:20.985 INFO  [14916] [TransClust::cluster@179] p_14: Clustered 6 Connected Components with FORCE
+2016-12-28 14:21:22.197 INFO  [16193] [TransClust::cluster@168] p_12: 3588 Connected Components were already transitive
+2016-12-28 14:21:22.197 INFO  [16193] [TransClust::cluster@173] p_12: Clustered 287 Connected Components to optimality
+2016-12-28 14:21:22.197 INFO  [16193] [TransClust::cluster@179] p_12: Clustered 4 Connected Components with FORCE
+2016-12-28 14:21:22.217 INFO  [17476] [TransClust::cluster@168] p_6: 3599 Connected Components were already transitive
+2016-12-28 14:21:22.217 INFO  [17476] [TransClust::cluster@173] p_6: Clustered 273 Connected Components to optimality
+2016-12-28 14:21:22.217 INFO  [17476] [TransClust::cluster@179] p_6: Clustered 8 Connected Components with FORCE
+2016-12-28 14:21:22.518 INFO  [16227] [TransClust::cluster@168] p_10: 3600 Connected Components were already transitive
+2016-12-28 14:21:22.518 INFO  [16227] [TransClust::cluster@173] p_10: Clustered 273 Connected Components to optimality
+2016-12-28 14:21:22.518 INFO  [16227] [TransClust::cluster@179] p_10: Clustered 6 Connected Components with FORCE
+2016-12-28 14:21:22.567 INFO  [16286] [TransClust::cluster@168] p_7: 3581 Connected Components were already transitive
+2016-12-28 14:21:22.568 INFO  [16286] [TransClust::cluster@173] p_7: Clustered 294 Connected Components to optimality
+2016-12-28 14:21:22.568 INFO  [16286] [TransClust::cluster@179] p_7: Clustered 5 Connected Components with FORCE
+2016-12-28 14:21:36.315 INFO  [3988] [main@529] Receiving results from processes...done
+2016-12-28 14:21:37.383 INFO  [3988] [finalize_master@345] Threshold:           42
+2016-12-28 14:21:37.383 INFO  [3988] [finalize_master@346] Clusters          68491
+2016-12-28 14:21:37.383 INFO  [3988] [finalize_master@347] Cost        10519079.72
+2016-12-28 14:21:37.383 INFO  [3988] [finalize_master@348] Time         00:02:18.5

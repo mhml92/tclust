@@ -1,0 +1,2 @@
+[STXXL-MSG] STXXL v1.4.99 (prerelease/Release) (git 78dd7ec6e72d7d6ef1209e594fc08e3759af5099) + gnu parallel(20160603)
+2016-12-24 16:45:21.278 INFO  [30464] [InputParser::getConnectedComponents@71] Reading input file

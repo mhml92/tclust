@@ -1,0 +1,42 @@
+[STXXL-MSG] STXXL v1.4.99 (prerelease/Release) (git 78dd7ec6e72d7d6ef1209e594fc08e3759af5099) + gnu parallel(20160603)
+2016-12-28 17:20:29.978 INFO  [5900] [InputParser::getConnectedComponents@71] Reading input file
+2016-12-28 17:22:03.567 INFO  [5900] [InputParser::getConnectedComponents@129] Reading input file...done
+2016-12-28 17:22:03.567 INFO  [5900] [InputParser::getConnectedComponents@135] Sorting input
+[STXXL-MSG] Disk '/home/milev10/tmp/stxxl.tmp' is allocated, space: 2370 MiB, I/O implementation: syscall direct=on queue=0 devid=0 unlink_on_open
+2016-12-28 17:22:40.498 INFO  [5900] [InputParser::getConnectedComponents@139] Sorting input...done
+2016-12-28 17:22:40.498 INFO  [5900] [InputParser::getConnectedComponents@145] Building DUF
+2016-12-28 17:22:43.323 INFO  [5900] [InputParser::getConnectedComponents@185] Building DUF...done
+2016-12-28 17:22:43.323 INFO  [5900] [InputParser::getConnectedComponents@191] Initializing ConnectedComponents
+2016-12-28 17:22:43.528 INFO  [5900] [InputParser::getConnectedComponents@224] Initializing ConnectedComponents...done
+2016-12-28 17:22:43.528 INFO  [5900] [InputParser::getConnectedComponents@225] Found 5000 ConnectedComponents
+2016-12-28 17:22:43.528 INFO  [5900] [InputParser::getConnectedComponents@235] Adding cost values to connected components
+2016-12-28 17:23:08.365 INFO  [5900] [InputParser::getConnectedComponents@301] Adding costs to connected components...done
+2016-12-28 17:23:08.365 WARN  [5900] [InputParser::getConnectedComponents@303] Similarity file is incomplete. Only 66834152 out of 1124999250000 possible edges for 1500000 nodes were found
+2016-12-28 17:23:08.365 INFO  [5900] [InputParser::getConnectedComponents@315] Committinig connected components
+2016-12-28 17:23:08.988 INFO  [5900] [InputParser::getConnectedComponents@319] Committinig connected components...done
+2016-12-28 17:23:09.189 INFO  [5900] [main@465] Sending Connected Components to processes
+2016-12-28 17:23:14.707 INFO  [5900] [main@508] Sending Connected Components to processes...done
+2016-12-28 17:23:14.734 INFO  [5900] [main@509] 0 Connected Components were already transitive
+2016-12-28 17:23:14.734 INFO  [5900] [main@510] Clustering 313 Connected Components
+2016-12-28 17:24:21.255 INFO  [5900] [TransClust::cluster@179] p_0: Clustered 313 Connected Components with FORCE
+2016-12-28 17:24:21.255 INFO  [5900] [main@526] Receiving results from processes
+2016-12-28 17:24:25.217 INFO  [20961] [TransClust::cluster@179] p_2: Clustered 313 Connected Components with FORCE
+2016-12-28 17:24:26.520 INFO  [20822] [TransClust::cluster@179] p_3: Clustered 313 Connected Components with FORCE
+2016-12-28 17:24:26.723 INFO  [22936] [TransClust::cluster@179] p_1: Clustered 313 Connected Components with FORCE
+2016-12-28 17:24:26.922 INFO  [17415] [TransClust::cluster@179] p_7: Clustered 313 Connected Components with FORCE
+2016-12-28 17:24:26.997 INFO  [18971] [TransClust::cluster@179] p_5: Clustered 313 Connected Components with FORCE
+2016-12-28 17:24:27.590 INFO  [18603] [TransClust::cluster@179] p_6: Clustered 313 Connected Components with FORCE
+2016-12-28 17:24:27.629 INFO  [15568] [TransClust::cluster@179] p_8: Clustered 312 Connected Components with FORCE
+2016-12-28 17:24:27.783 INFO  [17218] [TransClust::cluster@179] p_11: Clustered 312 Connected Components with FORCE
+2016-12-28 17:24:27.920 INFO  [19381] [TransClust::cluster@179] p_4: Clustered 313 Connected Components with FORCE
+2016-12-28 17:24:27.941 INFO  [19408] [TransClust::cluster@179] p_9: Clustered 312 Connected Components with FORCE
+2016-12-28 17:24:28.247 INFO  [14618] [TransClust::cluster@179] p_15: Clustered 312 Connected Components with FORCE
+2016-12-28 17:24:28.483 INFO  [17002] [TransClust::cluster@179] p_10: Clustered 312 Connected Components with FORCE
+2016-12-28 17:24:28.524 INFO  [15676] [TransClust::cluster@179] p_14: Clustered 312 Connected Components with FORCE
+2016-12-28 17:24:28.699 INFO  [16956] [TransClust::cluster@179] p_12: Clustered 312 Connected Components with FORCE
+2016-12-28 17:24:28.924 INFO  [14536] [TransClust::cluster@179] p_13: Clustered 312 Connected Components with FORCE
+2016-12-28 17:24:28.943 INFO  [5900] [main@529] Receiving results from processes...done
+2016-12-28 17:24:28.952 INFO  [5900] [finalize_master@345] Threshold:            50
+2016-12-28 17:24:28.952 INFO  [5900] [finalize_master@346] Clusters           15000
+2016-12-28 17:24:28.952 INFO  [5900] [finalize_master@347] Cost        371564500.00
+2016-12-28 17:24:28.952 INFO  [5900] [finalize_master@348] Time         00:03:58.97

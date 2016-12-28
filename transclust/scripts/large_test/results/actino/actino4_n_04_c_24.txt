@@ -1,0 +1,38 @@
+[STXXL-MSG] STXXL v1.4.99 (prerelease/Release) (git 78dd7ec6e72d7d6ef1209e594fc08e3759af5099) + gnu parallel(20160603)
+2016-12-28 14:39:50.864 INFO  [10038] [InputParser::getConnectedComponents@71] Reading input file
+2016-12-28 14:40:04.145 INFO  [10038] [InputParser::getConnectedComponents@129] Reading input file...done
+2016-12-28 14:40:04.145 INFO  [10038] [InputParser::getConnectedComponents@135] Sorting input
+[STXXL-MSG] Disk '/home/milev10/tmp/stxxl.tmp' is allocated, space: 365 MiB, I/O implementation: syscall direct=on queue=0 devid=0 unlink_on_open
+2016-12-28 14:40:09.811 INFO  [10038] [InputParser::getConnectedComponents@139] Sorting input...done
+2016-12-28 14:40:09.812 INFO  [10038] [InputParser::getConnectedComponents@145] Building DUF
+2016-12-28 14:40:10.151 INFO  [10038] [InputParser::getConnectedComponents@185] Building DUF...done
+2016-12-28 14:40:10.151 INFO  [10038] [InputParser::getConnectedComponents@191] Initializing ConnectedComponents
+2016-12-28 14:40:10.535 INFO  [10038] [InputParser::getConnectedComponents@224] Initializing ConnectedComponents...done
+2016-12-28 14:40:10.535 INFO  [10038] [InputParser::getConnectedComponents@225] Found 62072 ConnectedComponents
+2016-12-28 14:40:10.535 INFO  [10038] [InputParser::getConnectedComponents@235] Adding cost values to connected components
+2016-12-28 14:40:13.234 INFO  [10038] [InputParser::getConnectedComponents@301] Adding costs to connected components...done
+2016-12-28 14:40:13.234 WARN  [10038] [InputParser::getConnectedComponents@303] Similarity file is incomplete. Only 9620488 out of 55005645360 possible edges for 331680 nodes were found
+2016-12-28 14:40:13.234 INFO  [10038] [InputParser::getConnectedComponents@315] Committinig connected components
+2016-12-28 14:41:01.091 INFO  [10038] [InputParser::getConnectedComponents@319] Committinig connected components...done
+2016-12-28 14:41:01.142 INFO  [10038] [main@465] Sending Connected Components to processes
+2016-12-28 14:41:02.076 INFO  [10038] [main@508] Sending Connected Components to processes...done
+2016-12-28 14:41:02.076 INFO  [10038] [main@509] 57583 Connected Components were already transitive
+2016-12-28 14:41:02.076 INFO  [10038] [main@510] Clustering 18446744073709509551 Connected Components
+2016-12-28 14:41:22.347 INFO  [10038] [TransClust::cluster@168] p_0: 14375 Connected Components were already transitive
+2016-12-28 14:41:22.348 INFO  [10038] [TransClust::cluster@173] p_0: Clustered 1116 Connected Components to optimality
+2016-12-28 14:41:22.348 INFO  [10038] [TransClust::cluster@179] p_0: Clustered 27 Connected Components with FORCE
+2016-12-28 14:41:22.348 INFO  [10038] [main@526] Receiving results from processes
+2016-12-28 14:41:24.549 INFO  [15102] [TransClust::cluster@168] p_1: 14413 Connected Components were already transitive
+2016-12-28 14:41:24.550 INFO  [15102] [TransClust::cluster@173] p_1: Clustered 1082 Connected Components to optimality
+2016-12-28 14:41:24.550 INFO  [15102] [TransClust::cluster@179] p_1: Clustered 23 Connected Components with FORCE
+2016-12-28 14:41:55.125 INFO  [31593] [TransClust::cluster@168] p_3: 14387 Connected Components were already transitive
+2016-12-28 14:41:55.125 INFO  [31593] [TransClust::cluster@173] p_3: Clustered 1106 Connected Components to optimality
+2016-12-28 14:41:55.125 INFO  [31593] [TransClust::cluster@179] p_3: Clustered 25 Connected Components with FORCE
+2016-12-28 14:41:55.343 INFO  [30401] [TransClust::cluster@168] p_2: 14408 Connected Components were already transitive
+2016-12-28 14:41:55.344 INFO  [30401] [TransClust::cluster@173] p_2: Clustered 1082 Connected Components to optimality
+2016-12-28 14:41:55.344 INFO  [30401] [TransClust::cluster@179] p_2: Clustered 28 Connected Components with FORCE
+2016-12-28 14:41:55.386 INFO  [10038] [main@529] Receiving results from processes...done
+2016-12-28 14:41:55.421 INFO  [10038] [finalize_master@345] Threshold:           42
+2016-12-28 14:41:55.421 INFO  [10038] [finalize_master@346] Clusters          68491
+2016-12-28 14:41:55.421 INFO  [10038] [finalize_master@347] Cost        10519079.72
+2016-12-28 14:41:55.421 INFO  [10038] [finalize_master@348] Time        00:02:04.56
